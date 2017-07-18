@@ -840,9 +840,9 @@ static ssize_t store_tap_to_wake(TouchDriverData *pDriverData, const char *buf, 
     TouchState nextState = STATE_UNKNOWN;
     
     int status = 0;
-    sscanf(buf, "%d", &status);
-    
     int value[1] = {0};
+    
+    sscanf(buf, "%d", &status);
     value[0] = status;
     
     /* load stored previous setting */
