@@ -328,10 +328,11 @@ static void send_uevent(TouchDriverData *pDriverData, u8 eventIndex)
 		kobject_uevent_env(&device_touch.kobj, KOBJ_CHANGE, touch_uevent[eventIndex]);
 
 		if (eventIndex == UEVENT_KNOCK_ON) {
-			pDriverData->reportData.knockOn = 1;
             input_report_key(pDriverData->input_dev, KEY_WAKEUP, KEY_PRESSED);
             input_report_key(pDriverData->input_dev, KEY_WAKEUP, KEY_RELEASED);
             input_sync(pDriverData->input_dev);
+            TOUCH_LOG("KEY REPORT : KEY_WAKEUP\n");
+            pDriverData->reportData.knockOn = 1;
 		} else if (eventIndex == UEVENT_KNOCK_CODE) {
 			pDriverData->reportData.knockCode = 1;
 		} else if (eventIndex == UEVENT_SWIPE) {
@@ -857,15 +858,15 @@ static ssize_t store_tap_to_wake(TouchDriverData *pDriverData, const char *buf, 
     nextState = DecideNextDriverState(pLpwgSetting);
     
     /* apply it using device driver function */
-    if( ( pDriverData->currState != STATE_NORMAL ) && ( nextState != STATE_NORMAL )){
+    //if( ( pDriverData->currState != STATE_NORMAL ) && ( nextState != STATE_NORMAL )){
         TOUCH_LOG("%s : TAP2WAKE: %s\n", __func__, (status) ? "Enabled" : "Disabled");
         pDeviceControlFunc->SetLpwgMode(nextState, &pDriverData->lpwgSetting);
         SetDriverState(pDriverData, nextState);
-    } else {
+    //} else {
         /* store next state to use later ( suspend or resume ) */
-        pDriverData->nextState = nextState;
-        TOUCH_LOG("LPWG Setting will be processed on suspend or resume\n");
-    }
+     //   pDriverData->nextState = nextState;
+     //   TOUCH_LOG("LPWG Setting will be processed on suspend or resume\n");
+    //}
     mutex_unlock(pMutexTouch);
     
     return count;
