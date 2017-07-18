@@ -329,8 +329,8 @@ static void send_uevent(TouchDriverData *pDriverData, u8 eventIndex)
 
 		if (eventIndex == UEVENT_KNOCK_ON) {
 			pDriverData->reportData.knockOn = 1;
-            input_report_key(pDriverData->input_dev, KEY_WAKEUP, BUTTON_PRESSED);
-            input_report_key(pDriverData->input_dev, KEY_WAKEUP, BUTTON_RELEASED);
+            input_report_key(pDriverData->input_dev, KEY_WAKEUP, KEY_PRESSED);
+            input_report_key(pDriverData->input_dev, KEY_WAKEUP, KEY_RELEASED);
             input_sync(pDriverData->input_dev);
 		} else if (eventIndex == UEVENT_KNOCK_CODE) {
 			pDriverData->reportData.knockCode = 1;
