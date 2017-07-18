@@ -329,6 +329,9 @@ static void send_uevent(TouchDriverData *pDriverData, u8 eventIndex)
 
 		if (eventIndex == UEVENT_KNOCK_ON) {
 			pDriverData->reportData.knockOn = 1;
+            input_report_key(pDriverData->input_dev, KEY_WAKEUP, BUTTON_PRESSED);
+            input_report_key(pDriverData->input_dev, KEY_WAKEUP, BUTTON_RELEASED);
+            input_sync(pDriverData->input_dev);
 		} else if (eventIndex == UEVENT_KNOCK_CODE) {
 			pDriverData->reportData.knockCode = 1;
 		} else if (eventIndex == UEVENT_SWIPE) {
@@ -824,6 +827,50 @@ static ssize_t store_lpwg_notify(TouchDriverData *pDriverData, const char *buf, 
 	return count;
 }
 
+/* Sysfs - tap_to_wake (Low Power Wake-up Gesture Compatibility device)
+ *
+ * write
+ * 0 : DISABLE
+ * 1 : ENABLE
+ */
+static ssize_t store_tap_to_wake(TouchDriverData *pDriverData, const char *buf, size_t count)
+{
+    int status = 0;
+    sscanf(buf, "%d", &status);
+    
+    LpwgCmd lpwgCmd = LPWG_CMD_MODE;
+    LpwgSetting *pLpwgSetting = NULL;
+    TouchState nextState = STATE_UNKNOWN;
+    
+    int value[1] = {1};
+    value[0] = status;
+    
+    /* load stored previous setting */
+    pLpwgSetting = &pDriverData->lpwgSetting;
+    
+    mutex_lock(pMutexTouch);
+    
+    /* update new lpwg setting */
+    UpdateLpwgSetting(pLpwgSetting, lpwgCmd, value);
+    
+    /* decide next driver state */
+    nextState = DecideNextDriverState(pLpwgSetting);
+    
+    /* apply it using device driver function */
+    if( ( pDriverData->currState != STATE_NORMAL ) && ( nextState != STATE_NORMAL )){
+        TOUCH_LOG("%s : TAP2WAKE: %s\n", __func__, (status) ? "Enabled" : "Disabled");
+        pDeviceControlFunc->SetLpwgMode(nextState, &pDriverData->lpwgSetting);
+        SetDriverState(pDriverData, nextState);
+    } else {
+        /* store next state to use later ( suspend or resume ) */
+        pDriverData->nextState = nextState;
+        TOUCH_LOG("LPWG Setting will be processed on suspend or resume\n");
+    }
+    mutex_unlock(pMutexTouch);
+    
+    return count;
+}
+
 /****************************************************************************
 * CFW will use it to read knock-code data
 ****************************************************************************/
@@ -1212,6 +1259,7 @@ static ssize_t show_touch_position(TouchDriverData *pDriverData, char *buf)
 static LGE_TOUCH_ATTR(keyguard, S_IRUGO | S_IWUSR, NULL, store_keyguard_info);
 static LGE_TOUCH_ATTR(knock_on_type, S_IRUGO | S_IWUSR, show_knock_on_type, NULL);
 static LGE_TOUCH_ATTR(lpwg_notify, S_IRUGO | S_IWUSR, NULL, store_lpwg_notify);
+static LGE_TOUCH_ATTR(tap_to_wake, S_IRUGO | S_IWUSR, NULL, store_tap_to_wake);
 static LGE_TOUCH_ATTR(lpwg_data, S_IRUGO | S_IWUSR, show_lpwg_data, store_lpwg_data);
 static LGE_TOUCH_ATTR(firmware, S_IRUGO | S_IWUSR, show_firmware, NULL);
 static LGE_TOUCH_ATTR(version, S_IRUGO | S_IWUSR, show_version, NULL);
@@ -1234,6 +1282,7 @@ static struct attribute *lge_touch_attribute_list[] = {
 	&lge_touch_attr_keyguard.attr,
 	&lge_touch_attr_knock_on_type.attr,
 	&lge_touch_attr_lpwg_notify.attr,
+    &lge_touch_attr_tap_to_wake.attr,
 	&lge_touch_attr_lpwg_data.attr,
 	&lge_touch_attr_firmware.attr,
 	&lge_touch_attr_fw_ver.attr,
@@ -1382,6 +1431,8 @@ static int register_input_dev(TouchDriverData *pDriverData)
 
 	set_bit(EV_SYN, pDriverData->input_dev->evbit);
 	set_bit(EV_ABS, pDriverData->input_dev->evbit);
+    set_bit(EV_KEY, pDriverData->input_dev->evbit);
+    set_bit(KEY_WAKEUP, pDriverData->input_dev->evbit);
 	set_bit(INPUT_PROP_DIRECT, pDriverData->input_dev->propbit);
 
 	input_set_abs_params(pDriverData->input_dev, ABS_MT_POSITION_X, 0, pDriverData->mConfig.max_x, 0, 0);
