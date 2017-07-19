@@ -1432,8 +1432,8 @@ static int register_input_dev(TouchDriverData *pDriverData)
 
 	set_bit(EV_SYN, pDriverData->input_dev->evbit);
 	set_bit(EV_ABS, pDriverData->input_dev->evbit);
-    set_bit(EV_KEY, pDriverData->input_dev->evbit);
-    set_bit(KEY_WAKEUP, pDriverData->input_dev->evbit);
+	set_bit(EV_KEY, pDriverData->input_dev->evbit);
+	set_bit(KEY_WAKEUP, pDriverData->input_dev->keybit);
 	set_bit(INPUT_PROP_DIRECT, pDriverData->input_dev->propbit);
 
 	input_set_abs_params(pDriverData->input_dev, ABS_MT_POSITION_X, 0, pDriverData->mConfig.max_x, 0, 0);
