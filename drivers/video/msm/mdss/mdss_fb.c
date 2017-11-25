@@ -3493,6 +3493,10 @@ int mdss_fb_atomic_commit(struct fb_info *info,
 				MSMFB_ATOMIC_COMMIT, true, false);
 			if (mfd->panel.type == WRITEBACK_PANEL) {
 				output_layer = commit_v1->output_layer;
+				if (!output_layer) {
+					pr_err("Output layer is null\n");
+					goto end;
+				}
 				wb_change = !mdss_fb_is_wb_config_same(mfd,
 						commit_v1->output_layer);
 				if (wb_change) {
@@ -4435,6 +4439,10 @@ static int mdss_fb_handle_buf_sync_ioctl(struct msm_sync_pt_data *sync_pt_data,
 		goto buf_sync_err_3;
 	}
 
+<<<<<<< HEAD
+=======
+	sync_fence_install(rel_fence, rel_fen_fd);
+>>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	sync_fence_install(retire_fence, retire_fen_fd);
 
 skip_retire_fence:

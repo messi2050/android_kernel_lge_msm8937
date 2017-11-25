@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2015,2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -24,6 +24,7 @@
 #include <linux/slab.h>
 #include <linux/clk.h>
 #include <linux/clk/msm-clk.h>
+#include <asm/io.h>
 
 #define PWR_ON_MASK		BIT(31)
 #define EN_REST_WAIT_MASK	(0xF << 20)
@@ -42,6 +43,9 @@
 #define CLK_DIS_WAIT_VAL	(0x2 << 12)
 
 #define TIMEOUT_US		100
+
+#define FRVC_CAMERA_STATUS_REG       0x08600688UL
+#define FRVC_CAMERA_IS_WORKING                0x22
 
 struct gdsc {
 	struct regulator_dev	*rdev;
@@ -286,9 +290,27 @@ static int gdsc_disable(struct regulator_dev *rdev)
 {
 	struct gdsc *sc = rdev_get_drvdata(rdev);
 	uint32_t regval;
+        uint32_t reg_value = 0;
+        unsigned char earlycamera_stautus;
 	int i, ret = 0;
 
 	mutex_lock(&gdsc_seq_lock);
+        if(!strcmp(sc->rdesc.name,"gdsc_vfe1")){
+            void __iomem *frvc_camera_status_base = NULL;
+            frvc_camera_status_base = ioremap(FRVC_CAMERA_STATUS_REG, 4);
+            if(frvc_camera_status_base != NULL){
+                reg_value = readl(frvc_camera_status_base);
+                earlycamera_stautus = reg_value & 0xFF;
+                if(earlycamera_stautus == FRVC_CAMERA_IS_WORKING){
+                   printk("early camera is working ,cant disable :%s\n",sc->rdesc.name);
+                   iounmap(frvc_camera_status_base);
+	           sc->is_gdsc_enabled = false;
+	           mutex_unlock(&gdsc_seq_lock);
+                   return 0;
+                }
+                iounmap(frvc_camera_status_base);
+            }
+        }
 
 	if (sc->force_root_en)
 		clk_prepare_enable(sc->clocks[sc->root_clk_idx]);

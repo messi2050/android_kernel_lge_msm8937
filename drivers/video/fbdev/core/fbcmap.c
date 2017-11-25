@@ -189,9 +189,12 @@ int fb_cmap_to_user(const struct fb_cmap *from, struct fb_cmap_user *to)
 {
 	u32 tooff = 0, fromoff = 0;
 	u32 size;
+<<<<<<< HEAD
 
 	if (!to || !from || (int)(to->start) < 0)
 		return -EINVAL;
+=======
+>>>>>>> LA.UM.5.6.c1-02300-8x37.0
 
 	if (to->start > from->start)
 		fromoff = to->start - from->start;

@@ -9216,6 +9216,8 @@ static int fg_init_irqs(struct fg_chip *chip)
 				       chip->soc_irq[FULL_SOC].irq, rc);
 				return rc;
 			}
+			enable_irq_wake(chip->soc_irq[FULL_SOC].irq);
+			chip->full_soc_irq_enabled = true;
 
 			enable_irq_wake(chip->soc_irq[FULL_SOC].irq);
 			chip->full_soc_irq_enabled = true;
