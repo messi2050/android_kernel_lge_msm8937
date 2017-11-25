@@ -133,6 +133,7 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_CHARGE_EMPTY,
 	POWER_SUPPLY_PROP_CHARGE_NOW,
 	POWER_SUPPLY_PROP_CHARGE_NOW_RAW,
+	POWER_SUPPLY_PROP_CHARGE_REMAIN_CAPACITY,
 	POWER_SUPPLY_PROP_CHARGE_NOW_ERROR,
 	POWER_SUPPLY_PROP_CHARGE_AVG,
 	POWER_SUPPLY_PROP_CHARGE_COUNTER,
@@ -192,6 +193,21 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_RESISTANCE_CAPACITIVE,
 	POWER_SUPPLY_PROP_RESISTANCE_ID, /* in Ohms */
 	POWER_SUPPLY_PROP_RESISTANCE_NOW,
+#ifdef CONFIG_LGE_PM_CHARGING_TEMP_SCENARIO
+	POWER_SUPPLY_PROP_OTP_STATUS,
+#endif
+#ifdef CONFIG_LGE_PM_VZW_REQ
+	POWER_SUPPLY_PROP_VZW_CHG,
+#endif
+#ifdef CONFIG_LGE_PM_LLK_MODE
+	POWER_SUPPLY_PROP_STORE_DEMO_ENABLED,
+#endif
+#ifdef CONFIG_LGE_PM_PSEUDO_BATTERY
+	POWER_SUPPLY_PROP_PSEUDO_BATT,
+#endif
+#ifdef CONFIG_LGE_PM_USB_CURRENT_MAX_MODE
+	POWER_SUPPLY_PROP_USB_CURRENT_MAX_MODE,
+#endif
 	POWER_SUPPLY_PROP_FLASH_CURRENT_MAX,
 	POWER_SUPPLY_PROP_UPDATE_NOW,
 	POWER_SUPPLY_PROP_ESR_COUNT,
@@ -219,10 +235,40 @@ enum power_supply_property {
 	/* Local extensions of type int64_t */
 	POWER_SUPPLY_PROP_CHARGE_COUNTER_EXT,
 	/* Properties of type `const char *' */
+#ifdef CONFIG_LGE_PM_BATTERY_ID_CHECKER
+	POWER_SUPPLY_PROP_BATTERY_ID,
+	POWER_SUPPLY_PROP_BATTERY_ID_CHECKER,
+#endif
+#ifdef CONFIG_LGE_PM_TIME_TO_FULL
+	POWER_SUPPLY_PROP_TIME_TO_FULL,
+	POWER_SUPPLY_PROP_TIME_TO_FULL_CAPACITY,
+	POWER_SUPPLY_PROP_AICL_DONE,
+#endif
+#if defined(CONFIG_LGE_PM_QC20_SCENARIO) || defined(CONFIG_LGE_PM_CHG_LIMIT)
+	POWER_SUPPLY_PROP_IS_QC20_TA,
+	POWER_SUPPLY_PROP_IS_EVP_TA,
+#endif
+#ifdef CONFIG_LGE_PM_CHARGERLOGO_WAIT_FOR_FG_INIT
+	POWER_SUPPLY_PROP_FIRST_SOC_EST_DONE,
+#endif
+#ifdef CONFIG_LGE_PM
+	POWER_SUPPLY_PROP_FASTCHG,
+#endif
+#ifdef CONFIG_LGE_USB_FLOATED_CHARGER_DETECT
+	POWER_SUPPLY_PROP_INCOMPATIBLE_CHG,
+#endif
+#ifdef CONFIG_LGE_PM_CYCLE_BASED_CHG_VOLTAGE
+	POWER_SUPPLY_PROP_BATTERY_CYCLE,
+#endif
+	POWER_SUPPLY_PROP_BATTERY_CONDITION,
 	POWER_SUPPLY_PROP_MODEL_NAME,
 	POWER_SUPPLY_PROP_MANUFACTURER,
 	POWER_SUPPLY_PROP_SERIAL_NUMBER,
 	POWER_SUPPLY_PROP_BATTERY_TYPE,
+	POWER_SUPPLY_PROP_HW_REV,
+#ifdef CONFIG_INPUT_EPACK
+	POWER_SUPPLY_PROP_USB_EPACK,
+#endif
 };
 
 enum power_supply_type {
@@ -370,6 +416,9 @@ extern int power_supply_set_health_state(struct power_supply *psy, int health);
 extern int power_supply_set_present(struct power_supply *psy, bool enable);
 extern int power_supply_set_scope(struct power_supply *psy, int scope);
 extern int power_supply_set_usb_otg(struct power_supply *psy, int otg);
+#ifdef CONFIG_INPUT_EPACK
+extern int power_supply_set_usb_epack(struct power_supply *psy, int epack);
+#endif
 extern int power_supply_set_charge_type(struct power_supply *psy, int type);
 extern int power_supply_set_supply_type(struct power_supply *psy,
 					enum power_supply_type supply_type);

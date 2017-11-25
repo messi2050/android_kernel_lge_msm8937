@@ -95,6 +95,15 @@ config MSM_EEPROM
           and also provides support for writing data in case of FLASH ROM.
 	  Currently supports I2C, CCI and SPI protocol
 
+config MSM_OTP
+        bool "Qualcomm MSM Camera OTP Interface for Calibration support"
+        depends on MACH_LGE
+        ---help---
+          Enable support for ROM Interface for Calibration
+          Provides interface for reading the Claibration data.
+          and also provides support for writing data in case of OTP MEMORY.
+	      Currently supports I2C, CCI and SPI protocol
+
 config MSM_ISPIF
         bool "Qualcomm MSM Image Signal Processing interface support"
         depends on MSMB_CAMERA
@@ -241,3 +250,15 @@ config MSM_JPEGDMA
         select V4L2_MEM2MEM_DEV
 	---help---
 	  Enable support for Jpeg dma engine.
+
+config FLASHLIGHT_LM3559
+	bool "LM3559 Flashlight"
+	depends on MACH_LGE
+	help
+	  Enable LM3559 Flashlight
+
+config FLASHLIGHT_LM3648
+	bool "LM3648 Flashlight"
+	depends on MACH_LGE
+	help
+	  Enable LM3648 Flashlight

@@ -1,0 +1,31 @@
+/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&i2c_2 {
+	status = "ok";
+	max98925@31 {
+		status = "ok";
+		compatible = "maxim,max98925";
+		reg = <0x31>;
+		maxim,sub_reg = <0x34>;
+		maxim,sub_bus = <2>;
+		maxim,spk_vol = <0x14>;
+		maxim,platform_info = <1 0x1016 0x10001062 0x10001063 0x00000000 51>;
+		maxim,regcfg =
+			<0x0 0x36 0x90>,
+			<0x1 0x36 0x90>,
+			<0x0 0x2d 0x34>,
+			<0x1 0x2d 0x14>,
+			<0x0 0x2e 0x03>,
+			<0x1 0x2e 0x03>;
+	};
+};

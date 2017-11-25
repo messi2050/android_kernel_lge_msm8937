@@ -1,0 +1,45 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "msm8937-ph2n_global_ca-pinctrl.dtsi"
+#include "msm8937-ph2n_global_ca-camera.dtsi"
+#include "msm8937-ph2n_global_ca-panel.dtsi"
+#include "msm8937-ph2n_global_ca-sound.dtsi"
+#include "msm8937-ph2n_global_ca-misc.dtsi"
+#include "msm8937-ph2n_global_ca-pm.dtsi"
+#include "msm8937-ph2n_global_ca-touch.dtsi"
+#include "msm8937-ph2n_global_ca-nfc.dtsi"
+
+/ {
+	reserved-memory {
+		secure_mem: secure_region@0 {
+			status = "disabled";
+		};
+	};
+};
+
+&soc {
+	earjack-debugger {
+		compatible = "serial,earjack-debugger";
+		status = "ok";
+		interrupt-parent = <&tlmm>;
+		interrupts = <58 0x0>;
+		serial,irq-gpio = <&tlmm 58 0x00>;
+	};
+
+	qcom,ion {
+		qcom,ion-heap@8 {
+			status = "disabled";
+		};
+	};
+};

@@ -129,6 +129,9 @@ enum dsi_lane_map_type {
 enum dsi_pm_type {
 	/* PANEL_PM not used as part of power_data in dsi_shared_data */
 	DSI_PANEL_PM,
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_COMMON)
+	DSI_EXTRA_PM,
+#endif
 	DSI_CORE_PM,
 	DSI_CTRL_PM,
 	DSI_PHY_PM,
@@ -393,6 +396,10 @@ struct dsi_err_container {
 #define MDSS_DSI_COMMAND_COMPRESSION_MODE_CTRL3	0x02b0
 #define MSM_DBA_CHIP_NAME_MAX_LEN				20
 
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_COMMON)
+#include "lge/lge_mdss_dsi.h"
+#endif
+
 struct mdss_dsi_ctrl_pdata {
 	int ndx;	/* panel_num */
 	int (*on) (struct mdss_panel_data *pdata);
@@ -546,6 +553,13 @@ struct mdss_dsi_ctrl_pdata {
 	bool ds_registered;
 
 	bool timing_db_mode;
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_COMMON)
+	struct lge_mdss_dsi_ctrl_pdata lge_extra;
+#endif
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_DEBUG)
+	int debug_pwr_seq_dly[10];
+	int debug_pwr_always_on[10];
+#endif
 	bool update_phy_timing; /* flag to recalculate PHY timings */
 
 	bool phy_power_off;
@@ -662,6 +676,8 @@ void mdss_dsi_dsc_config(struct mdss_dsi_ctrl_pdata *ctrl,
 	struct dsc_desc *dsc);
 void mdss_dsi_dfps_config_8996(struct mdss_dsi_ctrl_pdata *ctrl);
 void mdss_dsi_set_burst_mode(struct mdss_dsi_ctrl_pdata *ctrl);
+void mdss_dsi_cfg_lane_ctrl(struct mdss_dsi_ctrl_pdata *ctrl,
+	u32 bits, int set);
 void mdss_dsi_set_reg(struct mdss_dsi_ctrl_pdata *ctrl, int off,
 	u32 mask, u32 val);
 int mdss_dsi_phy_pll_reset_status(struct mdss_dsi_ctrl_pdata *ctrl);
@@ -673,6 +689,9 @@ static inline const char *__mdss_dsi_pm_name(enum dsi_pm_type module)
 	case DSI_CTRL_PM:	return "DSI_CTRL_PM";
 	case DSI_PHY_PM:	return "DSI_PHY_PM";
 	case DSI_PANEL_PM:	return "PANEL_PM";
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_COMMON)
+	case DSI_EXTRA_PM:	return "EXTRA_PM";
+#endif
 	default:		return "???";
 	}
 }
@@ -685,6 +704,9 @@ static inline const char *__mdss_dsi_pm_supply_node_name(
 	case DSI_CTRL_PM:	return "qcom,ctrl-supply-entries";
 	case DSI_PHY_PM:	return "qcom,phy-supply-entries";
 	case DSI_PANEL_PM:	return "qcom,panel-supply-entries";
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_COMMON)
+	case DSI_EXTRA_PM:	return "lge,extra-supply-entries";
+#endif
 	default:		return "???";
 	}
 }

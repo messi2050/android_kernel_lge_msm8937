@@ -29,9 +29,9 @@
 #endif
 
 #define XLOG_DEFAULT_PANIC 1
-#define XLOG_DEFAULT_REGDUMP 0x2 /* dump in RAM */
-#define XLOG_DEFAULT_DBGBUSDUMP 0x2 /* dump in RAM */
-#define XLOG_DEFAULT_VBIF_DBGBUSDUMP 0x2 /* dump in RAM */
+#define XLOG_DEFAULT_REGDUMP 0x3 /* dump in RAM and LOG */
+#define XLOG_DEFAULT_DBGBUSDUMP 0x3 /* dump in RAM and LOG */
+#define XLOG_DEFAULT_VBIF_DBGBUSDUMP 0x3 /* dump in RAM and LOG */
 
 /*
  * xlog will print this number of entries when it is called through

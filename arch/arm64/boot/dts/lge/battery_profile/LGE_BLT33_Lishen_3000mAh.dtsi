@@ -1,0 +1,50 @@
+qcom,LGE_BLT33_Lishen_3000mAh {
+	/* #2849846_LGE_BLT33lishen_2900mAh_averaged_MasterSlave_Apr13th2017*/
+	qcom,max-voltage-uv = <4400000>;
+	qcom,nom-batt-capacity-mah = <2900>;
+	qcom,batt-id-kohm = <85000>;
+	qcom,batt-scale-criteria = <0xF0>;
+	qcom,batt-recharge-threshold = <0xF5>;
+	qcom,battery-beta = <4150>;
+	qcom,battery-type = "LGE_BLT33_Lishen_3000mAh";
+	qcom,chg-rslow-comp-c1 = <2233833>;
+	qcom,chg-rslow-comp-c2 = <2392911>;
+	qcom,chg-rs-to-rslow = <686595>;
+	qcom,chg-rslow-comp-thr = <0x99>;
+	qcom,checksum = <0x8CC0>;
+	qcom,gui-version = "PMI8950GUI - 2.0.0.16";
+	qcom,fg-profile-data = [
+		 D8 83 71 7C
+		 BF 80 7C 76
+		 61 83 B3 6E
+		 D7 88 13 94
+		 26 82 F4 99
+		 EE BC 88 C9
+		 56 0F DB 83
+		 2D 7C 75 80
+		 D0 75 65 83
+		 D4 6D C5 89
+		 C2 95 52 82
+		 F1 99 76 BD
+		 C2 CA 4C 0D
+		 05 0C BD 59
+		 14 70 71 FD
+		 0E 44 61 36
+		 DE 2B 00 00
+		 72 45 A4 32
+		 CE 3C 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 9C 6A A6 69
+		 11 4F 56 80
+		 80 74 06 61
+		 65 62 B4 80
+		 80 74 38 62
+		 07 84 61 C1
+		 0C 04 60 E5
+		 5C A0 71 0C
+		 28 00 FF 36
+		 F0 11 30 03
+		 00 00 00 0C
+	];
+};

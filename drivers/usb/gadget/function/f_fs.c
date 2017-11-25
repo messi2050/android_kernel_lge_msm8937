@@ -689,7 +689,6 @@ static void ffs_user_copy_worker(struct work_struct *work)
 
 	usb_ep_free_request(io_data->ep, io_data->req);
 
-	io_data->kiocb->private = NULL;
 	if (io_data->read)
 		kfree(io_data->iovec);
 	kfree(io_data->buf);
@@ -788,7 +787,17 @@ static ssize_t ffs_epfile_io(struct file *file, struct ffs_io_data *io_data)
 			   usb_ep_align_maybe(gadget, ep->ep, io_data->len) :
 			   io_data->len;
 
+#ifndef CONFIG_LGE_USB_G_ANDROID
 		extra_buf_alloc = gadget->extra_buf_alloc;
+#else
+		if (epfile->ffs->gadget) {
+			extra_buf_alloc = epfile->ffs->gadget->extra_buf_alloc;
+		} else {
+			spin_unlock_irq(&epfile->ffs->eps_lock);
+			ret = -ENODEV;
+			goto error;
+		}
+#endif
 		spin_unlock_irq(&epfile->ffs->eps_lock);
 
 		if (!io_data->read)
@@ -1579,16 +1588,20 @@ static void ffs_data_clear(struct ffs_data *ffs)
 {
 	ENTER();
 
-	pr_debug("%s: ffs->gadget= %p, ffs->flags= %lu\n", __func__,
+	pr_debug("%s: ffs->gadget= %pK, ffs->flags= %lu\n", __func__,
 			ffs->gadget, ffs->flags);
 
 	ffs_closed(ffs);
 
 	/* Dump ffs->gadget and ffs->flags */
 	if (ffs->gadget)
-		pr_err("%s: ffs:%p ffs->gadget= %p, ffs->flags= %lu\n",
+		pr_err("%s: ffs:%pK ffs->gadget= %pK, ffs->flags= %lu\n",
 				__func__, ffs, ffs->gadget, ffs->flags);
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	WARN_ON(ffs->gadget);
+#else
 	BUG_ON(ffs->gadget);
+#endif
 
 	if (ffs->epfiles)
 		ffs_epfiles_destroy(ffs->epfiles, ffs->eps_count);

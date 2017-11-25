@@ -388,7 +388,6 @@ void mdss_dsi_host_init(struct mdss_panel_data *pdata)
 	if (pinfo->data_lane0)
 		dsi_ctrl |= BIT(4);
 
-
 	data = 0;
 	if (pinfo->te_sel)
 		data |= BIT(31);
@@ -580,7 +579,7 @@ error:
 	return rc;
 }
 
-static void mdss_dsi_cfg_lane_ctrl(struct mdss_dsi_ctrl_pdata *ctrl,
+void mdss_dsi_cfg_lane_ctrl(struct mdss_dsi_ctrl_pdata *ctrl,
 						u32 bits, int set)
 {
 	u32 data;
@@ -591,6 +590,7 @@ static void mdss_dsi_cfg_lane_ctrl(struct mdss_dsi_ctrl_pdata *ctrl,
 	else
 		data &= ~bits;
 	MIPI_OUTP(ctrl->ctrl_base + 0x0ac, data);
+	wmb(); /* make sure write happen */
 }
 
 
@@ -1424,6 +1424,7 @@ int mdss_dsi_bta_status_check(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 {
 	int ret = 0;
 	unsigned long flag;
+	int ignore_underflow = 0;
 
 	if (ctrl_pdata == NULL) {
 		pr_err("%s: Invalid input data\n", __func__);
@@ -1438,6 +1439,9 @@ int mdss_dsi_bta_status_check(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 
 	mutex_lock(&ctrl_pdata->cmd_mutex);
 
+	if (ctrl_pdata->panel_mode == DSI_VIDEO_MODE)
+		ignore_underflow = 1;
+
 	pr_debug("%s: Checking BTA status\n", __func__);
 
 	mdss_dsi_clk_ctrl(ctrl_pdata, ctrl_pdata->dsi_clk_handle,
@@ -1446,6 +1450,9 @@ int mdss_dsi_bta_status_check(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 	reinit_completion(&ctrl_pdata->bta_comp);
 	mdss_dsi_enable_irq(ctrl_pdata, DSI_BTA_TERM);
 	spin_unlock_irqrestore(&ctrl_pdata->mdp_lock, flag);
+	/* mask out overflow errors */
+	if (ignore_underflow)
+		mdss_dsi_set_reg(ctrl_pdata, 0x10c, 0x0f0000, 0x0f0000);
 	MIPI_OUTP(ctrl_pdata->ctrl_base + 0x098, 0x01); /* trigger  */
 	wmb();
 
@@ -1454,6 +1461,13 @@ int mdss_dsi_bta_status_check(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 	if (ret <= 0) {
 		mdss_dsi_disable_irq(ctrl_pdata, DSI_BTA_TERM);
 		pr_err("%s: DSI BTA error: %i\n", __func__, ret);
+	}
+
+	if (ignore_underflow) {
+		/* clear pending overflow status */
+		mdss_dsi_set_reg(ctrl_pdata, 0xc, 0xffffffff, 0x44440000);
+		/* restore overflow isr */
+		mdss_dsi_set_reg(ctrl_pdata, 0x10c, 0x0f0000, 0);
 	}
 
 	mdss_dsi_clk_ctrl(ctrl_pdata, ctrl_pdata->dsi_clk_handle,
@@ -2320,7 +2334,8 @@ void mdss_dsi_wait4video_done(struct mdss_dsi_ctrl_pdata *ctrl)
 
 	/* DSI_INTL_CTRL */
 	data = MIPI_INP((ctrl->ctrl_base) + 0x0110);
-	data &= DSI_INTR_TOTAL_MASK;
+	/* clear previous VIDEO_DONE interrupt as well */
+	data &= (DSI_INTR_TOTAL_MASK | DSI_INTR_VIDEO_DONE);
 	data |= DSI_INTR_VIDEO_DONE_MASK;
 
 	MIPI_OUTP((ctrl->ctrl_base) + 0x0110, data);
@@ -2349,7 +2364,15 @@ static int mdss_dsi_wait4video_eng_busy(struct mdss_dsi_ctrl_pdata *ctrl)
 	if (ctrl->ctrl_state & CTRL_STATE_MDP_ACTIVE) {
 		mdss_dsi_wait4video_done(ctrl);
 		/* delay 4 ms to skip BLLP */
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_PRE_ACTIVE_AREA_DELAY)
+		usleep_range(ctrl->panel_data.panel_info.pre_active_area_delay_us, ctrl->panel_data.panel_info.pre_active_area_delay_us);
+#else
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_WITH_QCT_ESD)
+		usleep_range(1000, 1000);
+#else
 		usleep_range(4000, 4000);
+#endif
+#endif
 		ret = 1;
 	}
 
@@ -3068,7 +3091,7 @@ static void __dsi_error_counter(struct dsi_err_container *err_container)
 		pr_err("%s: panic in WQ as dsi error intrs within:%dms\n",
 				__func__, err_container->err_time_delta);
 		MDSS_XLOG_TOUT_HANDLER_WQ("mdp", "dsi0_ctrl", "dsi0_phy",
-			"dsi1_ctrl", "dsi1_phy", "panic");
+			"dsi1_ctrl", "dsi1_phy");
 	}
 }
 

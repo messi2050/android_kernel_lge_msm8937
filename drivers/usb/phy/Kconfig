@@ -260,6 +260,14 @@ config USB_ULPI_VIEWPORT
 	  Provides read/write operations to the ULPI phy register set for
 	  controllers with a viewport register (e.g. Chipidea/ARC controllers).
 
+config LGE_USB_TYPE_A
+        bool "LGE Support Sradard A Type USB"
+	depends on USB_PHY
+        help
+          Say Y to enable standard USB A TYPE Port, to support this configuration Need Specific H/W.
+
+        default n
+
 config DUAL_ROLE_USB_INTF
 	bool "Generic DUAL ROLE sysfs interface"
 	depends on SYSFS && USB_PHY
@@ -269,4 +277,25 @@ config DUAL_ROLE_USB_INTF
 	  this interface to expose it capabilities to the userspace
 	  and thereby allowing userspace to change the port mode.
 
+config LGE_USB_FLOATED_CHARGER_DETECT
+	bool "Floated charger detect"
+	depends on LGE_USB_G_ANDROID
+	default n
+	help
+	  Say Y if APSD can't detect floated charger.
+	  and there is no s/w charger detection codes in phys.
+
+config LGE_USB_BC_12_VZW
+	bool "Support BC 1.2 specification for VZW"
+	default n
+	help
+	  Say y if this must be needed.
+
+config VBUS_SW_MAX14727
+        bool "Support MAX14727 VBUS switch"
+	depends on USB_PHY
+        help
+          Say Y to enable MAX14727, to support this configuration Need Specific H/W.
+
+        default n
 endmenu

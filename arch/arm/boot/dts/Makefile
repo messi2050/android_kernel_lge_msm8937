@@ -517,12 +517,25 @@ dtb-$(CONFIG_MACH_DOVE) += dove-cm-a510.dtb \
 	dove-dove-db.dtb
 dtb-$(CONFIG_ARCH_MEDIATEK) += mt6589-aquaris5.dtb
 
+
 #used for cleaning - not building
+ifeq ($(CONFIG_MACH_LGE),y)
+subdir- := lge
+else
 subdir- := qcom
 endif
+endif
 
+ifeq ($(CONFIG_MACH_LGE),y)
+# *.dtb used to be generated in the directory above. Clean out the
+# old build results so people don't accidentally use them.
+dtbs: $(addprefix $(obj)/, $(DTB_LIST))
+
+clean-files := dts/*.dtb *.dtb
+else
 dtbs: $(addprefix $(obj)/, $(DTB_LIST))
 	$(Q)rm -f $(obj)/../*.dtb
 
 clean-files := *.dtb
 dtbs_install: $(addsuffix _dtbinst_, $(dtb-y))
+endif

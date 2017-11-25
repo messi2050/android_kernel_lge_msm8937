@@ -1,0 +1,90 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/{
+	lge_batterydata: qcom,battery-data {
+		#include "../battery_profile/LGE_BL45B1F_LGC_3000mAh.dtsi"
+		#include "../battery_profile/LGE_BL45B1F_Tocad_3000mAh.dtsi"
+	};
+};
+
+&pmi8950_fg {
+	qcom,fg-chg-iterm-ma = <150>;
+};
+
+&pmi8950_charger {
+	qcom,iterm-ma = <150>;
+};
+
+&pm8937_vadc {
+	chan@11 {
+		label = "mpp2_pcb_rev";
+		reg = <0x11>;
+		qcom,decimation = <0>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <0>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <3>;
+	};
+};
+
+&pm8937_mpps {
+	mpp@a100 {
+		reg = <0xa100 0x100>;
+		qcom,pin-num = <2>;
+		qcom,mode = <4>; /* AIN input */
+		qcom,invert = <1>; /* Enable MPP */
+		qcom,ain-route = <1>; /* AMUX 6 */
+		qcom,master-en = <1>;
+		qcom,src-sel = <0>; /* Function constant */
+	};
+};
+
+&pmi_haptic{
+	status = "ok";
+	qcom,vmax-mv = <3364>;
+};
+
+/* PM8937 GPIO configuration */
+&pm8937_gpios {
+ };
+
+&spmi_bus {
+	qcom,pmi8950@3 {
+		qcom,leds@d800 {
+			qcom,fs-curr-ua = <17500>;
+			/delete-property/ qcom,en-ext-pfet-sc-pro;
+		};
+	};
+};
+
+&soc {
+	/* vst = (0.42*xo_therm) + (0.44*quiet_therm) + 4.6 */
+	virtual_temp_sensor: lge,vts {
+		compatible = "lge,vts";
+		qcom,vts-vadc = <&pm8937_vadc>;
+		lge,scaling-factor= <10>;
+		lge,constant = <4600>;
+		composite_sensor_0: lge,sensor0 {
+			label = "xo_therm";
+			channel = <0x32>;
+			weight = <420>;
+		};
+		composite_sensor_1: lge,sensor1 {
+			label = "quiet_therm";
+			channel = <0x13>;
+			weight = <440>;
+		};
+	};
+};

@@ -616,6 +616,290 @@ config MSM_BCL_PERIPHERAL_CTL
 	  provides routines to configure and monitor the BCL
 	  PMIC peripheral.
 
+config LGE_PM_FACTORY_TESTMODE
+	bool "Support factory testmode for AT Command"
+	depends on MACH_LGE
+	default n
+	help
+	  Say Y to enable factory testmode in qpnp-smbcharger
+
+config LGE_PM_FACTORY_CABLE
+	tristate "support FACTORY CABLE Feature"
+	default n
+	depends on MACH_LGE
+	help
+	  cable detection for factory mode, etc
+
+config LGE_PM_SMPL_COUNTER
+    tristate "Support LGE SMPL COUNTER feature"
+    default n
+    depends on MACH_LGE
+    help
+      Say y to enable smpl_cnt module, that count when
+      booted by SMPL.
+
+config LGE_PM_BATTERY_ID_CHECKER
+    tristate "Virtual Device for LGE Battery ID Checker"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable LGE Battery ID Checker. Manufacturer have their own
+      systematic identification of cell types, and protect the system from
+      problems as using non-standard or unexpected types. so cross-
+      reference battery identification are useful to identify.
+
+config LGE_PM_BATTERY_ID_CHECKER_OLD
+    tristate "Virtual Device for LGE Battery ID Checker old"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable LGE Battery ID Checker OLD type battery ID IC
+
+config LGE_PM_BATTERY_ID_QCT
+    tristate "Support QCT battery id check"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable QCT Battery ID Checker
+
+config LGE_PM_BATTERY_COFF_4250K
+    tristate "4250k of thermal coefficients feature"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enble 4250k of thermal coefficients battery.
+
+config LGE_PM_TEMP_BY_CHG
+    tristate "Temperature Compensation In proportion to the charging current"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable Temperature Compensation In proportion to the charging current
+
+config LGE_PM_QC20_SCENARIO
+    tristate "LGE charging senario of QC2.0 feature"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable LGE charging senario of QC2.0 feature.
+      The device control the current of USB & BAT by event of framework
+      on QC 2.0 charger.
+
+config LGE_PM_CHG_LIMIT
+    tristate "LGE charging limitation senario"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable LGE charging limitation senario.
+      The device control the current of USB & BAT by event of framework
+      on charger.
+
+config LGE_PM_CHARGING_STATE
+    tristate "LGE charging state"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable LGE charging state.
+      The device control the current limit of USB & BAT by LCD on/off event of framework
+      on charger.
+
+config LGE_PM_EMBEDDED_BATTERY
+    tristate "LGE Setting related with embedded battery"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable LGE PM EMBEDDED BATTERY.
+      This is for embedded battery. For example change battery current
+      with Factory cable.
+
+config LGE_PM_USB_CURRENT_MAX_MODE
+    tristate "LGE_PM Support USB current max mode"
+    default n
+    depends on MACH_LGE
+    help
+      Say Y to enable LGE PM USB current max mode
+      for MST, Auto Testing with USB
+
+config LGE_PM_CHARGE_INFO
+    bool "LGE PM charging information"
+    depends on SPMI || MSM_SPMI
+    depends on MSM_BCL_CTL
+    help
+      Say Y here to enable LGE charging informaion kernel log.
+
+config LGE_PM_SOC_SCALING
+	tristate "QPNP FG SOC Scaling 94%"
+	depends on LGE_PM
+	default n
+	help
+	  Say Y to enable to soc rescaling for 94%.
+
+config LGE_PM_SOC_UNDER_5LEVEL
+	tristate "QPNP FG SOC Scaling under 5level"
+	depends on LGE_PM
+	default n
+	help
+	  Say Y to enable to soc rescaling for under 5level.
+
+config LGE_PM_READ_REAL_TIME_CURRENT
+	tristate "QPNP FG read real time current"
+	depends on LGE_PM
+	default n
+	help
+	  Say Y to enable to real time current for DCM .
+
+config LGE_PM_AGE_DCM
+	tristate "QPNP FG battery age mode"
+	depends on LGE_PM
+	default n
+	help
+	  Say Y to enable to battery age mode for DCM.
+	  age value is 1 = very good condition
+	  age value is 2 = good condition
+	  age value is 3 = bad condition
+
+config LGE_PM_AGE_CONDITION
+	tristate "QPNP FG battery age mode (default)"
+	depends on LGE_PM
+	default n
+	help
+	  Say Y to enable to battery age mode string.
+	  age value is 1 = very good condition
+	  age value is 2 = good condition
+	  age value is 3 = bad condition
+
+config LGE_PM_VZW_REQ
+	tristate "Implementation of power requirements of Verizon"
+	depends on LGE_PM
+	default n
+	help
+	  power requirements for Verizon Wireless
+
+config LGE_PM_VZW_LLK_MODE
+	tristate "implementation power requirements of vzw retail mode"
+	depends on LGE_PM
+	default n
+	help
+	  power requirements for retail mode(charging from 30% to 35%)
+
+config LGE_PM_LLK_MODE
+        tristate "implementation power requirements of retail mode"
+        depends on LGE_PM
+        default n
+        help
+          power requirements for retail mode
+
+config LGE_PM_PARALLEL_BATTERY_PROTECT
+	tristate "LGE parallel charging feature"
+	default n
+	depends on MACH_LGE
+	help
+	  lge parallel charging battery protect feature
+
+config LGE_PM_WAKE_LOCK_FOR_CHG_LOGO
+	bool "Wakelocks for LGE Chargerlogo"
+	depends on LGE_PM
+	help
+	  It enables wakelocks for LGE Chargerlogo.
+
+config LGE_PM_SOC_RECHARGING_WA
+       bool "LGE_PM Support recharging by SOC"
+       depends on LGE_PM
+       help
+         Say Y here to recharging by SOC
+
+config LGE_PM_CHARGERLOGO_WAIT_FOR_FG_INIT
+    bool "Wait for FG init in LGE Chargerlogo"
+    default n
+    depends on LGE_PM
+    depends on QPNP_FG
+    help
+      It is wait for FG init in LGE Chargerlogo.
+
+config LGE_PM_SMBCHG_STEP_CHG
+    tristate "LGE charging senario of step charge feature"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable LGE charging senario of step charge feature.
+
+config LGE_PM_VFLOAT_TRIM_RESTORE
+    tristate "LGE charging senario of step charge feature"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable LGE charging senario of step charge feature.
+
+config LGE_PM_TAPER_CHG_AICL_DISABLE
+    tristate "implementation aicl disable when taper charge"
+    depends on LGE_PM
+    default n
+    help
+        aicl disable when taper charge
+
+config LGE_PM_CHARGERLOGO_ADAPTIVE_MORE_CHG_CURRENT
+	tristate "Enable to charge more current in chargerlogo"
+	depends on LGE_PM
+	default n
+	help
+	  Say Y to enable to charge more current in chargerlogo
+
+config LGE_PM_CHARGING_SLEEP
+	bool "enter sleep during charging"
+	depends on LGE_PM
+	help
+	  Enable sleep during charging
+
+config LGE_PM_LV9_CHARGING_SCENARIO
+	tristate "Enable to lv9 charging scenario"
+	depends on LGE_PM
+	default n
+	help
+	  Say Y to enable to lv9 charging scenario
+
+config LGE_PM_SF3F_CHARGING_SCENARIO
+    tristate "Enable to sf3f charging scenario"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable to sf3f charging scenario
+
+config LGE_PM_MH_NA_CHARGING_SCENARIO
+    tristate "Enable to mh_na charging scenario"
+    depends on LGE_PM
+    default n
+    help
+      Say Y to enable to mh_na charging scenario
+
+config LGE_PM_CYCLE_BASED_CHG_VOLTAGE
+    bool "LGE battery cycle based chg voltage change feature"
+    depends on LGE_PM
+    default n
+    help
+      lge battery extending feature
+
+config LGE_PM_CYCLE_BASED_WEIGHT
+    bool "LGE battery cycle based weight feature"
+    depends on LGE_PM
+    depends on LGE_PM_CYCLE_BASED_CHG_VOLTAGE
+    default n
+    help
+      lge battery extending feature with cycle weight
+
+config LGE_PM_HIGH_CURRENT_FAST_CHG
+    bool "LGE high current(3A) fast charging feature"
+    depends on LGE_PM
+    default n
+    help
+      lge high current(3A) fast charging support feature
+
+config LGE_PM_CHARGING_VDD_FLASH_CAP_FOR_CAMERA
+    tristate "Enable OTG When taking pictures"
+    depends on LGE_PM
+    default n
+    help
+      Say Y enable OTG When taking pictures
+
 source "drivers/power/reset/Kconfig"
 
 endif # POWER_SUPPLY

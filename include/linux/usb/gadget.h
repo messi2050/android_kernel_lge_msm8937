@@ -220,6 +220,9 @@ struct usb_ep_ops {
 	void (*fifo_flush) (struct usb_ep *ep);
 	int (*gsi_ep_op)(struct usb_ep *ep, void *op_data,
 		enum gsi_ep_op op);
+#ifdef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
+	void (*yield_request)(struct usb_ep *ep, struct usb_request *req);
+#endif
 };
 
 /**
@@ -274,6 +277,19 @@ struct usb_ep {
 };
 
 /*-------------------------------------------------------------------------*/
+#ifdef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
+/*
+ * If some eps need to share the usb_requset,
+ * this function do that.
+ * Change original ep num of dwc3_request to parameter ep num.
+ */
+static inline void lge_usb_ep_yield_request(struct usb_ep *ep,
+				       struct usb_request *req)
+{
+	if (ep->ops->yield_request)
+		ep->ops->yield_request(ep, req);
+}
+#endif
 
 /**
  * usb_ep_set_maxpacket_limit - set maximum packet size limit for endpoint

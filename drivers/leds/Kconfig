@@ -196,6 +196,7 @@ config LEDS_LP55XX_COMMON
 	tristate "Common Driver for TI/National LP5521/5523/55231/5562/8501"
 	depends on LEDS_LP5521 || LEDS_LP5523 || LEDS_LP5562 || LEDS_LP8501
 	select FW_LOADER
+	select FW_LOADER_USER_HELPER
 	help
 	  This option supports common operations for LP5521/5523/55231/5562/8501
 	  devices.
@@ -220,7 +221,11 @@ config LEDS_LP5523
 	  It is 9 channel chip with programmable engines.
 	  Driver provides direct control via LED class and interface for
 	  programming the engines.
-
+config LGE_LEDS_LP5523
+	tristate "LED Support for TI LP5523 LED driver chip with LGE"
+	depends on LEDS_LP5523
+	help
+	  This option enables support for LP5523 with LED
 config LEDS_LP5562
 	tristate "LED Support for TI LP5562 LED driver chip"
 	depends on LEDS_CLASS && I2C
@@ -545,4 +550,10 @@ config LEDS_AW2013
 comment "LED Triggers"
 source "drivers/leds/trigger/Kconfig"
 
+config LGE_LEDS_PM8937
+	bool "LGE PM8952 Emotional LED"
+	default n
+	help
+	  This option enables support for PM8952 in MSM8952.
+	  PM8952 only supports RED LED with PWM.
 endif # NEW_LEDS

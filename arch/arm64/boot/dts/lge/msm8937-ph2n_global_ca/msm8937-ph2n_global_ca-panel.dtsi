@@ -1,0 +1,148 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+#include "../../qcom/msm8937-mdss-panels.dtsi"
+#include "../dsi-panel-sharp-nt35596-fhd-video.dtsi"
+#include "../dsi-panel-jdi-nt35596-fhd-video.dtsi"
+
+&mdss_mdp {
+	qcom,mdss-pref-prim-intf = "dsi";
+};
+
+&dsi_sharp_nt35596_vid {
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&dsi_jdi_nt35596_vid {
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&tlmm {
+	pmx_mdss {
+		mdss_dsi_active: mdss_dsi_active {
+			mux {
+				pins = "gpio33";
+			};
+
+			config {
+				pins = "gpio33";
+			};
+		};
+
+		mdss_dsi_suspend: mdss_dsi_suspend {
+			mux {
+				pins = "gpio33";
+			};
+
+			config {
+				pins = "gpio33";
+			};
+		};
+	};
+
+	pmx_mdss_te {
+		mdss_te_active: mdss_te_active {
+			mux {
+				pins = "gpio24";
+			};
+
+			config {
+				pins = "gpio24";
+			};
+		};
+
+		mdss_te_suspend: mdss_te_suspend {
+			mux {
+				pins = "gpio24";
+			};
+
+			config {
+				pins = "gpio24";
+			};
+		};
+	};
+};
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_sharp_nt35596_vid>;
+	pinctrl-names = "mdss_default", "mdss_sleep";
+	pinctrl-0 = <&mdss_dsi_active>;
+	pinctrl-1 = <&mdss_dsi_suspend>;
+	qcom,regulator-ldo-mode;
+	qcom,platform-reset-gpio = <&tlmm 33 0>;
+
+	lge,extra-gpio-names = "vddio", "touch-reset", "touch-avdd", "touch-vdddc";
+
+	lge,gpio-vddio = <&tlmm 63 0>;
+	lge,gpio-touch-reset = <&tlmm 64 0>;
+	lge,gpio-touch-avdd = <&tlmm 3 0>;
+	lge,gpio-touch-vdddc = <&tlmm 128 0>;
+
+	lge,esc-clk-rate = <16000000>;
+
+	/delete-property/ vdd-supply;
+
+	lab-supply = <&lab_regulator>;
+	ibb-supply = <&ibb_regulator>;
+};
+
+&dsi_panel_pwr_supply {
+	/delete-node/ qcom,panel-supply-entry@0;
+};
+
+&labibb {
+	status = "ok";
+	qpnp,qpnp-labibb-mode = "lcd";
+};
+
+&lab_regulator {
+	qcom,qpnp-lab-init-lcd-voltage = <5800000>;
+};
+
+&ibb_regulator {
+	qcom,qpnp-ibb-init-lcd-voltage = <5800000>;
+	qcom,qpnp-ibb-discharge-resistor = <32>;
+	qcom,qpnp-ibb-lab-pwrup-delay = <2000>;
+	qcom,qpnp-ibb-lab-pwrdn-delay = <1000>;
+};
+
+&dsi_panel_pwr_supply {
+	qcom,panel-supply-entry@2 {
+		reg = <2>;
+		qcom,supply-name = "lab";
+		qcom,supply-min-voltage = <4600000>;
+		qcom,supply-max-voltage = <6000000>;
+		qcom,supply-enable-load = <100000>;
+		qcom,supply-disable-load = <100>;
+	};
+
+	qcom,panel-supply-entry@3 {
+		reg = <3>;
+		qcom,supply-name = "ibb";
+		qcom,supply-min-voltage = <4600000>;
+		qcom,supply-max-voltage = <6000000>;
+		qcom,supply-enable-load = <100000>;
+		qcom,supply-disable-load = <100>;
+		qcom,supply-post-on-sleep = <20>;
+	};
+};
+
+&mdss_fb0 {
+	/delete-property/ qcom,mdss-fb-splash-logo-enabled;
+};
+

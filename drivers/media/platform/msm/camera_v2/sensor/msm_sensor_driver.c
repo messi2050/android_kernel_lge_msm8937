@@ -18,11 +18,18 @@
 #include "msm_cci.h"
 #include "msm_camera_dt_util.h"
 
+#define SENSOR_INFO
 /* Logging macro */
 #undef CDBG
 #define CDBG(fmt, args...) pr_debug(fmt, ##args)
 
 #define SENSOR_MAX_MOUNTANGLE (360)
+
+#ifdef SENSOR_INFO
+static struct class *camera_sensor_id_class = NULL;
+static char* rear_sensor_name=NULL;
+static char* front_sensor_name = NULL;
+#endif
 
 static struct v4l2_file_operations msm_sensor_v4l2_subdev_fops;
 static int32_t msm_sensor_driver_platform_probe(struct platform_device *pdev);
@@ -282,6 +289,83 @@ static int32_t msm_sensor_fill_actuator_subdevid_by_name(
 
 	return rc;
 }
+
+#if defined(CONFIG_MSM_OTP)
+static int32_t msm_sensor_fill_otp_subdevid_by_name(
+				struct msm_sensor_ctrl_t *s_ctrl)
+{
+	int32_t rc = 0;
+	const char *otp_name;
+	struct device_node *src_node = NULL;
+	uint32_t val = 0, count = 0, otp_name_len;
+	int i;
+	int32_t *otp_subdev_id;
+	struct  msm_sensor_info_t *sensor_info;
+	struct device_node *of_node = s_ctrl->of_node;
+	const void *p;
+
+	if (!s_ctrl->sensordata->otp_name || !of_node)
+		return -EINVAL;
+
+	otp_name_len = strlen(s_ctrl->sensordata->otp_name);
+	if (otp_name_len >= MAX_SENSOR_NAME)
+		return -EINVAL;
+
+	sensor_info = s_ctrl->sensordata->sensor_info;
+	otp_subdev_id = &sensor_info->subdev_id[SUB_MODULE_OTP];
+	/*
+	 * string for otp name is valid, set sudev id to -1
+	 *  and try to found new id
+	 */
+	*otp_subdev_id = -1;
+
+	if (0 == otp_name_len)
+		return 0;
+
+	CDBG("Try to find otp subdev for %s\n",
+			s_ctrl->sensordata->otp_name);
+	p = of_get_property(of_node, "qcom,otp-src", &count);
+	if (!p || !count)
+		return 0;
+
+	count /= sizeof(uint32_t);
+	for (i = 0; i < count; i++) {
+		otp_name = NULL;
+		src_node = of_parse_phandle(of_node, "qcom,otp-src", i);
+		if (!src_node) {
+			pr_err("otp src node NULL\n");
+			continue;
+		}
+		rc = of_property_read_string(src_node, "qcom,otp-name",
+			&otp_name);
+		if (rc < 0) {
+			pr_err("failed\n");
+			of_node_put(src_node);
+			continue;
+		}
+		if (strcmp(otp_name, s_ctrl->sensordata->otp_name))
+			continue;
+
+		rc = of_property_read_u32(src_node, "cell-index", &val);
+
+		CDBG("%s qcom,otp cell index %d, rc %d\n", __func__,
+			val, rc);
+		if (rc < 0) {
+			pr_err("failed\n");
+			of_node_put(src_node);
+			continue;
+		}
+
+		*otp_subdev_id = val;
+		CDBG("Done. otp subdevice id is %d\n", val);
+		of_node_put(src_node);
+		src_node = NULL;
+		break;
+	}
+
+	return rc;
+}
+#endif
 
 static int32_t msm_sensor_fill_ois_subdevid_by_name(
 				struct msm_sensor_ctrl_t *s_ctrl)
@@ -689,6 +773,11 @@ int32_t msm_sensor_driver_probe(void *setting,
 		strlcpy(slave_info->flash_name, slave_info32->flash_name,
 			sizeof(slave_info->flash_name));
 
+#if defined(CONFIG_MSM_OTP)
+		strlcpy(slave_info->otp_name, slave_info32.otp_name,
+			sizeof(slave_info->flash_otp));
+#endif
+
 		slave_info->addr_type = slave_info32->addr_type;
 		slave_info->camera_id = slave_info32->camera_id;
 
@@ -739,6 +828,16 @@ int32_t msm_sensor_driver_probe(void *setting,
 		slave_info->sensor_init_params.position);
 	CDBG("mount %d",
 		slave_info->sensor_init_params.sensor_mount_angle);
+#ifdef SENSOR_INFO
+	 if(slave_info->camera_id == 0)
+	 {
+	 	rear_sensor_name = slave_info->sensor_name;
+	 }
+	 else if (slave_info->camera_id == 1)
+	 {
+	 	front_sensor_name = slave_info->sensor_name;
+	 }
+#endif
 
 	/* Validate camera id */
 	if (slave_info->camera_id >= MAX_CAMERAS) {
@@ -765,9 +864,12 @@ int32_t msm_sensor_driver_probe(void *setting,
 		 * and probe already succeeded for that sensor. Ignore this
 		 * probe
 		 */
-		if (slave_info->sensor_id_info.sensor_id ==
-			s_ctrl->sensordata->cam_slave_info->
-				sensor_id_info.sensor_id) {
+/* LGE_CHANGE_S, check slave address as well when sensor is probed again, 2016-09-12, jungryoul.choi@lge.com */
+		if ((slave_info->sensor_id_info.sensor_id ==
+			s_ctrl->sensordata->cam_slave_info->sensor_id_info.sensor_id) &&
+			(slave_info->slave_addr ==
+			s_ctrl->sensordata->cam_slave_info->slave_addr)) {
+/* LGE_CHANGE_E, check slave address as well when sensor is probed again, 2016-09-12, jungryoul.choi@lge.com */
 			pr_err("slot%d: sensor id%d already probed\n",
 				slave_info->camera_id,
 				s_ctrl->sensordata->cam_slave_info->
@@ -862,6 +964,9 @@ CSID_TG:
 	*  sensor control structure */
 	s_ctrl->sensordata->sensor_name = slave_info->sensor_name;
 	s_ctrl->sensordata->eeprom_name = slave_info->eeprom_name;
+#if defined(CONFIG_MSM_OTP)
+	s_ctrl->sensordata->otp_name = slave_info->otp_name;
+#endif
 	s_ctrl->sensordata->actuator_name = slave_info->actuator_name;
 	s_ctrl->sensordata->ois_name = slave_info->ois_name;
 	/*
@@ -875,6 +980,18 @@ CSID_TG:
 	/*
 	 * Update actuator subdevice Id by input actuator name
 	 */
+
+#if defined(CONFIG_MSM_OTP)
+	/*
+	 * Update eeporm subdevice Id by input eeprom name
+	 */
+	rc = msm_sensor_fill_otp_subdevid_by_name(s_ctrl);
+	if (rc < 0) {
+		pr_err("%s failed %d\n", __func__, __LINE__);
+		goto free_camera_info;
+	}
+#endif
+
 	rc = msm_sensor_fill_actuator_subdevid_by_name(s_ctrl);
 	if (rc < 0) {
 		pr_err("%s failed %d\n", __func__, __LINE__);
@@ -1271,6 +1388,17 @@ static int msm_sensor_driver_i2c_remove(struct i2c_client *client)
 	return 0;
 }
 
+#ifdef SENSOR_INFO
+static ssize_t show_LGCameraSensorName(struct device *dev,struct device_attribute *attr, char *buf)
+{
+	pr_err("show_LGCameraSensorName: rear_camera_name [%s] , front_camera_name [%s] \n", rear_sensor_name, front_sensor_name);
+
+	return sprintf(buf, "FCam:%s^^RCam:%s\n", front_sensor_name, rear_sensor_name);
+}
+
+static DEVICE_ATTR(sensor_name, S_IRUGO, show_LGCameraSensorName, NULL);
+#endif
+
 static const struct i2c_device_id i2c_id[] = {
 	{SENSOR_DRIVER_I2C, (kernel_ulong_t)NULL},
 	{ }
@@ -1288,7 +1416,9 @@ static struct i2c_driver msm_sensor_driver_i2c = {
 static int __init msm_sensor_driver_init(void)
 {
 	int32_t rc = 0;
-
+#ifdef SENSOR_INFO
+	struct device*	camera_sensor_name_dev;
+#endif
 	CDBG("%s Enter\n", __func__);
 	rc = platform_driver_register(&msm_sensor_platform_driver);
 	if (rc)
@@ -1298,6 +1428,17 @@ static int __init msm_sensor_driver_init(void)
 	if (rc)
 		pr_err("%s i2c_add_driver failed rc = %d",  __func__, rc);
 
+#ifdef SENSOR_INFO
+	if(!rc)
+	{
+		CDBG(" %s : register sensor_name class  ",__func__);
+		camera_sensor_id_class = class_create(THIS_MODULE, "camsensor");
+		camera_sensor_name_dev = device_create(camera_sensor_id_class, NULL,
+		0, NULL, "sensor_name");
+		device_create_file(camera_sensor_name_dev, &dev_attr_sensor_name);
+	}
+#endif
+
 	return rc;
 }
 
@@ -1306,6 +1447,9 @@ static void __exit msm_sensor_driver_exit(void)
 	CDBG("Enter");
 	platform_driver_unregister(&msm_sensor_platform_driver);
 	i2c_del_driver(&msm_sensor_driver_i2c);
+#ifdef SENSOR_INFO
+	class_destroy(camera_sensor_id_class);
+#endif
 	return;
 }
 

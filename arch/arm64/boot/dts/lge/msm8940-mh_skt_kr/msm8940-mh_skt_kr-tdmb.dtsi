@@ -1,0 +1,305 @@
+/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/ {
+	aliases {
+		spi8 = &spi_8;
+	};
+
+	tdmb_lna: tdmb_lna {
+	compatible = "lge,tdmb_lna";
+	status = "diasbled";
+	};
+
+	tdmb_ant_switch: tdmb_ant_switch {
+	compatible = "lge,tdmb_ant_switch";
+	status = "diasbled";
+	};
+
+	soc {
+		spi_8: spi@7af8000{ // [Modified] QUP_BASE address for BLSP# QUP# (ref. AP datasheet, This model use BLSP-2 QUP4)
+		compatible = "qcom,spi-qup-v2"; // [Fixed] Should be "qcom,spi-qup-v2".
+
+		// [Fixed] Address, size for slave chips.
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* [Fixed] Resister region names referenced in reg.
+		"spi_physical"     : Physical address of controller register blocks.
+		when use BAM mode, add "spi_bam_physical"
+		"spi_bam_physical" : Physical address of BAM controller.
+		Keep the same names. */
+		reg-names = "spi_physical", "spi_bam_physical";
+
+		/* [Modified] Modify the reg field as below to add BLSP BAM base address (ref. AP datasheet)
+		First Row is BLSP_QUP base address, size,
+		Second Row is BAM address, size. */
+		reg = <0x7af8000 0x600>, <0x7ac4000 0x1f000>;
+
+		/* [Fixed] Interrupt resource names referenced in interrupts.
+		"spi_irq"     : QUP-core interrupt
+		when use BAM mode, add "spi_bam_irq"
+		"spi_bam_irq" : BAM interrupt
+		Keep the same names. */
+		interrupt-names = "spi_irq", "spi_bam_irq";
+
+		/* [Modified] Replace the interrupt filed. (ref. AP datasheet)
+		First Field  : SPI interrupt, keep 0
+		Second Field : Interrupt #
+		Third Field  : Trigger type, keep 0
+		First Row is BLSP_QUP base, Second Row is BAM. */
+		interrupts = <0 302 0>, <0 239 0>;
+
+		// [Modified] BLSP bus master ID. (ref. AP datasheet)
+		qcom,master-id = <84>;
+
+		// [Fixed] Set up the clocks, Keep the same names.
+		clock-names = "iface_clk", "core_clk";
+
+		/* [Modified]
+		Add node to BLSP# AHB clock,
+		Add node to QUP Core clock (BLSP# QUP#)
+		Note : In clock QUP Core is label #1 to X. So QUP0 would be label as QUP1. */
+		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>, <&clock_gcc clk_gcc_blsp2_qup4_spi_apps_clk>;
+
+		// [Fixed] Specifies maximum SPI clock frequency of AP(50 MHz). (ref. QCT SPI datasheet)
+		spi-max-frequency = <50000000>;
+
+		// [Fixed] QUP uses infinite-mode. set zero
+		qcom,infinite-mode = <0>;
+		// [Fixed] Version register exists.
+		qcom,ver-reg-exists;
+
+		// [Fixed] When use BAM mode, enable.
+		qcom,use-bam;
+		// [Modified] Add consumer and producer pipes (ref. AP datasheet)
+		qcom,bam-consumer-pipe-index = <10>; // Consumer pipe from AP BLSP SPI pipe assignment
+		qcom,bam-producer-pipe-index = <11>; // Producer pipe from AP BLSP SPI pipe assignment
+
+		// [Fixed] When use pinctrl, enable.
+		qcom,use-pinctrl;
+		// [Fixed] Must contain "spi_default" and "spi_sleep" if pinctrl is to be used. Keep the same names.
+		pinctrl-names = "spi_default", "spi_sleep";
+		/* [Fixed] List of phandles, each pointing at a pin configuration node within a pin controller.
+		The list of names to assign states, List entry 0 defines the name for integer state ID 0... */
+		pinctrl-0 = <&spi_tdmb_active>;
+		pinctrl-1 = <&spi_tdmb_suspend>;
+
+		/* [Modified] Set SPI GPIO (mosi, miso, cs, clk)
+		tlmm is the parent, second # is gpio #, third flag keep it 0. */
+		qcom,gpio-mosi = <&tlmm 96 0x00>;
+		qcom,gpio-miso = <&tlmm 97 0x00>;
+		qcom,gpio-cs0 = <&tlmm 98 0x00>;
+		qcom,gpio-clk = <&tlmm 99 0x00>;
+
+		status = "okay";
+		};
+	};
+};
+
+&spi_8 {
+	tdmb: tdmb@0 {
+		compatible = "lge,tdmb";
+		status = "okay";
+	};
+};
+
+&tdmb {
+	reg = <0x0>;
+	interrupt-parent = <&tlmm>;
+	interrupts = <61 0x0>;
+
+	spi-max-frequency = <38400000>;
+
+	/* TDMB CLK */
+	clock-names = "tdmb_xo";
+	clocks = <&clock_gcc clk_rf_clk2>;
+
+	/*set hw configure here
+	when use pmic clk buffer, change use-xtal to 0, and set xtal-freq value*/
+	use-external-xtal = <0>;
+	xtal-freq = <19200>;
+
+	pinctrl-names = "default",
+			"en_high", "en_low",
+			"irq_enable", "irq_disable";
+
+	pinctrl-0 = <&tdmb_default>;
+	pinctrl-1 = <&tdmb_en_high>;
+	pinctrl-2 = <&tdmb_en_low>;
+	pinctrl-3 = <&tdmb_int_enable>;
+	pinctrl-4 = <&tdmb_int_disable>;
+
+	tdmb-ldo-supply = <&pm8937_l5>;
+	ant-sw-io-supply = <&pm8937_l10>;
+
+	status = "okay";
+};
+
+&tdmb_lna {
+	pinctrl-names = "default",
+			"lna_high", "lna_low";
+
+	pinctrl-0 = <&tdmb_default>;
+	pinctrl-1 = <&tdmb_lna_high>;
+	pinctrl-2 = <&tdmb_lna_low>;
+
+	status = "okay";
+};
+
+&tdmb_ant_switch {
+	pinctrl-names = "default",
+			"ant_sw_enable", "ant_sw_disable";
+
+	pinctrl-0 = <&tdmb_default>;
+	pinctrl-1 = <&tdmb_ant_sw_enable>;
+	pinctrl-2 = <&tdmb_ant_sw_disable>;
+
+	status = "okay";
+};
+
+&soc {
+	tlmm: pinctrl@1000000 {
+		pmx_spi_tdmb {
+			spi_tdmb_active: spi_tdmb_active {
+				mux {
+					pins =  "gpio96", "gpio97", "gpio98", "gpio99";
+					function = "blsp_spi8";
+				};
+				config {
+					pins =  "gpio96", "gpio97", "gpio98", "gpio99";
+					drive-strength = <8>; /* 8MA */
+					bias-disable;
+				};
+			};
+
+			spi_tdmb_suspend: spi_tdmb_suspend {
+				mux {
+					pins =  "gpio96", "gpio97", "gpio98", "gpio99";
+					function = "gpio";
+				};
+				config {
+					pins =  "gpio96", "gpio97", "gpio98", "gpio99";
+					drive-strength = <2>; /* 8MA */
+					bias-pull-down;
+				};
+			};
+		};
+
+		pmx_gpio_tdmb {
+			tdmb_default: tdmb_default {
+			};
+
+			tdmb_en_high: tdmb_en_high {
+				mux {
+					pins = "gpio129";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio129";
+					drive-strength = <8>; /* 8MA */
+					output-high;
+					bias-disable;
+				};
+			};
+
+			tdmb_en_low: tdmb_en_low {
+				mux {
+					pins = "gpio129";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio129";
+					drive-strength = <8>; /* 8MA */
+					output-low;
+					bias-disable;
+				};
+			};
+
+			tdmb_int_enable: tdmb_int_enable {
+				mux {
+					pins = "gpio61";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio61";
+					drive-strength = <8>; /* 8MA */
+					bias-pull-up;
+				};
+			};
+
+			tdmb_int_disable: tdmb_int_disable {
+				mux {
+					pins = "gpio61";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio61";
+					drive-strength = <8>; /* 8MA */
+					bias-disable;
+				};
+			};
+
+			tdmb_lna_high: tdmb_lna_high {
+				mux {
+					pins = "gpio62";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio62";
+					drive-strength = <8>; /* 8MA */
+					output-high;
+					bias-pull-down;
+				};
+			};
+
+			tdmb_lna_low: tdmb_lna_low {
+				mux {
+					pins = "gpio62";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio62";
+					drive-strength = <8>; /* 8MA */
+					output-low;
+					bias-pull-down;
+				};
+			};
+
+			tdmb_ant_sw_enable: tdmb_ant_sw_enable {
+				mux {
+					pins = "gpio45";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio45";
+					drive-strength = <8>; /* 8MA */
+					output-high;
+					bias-disable;
+				};
+			};
+
+			tdmb_ant_sw_disable: tdmb_ant_sw_disable {
+				mux {
+					pins = "gpio45";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio45";
+					drive-strength = <8>; /* 8MA */
+					output-low;
+					bias-disable;
+				};
+			};
+		};
+	};
+};

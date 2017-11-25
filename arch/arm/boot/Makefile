@@ -31,13 +31,23 @@ export ZRELADDR INITRD_PHYS PARAMS_PHYS
 
 targets := Image zImage xipImage bootpImage uImage
 
+ifeq ($(CONFIG_MACH_LGE),y)
+ALL_DTS := $(notdir $(wildcard echo $(srctree)/arch/arm/boot/dts/lge/$(DTS_TARGET)/*.dts))
+dtb-y += $(patsubst %.dts,%.dtb,$(ALL_DTS))
+endif
+
 DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES))
 ifneq ($(DTB_NAMES),)
 DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))
 else
 DTB_LIST := $(dtb-y)
 endif
+
+ifeq ($(CONFIG_MACH_LGE),y)
+DTB_OBJS := $(addprefix $(obj)/dts/lge/$(DTS_TARGET)/,$(DTB_LIST))
+else
 DTB_OBJS := $(addprefix $(obj)/dts/qcom/,$(DTB_LIST))
+endif
 
 ifeq ($(CONFIG_XIP_KERNEL),y)
 

@@ -2,6 +2,7 @@
 #define __LINUX_MSM_CAM_SENSOR_H
 
 #include <uapi/media/msm_cam_sensor.h>
+#include <uapi/media/msm_camsensor_sdk.h>
 
 #include <linux/compat.h>
 
@@ -31,6 +32,7 @@ struct msm_camera_sensor_slave_info32 {
 	char actuator_name[32];
 	char ois_name[32];
 	char flash_name[32];
+	char otp_name[32];
 	enum msm_sensor_camera_id_t camera_id;
 	uint16_t slave_addr;
 	enum i2c_freq_mode_t i2c_freq_mode;
@@ -70,6 +72,16 @@ struct csid_cfg_data32 {
 		compat_uptr_t csid_params;
 		compat_uptr_t csid_testmode_params;
 	} cfg;
+};
+
+struct msm_ir_led_cfg_data_t32 {
+	enum msm_ir_led_cfg_type_t cfg_type;
+	int32_t pwm_duty_on_ns;
+	int32_t pwm_period_ns;
+};
+
+struct msm_ir_cut_cfg_data_t32 {
+	enum msm_ir_cut_cfg_type_t cfg_type;
 };
 
 struct eeprom_read_t32 {
@@ -258,6 +270,15 @@ struct msm_flash_cfg_data_t32 {
 
 #define VIDIOC_MSM_FLASH_CFG32 \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 13, struct msm_flash_cfg_data_t32)
+
+#define VIDIOC_MSM_IR_LED_CFG32 \
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 14, struct msm_ir_led_cfg_data_t32)
+
+#define VIDIOC_MSM_IR_CUT_CFG32 \
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_ir_cut_cfg_data_t32)
+
+#define VIDIOC_MSM_OTP_CFG32 \
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_otp_cfg_data32)
 #endif
 
 #endif

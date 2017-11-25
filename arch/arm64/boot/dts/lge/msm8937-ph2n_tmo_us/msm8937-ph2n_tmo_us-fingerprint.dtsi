@@ -1,0 +1,155 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+/{
+	reserved-memory {
+		other_ext_mem: other_ext_region@0 {
+			reg = <0x0 0x85500000 0x0 0x1300000>;
+		};
+	};
+};
+
+	&soc{
+		qcom_seecom: qseecom@85b00000 {
+			reg = <0x85500000 0xE00000>;
+		};
+	};
+
+/ {
+	aliases {
+	spi6 = &spi_6;
+	};
+
+
+   soc {
+   	tlmm: pinctrl@1000000 {
+		spi6 {
+			spi6_default: spi6_default {
+				/* active state */
+				mux {
+					/* MOSI, MISO, CLK */
+					pins = "gpio20", "gpio21", "gpio23";
+					function = "blsp_spi6";
+				};
+
+				config {
+					pins = "gpio20", "gpio21", "gpio23";
+					drive-strength = <12>; /* 12 MA */
+					bias-disable = <0>; /* No PULL */
+				};
+			};
+
+			spi6_sleep: spi6_sleep {
+				/* suspended state */
+				mux {
+					/* MOSI, MISO, CLK */
+					pins = "gpio20", "gpio21", "gpio23";
+					function = "gpio";
+				};
+
+				config {
+					pins = "gpio20", "gpio21", "gpio23";
+					drive-strength = <2>; /* 2 MA */
+					bias-pull-down; /* PULL Down */
+				};
+			};
+
+			spi6_cs0_active: cs0_active {
+				/* CS */
+				mux {
+					pins = "gpio22";
+					function = "blsp_spi6";
+				};
+
+				config {
+					pins = "gpio22";
+					drive-strength = <2>;
+					bias-disable = <0>;
+				};
+			};
+
+			spi6_cs0_sleep: cs0_sleep {
+				/* CS */
+				mux {
+					pins = "gpio22";
+					function = "gpio";
+				};
+
+				config {
+					pins = "gpio22";
+					drive-strength = <2>;
+					bias-disable = <0>;
+				};
+			};
+		};
+	};
+   
+	spi_6: spi@7af6000 { /* BLSP2 QUP1 */
+		status = "ok";
+		compatible = "qcom,spi-qup-v2";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "spi_physical", "spi_bam_physical";
+		reg = <0x7af6000 0x600>,
+			<0x7ac4000 0x1f000>;
+		interrupt-names = "spi_irq", "spi_bam_irq";
+		interrupts = <0 300 0>, <0 239 0>;
+		spi-max-frequency = <4800000>;
+
+/*
+		qcom,use-pinctrl;
+		pinctrl-names = "spi_default", "spi_sleep";
+		pinctrl-0 = <&spi6_default &spi6_cs0_active>;
+		pinctrl-1 = <&spi6_sleep &spi6_cs0_sleep>;
+*/
+		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
+			<&clock_gcc clk_gcc_blsp2_qup2_spi_apps_clk>;
+		clock-names = "iface_clk", "core_clk";
+		qcom,infinite-mode = <0>;
+		
+/*		qcom,use-pinctrl; */
+		qcom,ver-reg-exists;
+		qcom,bam-consumer-pipe-index = <6>;
+		qcom,bam-producer-pipe-index = <7>;
+		qcom,master-id = <84>;
+	};
+    };
+};
+
+&spi_6 {
+    btp@0 {
+		status = "ok";
+    		compatible = "ix,btp";
+		reg = <0>;
+		
+		interrupt-parent = <&tlmm>;
+		interrupts = <62>;
+
+		qcom,qup-id = <6>;
+		spi-max-frequency = <4800000>;
+	
+		qcom,use-pinctrl;
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&spi6_default &spi6_cs0_active>;
+		pinctrl-1 = <&spi6_sleep &spi6_cs0_sleep>;
+
+		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
+			<&clock_gcc clk_gcc_blsp2_qup2_spi_apps_clk>;
+		clock-names = "iface_clk", "core_clk";
+		
+		ix,gpio_irq = <&tlmm 62 0x00>;
+		ix,gpio_reset = <&tlmm 47 0x00>;
+		ix,gpio_cs  = <&tlmm 22 0x00>;
+		ix,vddio-supply = <&pm8937_l15>;
+	};
+};
+

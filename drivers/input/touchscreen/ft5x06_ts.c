@@ -2579,6 +2579,10 @@ static int ft5x06_ts_probe(struct i2c_client *client,
 		}
 	}
 
+	/*Initialize secure touch */
+	ft5x06_secure_touch_init(data);
+	ft5x06_secure_touch_stop(data, 1);
+
 	ft5x06_update_fw_ver(data);
 	ft5x06_update_fw_vendor_id(data);
 

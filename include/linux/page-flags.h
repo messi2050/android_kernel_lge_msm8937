@@ -112,6 +112,9 @@ enum pageflags {
 #ifdef CONFIG_ZCACHE
 	PG_was_active,
 #endif
+#ifdef CONFIG_MARK_MMAP_HOT_PAGE_ENABLE
+	PG_hotpage,				/* Added by dongwook.seo - HOTPAGE */
+#endif
 	__NR_PAGEFLAGS,
 
 	/* Filesystems */
@@ -249,6 +252,9 @@ PAGEFLAG(MappedToDisk, mappedtodisk)
 /* PG_readahead is only used for reads; PG_reclaim is only for writes */
 PAGEFLAG(Reclaim, reclaim) TESTCLEARFLAG(Reclaim, reclaim)
 PAGEFLAG(Readahead, reclaim) TESTCLEARFLAG(Readahead, reclaim)
+#ifdef CONFIG_MARK_MMAP_HOT_PAGE_ENABLE
+PAGEFLAG(Hotpage, hotpage)
+#endif
 
 #ifdef CONFIG_HIGHMEM
 /*

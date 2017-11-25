@@ -1,0 +1,33 @@
+/*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&pmi8950_vadc {
+	interrupts = <0x2 0x31 0x0>,
+			   <0x2 0x31 0x3>,
+			   <0x2 0x31 0x4>;
+	interrupt-names = "eoc-int-en-set",
+		"high-thr-en-set",
+		"low-thr-en-set";
+	qcom,vadc-meas-int-mode;
+};
+
+&usb_otg {
+	qcom,hsusb-otg-mode = <3>;
+	qcom,hsusb-otg-otg-control = <2>;
+	qcom,hsusb-otg-mpm-dpsehv-int = <49>;
+	qcom,hsusb-otg-mpm-dmsehv-int = <58>;
+	qcom,dpdm_sw-gpio = <&tlmm 57 0x0>;
+	qcom,otg_ena-gpio = <&tlmm 43 0x0>;
+	qcom,otg_enb-gpio = <&tlmm 21 0x0>;
+	qcom,phy-otg-vadc = <&pmi8950_vadc>;
+};

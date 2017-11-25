@@ -201,6 +201,24 @@ int power_supply_set_usb_otg(struct power_supply *psy, int otg)
 }
 EXPORT_SYMBOL(power_supply_set_usb_otg);
 
+#ifdef CONFIG_INPUT_EPACK
+/**
+ * power_supply_set_usb_epack - set epack of the usb power supply
+ * @psy:	the usb power supply to control
+ * @scope:	value to set the otg property to
+ */
+int power_supply_set_usb_epack(struct power_supply *psy, int epack)
+{
+	const union power_supply_propval ret = {epack, };
+
+	if (psy->set_property)
+		return psy->set_property(psy, POWER_SUPPLY_PROP_USB_EPACK,
+								&ret);
+	return -ENXIO;
+}
+EXPORT_SYMBOL(power_supply_set_usb_epack);
+#endif
+
 /**
  * power_supply_set_supply_type - set type of the power supply
  * @psy:	the power supply to control

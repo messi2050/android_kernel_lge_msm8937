@@ -1,0 +1,5 @@
+
+#ifndef _LGE_MDSS_DSI_PH2N_GLOBAL_CA_H
+#define _LGE_MDSS_DSI_PH2N_GLOBAL_CA_H
+
+#endif

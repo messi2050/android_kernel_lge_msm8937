@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -83,6 +83,12 @@ static inline void msm_vidc_free_platform_version_table(
 	res->pf_ver_tbl = NULL;
 }
 
+static inline void msm_vidc_free_capability_version_table(
+		struct msm_vidc_platform_resources *res)
+{
+	res->pf_cap_tbl = NULL;
+}
+
 static inline void msm_vidc_free_freq_table(
 		struct msm_vidc_platform_resources *res)
 {
@@ -162,6 +168,7 @@ void msm_vidc_free_platform_resources(
 	msm_vidc_free_regulator_table(res);
 	msm_vidc_free_freq_table(res);
 	msm_vidc_free_platform_version_table(res);
+	msm_vidc_free_capability_version_table(res);
 	msm_vidc_free_dcvs_table(res);
 	msm_vidc_free_dcvs_limit(res);
 	msm_vidc_free_cycles_per_mb_table(res);
@@ -381,6 +388,33 @@ static int msm_vidc_load_platform_version_table(
 			"qcom,platform-version",
 			sizeof(*res->pf_ver_tbl),
 			(u32 **)&res->pf_ver_tbl,
+			NULL);
+	if (rc) {
+		dprintk(VIDC_ERR,
+			"%s: failed to read platform version table\n",
+			__func__);
+		return rc;
+	}
+
+	return 0;
+}
+
+static int msm_vidc_load_capability_version_table(
+		struct msm_vidc_platform_resources *res)
+{
+	int rc = 0;
+	struct platform_device *pdev = res->pdev;
+
+	if (!of_find_property(pdev->dev.of_node,
+			"qcom,capability-version", NULL)) {
+		dprintk(VIDC_DBG, "qcom,capability-version not found\n");
+		return 0;
+	}
+
+	rc = msm_vidc_load_u32_table(pdev, pdev->dev.of_node,
+			"qcom,capability-version",
+			sizeof(*res->pf_cap_tbl),
+			(u32 **)&res->pf_cap_tbl,
 			NULL);
 	if (rc) {
 		dprintk(VIDC_ERR,
@@ -1007,6 +1041,11 @@ int read_platform_resources_from_dt(
 	if (rc)
 		dprintk(VIDC_ERR, "Failed to load pf version table: %d\n", rc);
 
+	rc = msm_vidc_load_capability_version_table(res);
+	if (rc)
+		dprintk(VIDC_ERR,
+			"Failed to load pf capability table: %d\n", rc);
+
 	rc = msm_vidc_load_freq_table(res);
 	if (rc) {
 		dprintk(VIDC_ERR, "Failed to load freq table: %d\n", rc);
@@ -1273,7 +1312,7 @@ int msm_vidc_smmu_fault_handler(struct iommu_domain *domain,
 		list_for_each_entry(buf, &inst->scratchbufs.list, list)
 			dprintk(VIDC_ERR, "type: %d addr: %pa size: %zu\n",
 				buf->buffer_type, &buf->handle->device_addr,
-				buf->handle->size);
+				buf->handle->size); //LGE_CHANGE, porting for recording by QCT, 2015-12-17, seungmin.hong@lge.com
 		mutex_unlock(&inst->scratchbufs.lock);
 
 		mutex_lock(&inst->persistbufs.lock);
@@ -1281,7 +1320,7 @@ int msm_vidc_smmu_fault_handler(struct iommu_domain *domain,
 		list_for_each_entry(buf, &inst->persistbufs.list, list)
 			dprintk(VIDC_ERR, "type: %d addr: %pa size: %zu\n",
 				buf->buffer_type, &buf->handle->device_addr,
-				buf->handle->size);
+				buf->handle->size); //LGE_CHANGE, porting for recording by QCT, 2015-12-17, seungmin.hong@lge.com
 		mutex_unlock(&inst->persistbufs.lock);
 
 		mutex_lock(&inst->outputbufs.lock);
@@ -1289,7 +1328,7 @@ int msm_vidc_smmu_fault_handler(struct iommu_domain *domain,
 		list_for_each_entry(buf, &inst->outputbufs.list, list)
 			dprintk(VIDC_ERR, "type: %d addr: %pa size: %zu\n",
 				buf->buffer_type, &buf->handle->device_addr,
-				buf->handle->size);
+				buf->handle->size); //LGE_CHANGE, porting for recording by QCT, 2015-12-17, seungmin.hong@lge.com
 		mutex_unlock(&inst->outputbufs.lock);
 	}
 	core->smmu_fault_handled = true;
@@ -1302,7 +1341,6 @@ int msm_vidc_smmu_fault_handler(struct iommu_domain *domain,
 	 */
 	return -ENOSYS;
 }
-
 static int msm_vidc_populate_context_bank(struct device *dev,
 		struct msm_vidc_core *core)
 {

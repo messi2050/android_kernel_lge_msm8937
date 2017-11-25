@@ -47,7 +47,7 @@
 
 #define ISPIF_TIMEOUT_SLEEP_US                1000
 #define ISPIF_TIMEOUT_ALL_US               1000000
-#define ISPIF_SOF_DEBUG_COUNT                    0
+#define ISPIF_SOF_DEBUG_COUNT                    5
 
 #undef CDBG
 #ifdef CONFIG_MSMB_CAMERA_DEBUG
@@ -73,7 +73,7 @@ static void msm_ispif_io_dump_reg(struct ispif_device *ispif)
 
 
 static inline int msm_ispif_is_intf_valid(uint32_t csid_version,
-	uint8_t intf_type)
+	enum msm_ispif_vfe_intf intf_type)
 {
 	return ((csid_version <= CSID_VERSION_V22 && intf_type != VFE0) ||
 		(intf_type >= VFE_MAX)) ? false : true;
@@ -1323,6 +1323,12 @@ static inline void msm_ispif_read_irq_status(struct ispif_irq_status *out,
 		pr_err_ratelimited("%s: fatal error, stop ispif immediately\n",
 			__func__);
 		for (i = 0; i < ispif->vfe_info.num_vfe; i++) {
+			msm_camera_io_w(0x0,
+				ispif->base + ISPIF_VFE_m_IRQ_MASK_0(i));
+			msm_camera_io_w(0x0,
+				ispif->base + ISPIF_VFE_m_IRQ_MASK_1(i));
+			msm_camera_io_w(0x0,
+				ispif->base + ISPIF_VFE_m_IRQ_MASK_2(i));
 			msm_camera_io_w(ISPIF_STOP_INTF_IMMEDIATELY,
 				ispif->base + ISPIF_VFE_m_INTF_CMD_0(i));
 			msm_camera_io_w(ISPIF_STOP_INTF_IMMEDIATELY,
@@ -1501,8 +1507,20 @@ static long msm_ispif_subdev_ioctl_unlocked(struct v4l2_subdev *sd,
 	}
 	case MSM_SD_UNNOTIFY_FREEZE:
 		return 0;
-	case MSM_SD_SHUTDOWN:
+	case MSM_SD_SHUTDOWN: {
+		struct ispif_device *ispif =
+			(struct ispif_device *)v4l2_get_subdevdata(sd);
+
+		if (ispif && ispif->base) {
+			while (ispif->open_cnt != 0)
+				ispif_close_node(sd, NULL);
+		} else {
+			pr_debug("%s:SD SHUTDOWN fail, ispif%s %p\n", __func__,
+				ispif ? "_base" : "",
+				ispif ? ispif->base : NULL);
+		}
 		return 0;
+	}
 	default:
 		pr_err_ratelimited("%s: invalid cmd 0x%x received\n",
 			__func__, cmd);

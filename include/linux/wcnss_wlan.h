@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -124,6 +124,7 @@ void wcnss_suspend_notify(void);
 void wcnss_resume_notify(void);
 void wcnss_riva_log_debug_regs(void);
 void wcnss_pronto_log_debug_regs(void);
+void wcnss_pronto_dump_regs(void);
 int wcnss_is_hw_pronto_ver3(void);
 int wcnss_device_ready(void);
 bool wcnss_cbc_complete(void);
@@ -138,6 +139,7 @@ void wcnss_init_work(struct work_struct *work , void *callbackptr);
 void wcnss_init_delayed_work(struct delayed_work *dwork , void *callbackptr);
 int wcnss_get_iris_name(char *iris_version);
 void wcnss_dump_stack(struct task_struct *task);
+void wcnss_snoc_vote(bool clk_chk_en);
 
 #ifdef CONFIG_WCNSS_REGISTER_DUMP_ON_BITE
 void wcnss_log_debug_regs_on_bite(void);

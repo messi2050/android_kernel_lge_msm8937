@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -28,6 +28,7 @@
 
 	aliases {
 		/* smdtty devices */
+		smd0 = &smdtty_ds;
 		smd1 = &smdtty_apps_fm;
 		smd2 = &smdtty_apps_riva_bt_acl;
 		smd3 = &smdtty_apps_riva_bt_cmd;
@@ -89,6 +90,7 @@
 			reusable;
 			alignment = <0 0x400000>;
 			size = <0 0x7000000>;
+			status = "disabled";
 		};
 
 		qseecom_mem: qseecom_region@0 {
@@ -529,7 +531,6 @@
 		dmas = <&dma_blsp1 8 64 0x20000020 0x20>,
 			<&dma_blsp1 9 32 0x20000020 0x20>;
 		dma-names = "tx", "rx";
-		status = "disabled";
 	};
 
 	i2c_5: i2c@7af5000 { /* BLSP2 QUP1 */
@@ -839,7 +840,8 @@
 			<  2929 /*  384   MHz */ >,
 			<  4248 /*  556.8 MHz */ >,	/*SVS+*/
 			<  4541 /*  595.2 MHz */ >,	/*NOM*/
-			<  5126 /*  672   MHz */ >;	/*TURBO*/
+			<  5126 /*  672   MHz */ >,	/*NOM+*/
+			<  5645 /*  740   MHz */ >;	/*TURBO*/
 	};
 
 	mincpubw: qcom,mincpubw {
@@ -854,7 +856,8 @@
 			<  2929 /*  384   MHz */ >,
 			<  4248 /*  556.8 MHz */ >,
 			<  4541 /*  595.2 MHz */ >,
-			<  5126 /*  672   MHz */ >;
+			<  5126 /*  672   MHz */ >,
+			<  5645 /*  740   MHz */ >;
 	};
 
 	qcom,cpu-bwmon {
@@ -872,7 +875,7 @@
 		cpu-to-dev-map =
 			<  998400  4248 >,
 			< 1094400  4541 >,
-			< 1497600  5126 >;
+			< 1497600  5645 >;
 		};
 
 		mincpubw-cpufreq {
@@ -913,7 +916,7 @@
 			label = "modem";
 		};
 
-		qcom,client_3 {
+		mem_client_3_size: qcom,client_3 {
 			compatible = "qcom,memshare-peripheral";
 			qcom,peripheral-size = <0x0>;
 			qcom,client-id = <1>;
@@ -1113,6 +1116,11 @@
 	qcom,smdtty {
 		compatible = "qcom,smdtty";
 
+		smdtty_ds: qcom,smdtty-ds {
+			qcom,smdtty-remote = "modem";
+			qcom,smdtty-port-name = "DS";
+		};
+
 		smdtty_apps_fm: qcom,smdtty-apps-fm {
 			qcom,smdtty-remote = "wcnss";
 			qcom,smdtty-port-name = "APPS_FM";
@@ -1290,6 +1298,7 @@
 		qcom,qsee-ce-hw-instance = <0>;
 		qcom,disk-encrypt-pipe-pair = <2>;
 		qcom,support-fde;
+		qcom,appsbl-qseecom-support;
 		qcom,msm-bus,name = "qseecom-noc";
 		qcom,msm-bus,num-cases = <4>;
 		qcom,msm-bus,num-paths = <1>;
@@ -1299,6 +1308,21 @@
 			<55 512 0 0>,
 			<55 512 120000 1200000>,
 			<55 512 393600 3936000>;
+		clocks = <&clock_gcc clk_crypto_clk_src>,
+			 <&clock_gcc clk_gcc_crypto_clk>,
+			 <&clock_gcc clk_gcc_crypto_ahb_clk>,
+			 <&clock_gcc clk_gcc_crypto_axi_clk>;
+		clock-names = "core_clk_src", "core_clk",
+				"iface_clk", "bus_clk";
+		qcom,ce-opp-freq = <100000000>;
+	};
+
+	mcd {
+		compatible = "qcom,mcd";
+		qcom,ce-hw-instance = <0>;
+		qcom,ce-device = <0>;
+		interrupts = <0 319 0>;
+		interrupt-names = "mcd_irq";
 		clocks = <&clock_gcc clk_crypto_clk_src>,
 			 <&clock_gcc clk_gcc_crypto_clk>,
 			 <&clock_gcc clk_gcc_crypto_ahb_clk>,
@@ -1394,12 +1418,12 @@
 		qcom,devfreq,freq-table = <50000000 200000000>;
 
 		qcom,pm-qos-irq-type = "affine_irq";
-		qcom,pm-qos-irq-latency = <13 281>;
+		qcom,pm-qos-irq-latency = <13 651>;
 
 		qcom,pm-qos-cpu-groups = <0x0f>;
-		qcom,pm-qos-cmdq-latency-us = <13 281>;
+		qcom,pm-qos-cmdq-latency-us = <13 651>;
 
-		qcom,pm-qos-legacy-latency-us = <13 281>;
+		qcom,pm-qos-legacy-latency-us = <13 651>;
 
 		qcom,msm-bus,name = "sdhc1";
 		qcom,msm-bus,num-cases = <9>;
@@ -1438,10 +1462,10 @@
 		qcom,large-address-bus;
 
 		qcom,pm-qos-irq-type = "affine_irq";
-		qcom,pm-qos-irq-latency = <13 281>;
+		qcom,pm-qos-irq-latency = <13 651>;
 
 		qcom,pm-qos-cpu-groups = <0x0f>;
-		qcom,pm-qos-legacy-latency-us = <13 281>;
+		qcom,pm-qos-legacy-latency-us = <13 651>;
 
 		qcom,msm-bus,name = "sdhc2";
 		qcom,msm-bus,num-cases = <8>;

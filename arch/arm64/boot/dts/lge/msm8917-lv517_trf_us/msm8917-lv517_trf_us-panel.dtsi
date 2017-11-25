@@ -1,0 +1,129 @@
+/*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&wled {
+	qcom,cons-sync-write-delay-us = <1000>;
+};
+
+&mdss_mdp {
+	qcom,mdss-pref-prim-intf = "dsi";
+};
+
+&mdss_dsi {
+	hw-config = "single_dsi";
+};
+
+#include "../dsi-panel-lv5-lgd-lg4894-hd-video.dtsi"
+
+&dsi_lv5_lgd_lg4894_hd_video {
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&tlmm {
+	pmx_mdss {
+		mdss_dsi_active: mdss_dsi_active {
+			mux {
+				pins = "gpio33";
+			};
+
+			config {
+				pins = "gpio33";
+			};
+		};
+
+		mdss_dsi_suspend: mdss_dsi_suspend {
+			mux {
+				pins = "gpio33";
+			};
+
+			config {
+				pins = "gpio33";
+			};
+		};
+	};
+
+	pmx_mdss_te {
+		mdss_te_active: mdss_te_active {
+			mux {
+				pins = "gpio24";
+			};
+
+			config {
+				pins = "gpio24";
+			};
+		};
+
+		mdss_te_suspend: mdss_te_suspend {
+			mux {
+				pins = "gpio24";
+			};
+
+			config {
+				pins = "gpio24";
+			};
+		};
+	};
+};
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_lv5_lgd_lg4894_hd_video>;
+	pinctrl-names = "mdss_default", "mdss_sleep";
+	pinctrl-0 = <&mdss_dsi_active>;
+	pinctrl-1 = <&mdss_dsi_suspend>;
+	qcom,regulator-ldo-mode;
+	qcom,platform-reset-gpio = <&tlmm 33 0>;
+
+	lge,extra-gpio-names = "vdda", "dsv-ena";
+
+	lge,gpio-vdda = <&tlmm 3 0>;
+	lge,gpio-dsv-ena = <&tlmm 60 0>;
+
+	/delete-property/ vdd-supply;
+};
+
+&soc {
+	dsi_panel_pwr_supply: dsi_panel_pwr_supply {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		qcom,panel-supply-entry@1 {
+			reg = <1>;
+			qcom,supply-name = "vddio";
+			qcom,supply-min-voltage = <1800000>;
+			qcom,supply-max-voltage = <1800000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+			qcom,supply-post-on-sleep = <1>;
+		};
+	};
+};
+
+&mdss_fb0 {
+	/delete-property/ qcom,mdss-fb-splash-logo-enabled;
+};
+
+&i2c_2 {
+	dw8768@3e {
+		status = "ok";
+		compatible = "dw8768";
+		reg = <0x3e>;
+	};
+};
+
+&wled {
+	qcom,fs-curr-ua = <20000>;
+	qcom,led-strings-list = [00];
+};

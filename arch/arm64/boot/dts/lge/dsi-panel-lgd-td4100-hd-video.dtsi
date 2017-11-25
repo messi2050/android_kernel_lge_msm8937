@@ -1,0 +1,152 @@
+&mdss_mdp {
+	dsi_lgd_td4100_hd_incell_vid: qcom,mdss_dsi_lgd_incell_td4100_hd_video{
+		compatible = "qcom,mdss-dsi-panel";
+		status = "disable";
+		qcom,cont-splash-enabled;
+		qcom,mdss-dsi-panel-name = "LGD INCELL TD4100 HD video mode dsi panel";
+		qcom,mdss-dsi-panel-controller = <&mdss_dsi0>;
+		qcom,mdss-dsi-panel-type = "dsi_video_mode";
+		qcom,mdss-dsi-panel-destination = "display_1";
+		qcom,mdss-dsi-panel-framerate = <60>;
+		//qcom,mdss-dsi-force-clock-lane-hs;
+		qcom,mdss-dsi-virtual-channel-id = <0>;
+		qcom,mdss-dsi-stream = <0>;
+		qcom,mdss-dsi-lp11-init;
+		qcom,suspend-ulps-enabled;
+		qcom,mdss-dsi-panel-width = <720>;
+		qcom,mdss-dsi-panel-height = <1280>;
+		qcom,mdss-dsi-h-front-porch = <80>;
+		qcom,mdss-dsi-h-back-porch = <40>;
+		qcom,mdss-dsi-h-pulse-width = <4>;
+		qcom,mdss-dsi-h-sync-skew = <0>;
+		qcom,mdss-dsi-v-front-porch = <17>;
+		qcom,mdss-dsi-v-back-porch = <230>;
+		qcom,mdss-dsi-v-pulse-width = <191>;
+		qcom,mdss-dsi-h-left-border = <0>;
+		qcom,mdss-dsi-h-right-border = <0>;
+		qcom,mdss-dsi-v-top-border = <0>;
+		qcom,mdss-dsi-v-bottom-border = <0>;
+		qcom,mdss-pan-physical-width-dimension = <71>;
+		qcom,mdss-pan-physical-height-dimension = <126>;
+		qcom,mdss-dsi-bpp = <24>;
+		qcom,mdss-dsi-color-order = "rgb_swap_rgb";
+		qcom,mdss-dsi-underflow-color = <0>;
+		qcom,mdss-dsi-border-color = <0>;
+		qcom,mdss-dsi-post-panel-on-command = [
+			05 01 00 00 78 00 02
+			11 00
+			05 01 00 00 00 00 02
+			29 00
+		];
+		qcom,mdss-dsi-off-command = [
+			05 01 00 00 3C 00 02
+			28 00
+			05 01 00 00 78 00 02
+			10 00
+		];
+
+		qcom,panel-reader-mode-step1-command = [
+			29 01 00 00 00 00 02    // MACP
+			B0 04
+			15 01 00 00 00 00 02
+			84 CC
+			15 01 00 00 00 00 02
+			C8 01
+			29 01 00 00 00 00 02    // MACP
+			B0 03
+		];
+		qcom,panel-reader-mode-step2-command = [
+			29 01 00 00 00 00 02    // MACP
+			B0 04
+			15 01 00 00 00 00 02
+			84 A5
+			15 01 00 00 00 00 02
+			C8 01
+			29 01 00 00 00 00 02    // MACP
+			B0 03
+		];
+		qcom,panel-reader-mode-step3-command = [
+			29 01 00 00 00 00 02    // MACP
+			B0 04
+			15 01 00 00 00 00 02
+			84 80
+			15 01 00 00 00 00 02
+			C8 01
+			29 01 00 00 00 00 02    // MACP
+			B0 03
+		];
+		qcom,panel-reader-mode-off-command = [
+			29 01 00 00 00 00 02    // MACP
+			B0 04
+			15 01 00 00 00 00 02
+			84 00
+			15 01 00 00 00 00 02
+			C8 00
+			29 01 00 00 00 00 02    // MACP
+			B0 03
+		];
+
+		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
+		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
+		qcom,mdss-dsi-reader-mode-command-state = "dsi_hs_mode";
+		qcom,mdss-dsi-h-sync-pulse = <1>;
+		qcom,mdss-dsi-traffic-mode = "non_burst_sync_pulse";
+		qcom,mdss-dsi-lane-map = "lane_map_0123";
+		qcom,mdss-dsi-bllp-eof-power-mode;
+		qcom,mdss-dsi-bllp-power-mode;
+		qcom,mdss-dsi-lane-0-state;
+		qcom,mdss-dsi-lane-1-state;
+		qcom,mdss-dsi-lane-2-state;
+		qcom,mdss-dsi-lane-3-state;
+		qcom,mdss-dsi-tx-eot-append;
+
+		qcom,mdss-dsi-panel-timings = [95 20 14 00 48 4A 1A 24 1F 03 04 00];
+		qcom,mdss-dsi-t-clk-post = <0x04>;
+		qcom,mdss-dsi-t-clk-pre = <0x1E>;
+
+		//The following feature "none" and "trigger_sw" are the same in video mode.
+		//The feature used any option of TE signal in command mode.
+		qcom,mdss-dsi-dma-trigger = "trigger_sw";	//default "trigger_sw"
+		qcom,mdss-dsi-mdp-trigger = "trigger_sw";	//default "trigger_sw"
+
+		qcom,mdss-dsi-bl-min-level = <1>;
+		qcom,mdss-dsi-bl-max-level = <255>;
+		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+		qcom,mdss-dsi-reset-sequence = <0 10>, <1 130>;
+
+		lge,blmap-size = <256>;
+		lge,blmap = <
+			0	25	25	25	25	25	25	25	25	25		/* 0 ~ 9 */
+			25	25	25	26	26	27	27	28	28	29		/* 10 ~ 19 */
+			29	30	30	31	32	33	35	36	38	39		/* 20 ~ 29 */
+			40	42	43	45	46	48	50	52	54	57		/* 30 ~ 39 */
+			59	61	64	66	68	70	73	75	77	80		/* 40 ~ 49 */
+			85	90	95	100	105	110	115	120	125	130		/* 50 ~ 59 */
+			133	137	141	145	149	153	157	161	165	169		/* 60 ~ 69 */
+			173	177	181	185	192	199	206	213	220	227		/* 70 ~ 79 */
+			234	241	248	255	262	270	277	284	291	299		/* 80 ~ 89 */
+			306	313	321	328	335	343	350	357	365	375		/* 90 ~ 99 */
+			385	396	406	417	427	438	448	459	469	480		/* 100 ~ 109 */
+			490	500	511	521	531	542	552	563	573	583		/* 110 ~ 119 */
+			594	604	615	627	640	653	666	679	692	705		/* 120 ~ 129 */
+			718	731	744	757	770	786	802	819	835	851		/* 130 ~ 139 */
+			868	884	900	917	933	950	964	979	993	1008		/* 140 ~ 149 */
+			1023	1037	1052	1066	1081	1096	1110	1125	1140	1157		/* 150 ~ 159 */
+			1175	1192	1210	1227	1245	1262	1280	1297	1315	1332		/* 160 ~ 169 */
+			1350	1369	1388	1407	1426	1446	1465	1484	1503	1523		/* 170 ~ 179 */
+			1542	1561	1580	1600	1622	1645	1667	1690	1712	1735		/* 180 ~ 189 */
+			1757	1780	1802	1825	1847	1870	1893	1917	1941	1965		/* 190 ~ 199 */
+			1989	2013	2036	2060	2084	2108	2132	2156	2180	2207		/* 200 ~ 209 */
+			2234	2261	2289	2316	2343	2370	2398	2425	2452	2480		/* 210 ~ 219 */
+			2506	2533	2560	2587	2614	2641	2668	2695	2722	2749		/* 220 ~ 229 */
+			2776	2803	2830	2862	2895	2927	2960	2992	3025	3057		/* 230 ~ 239 */
+			3090	3122	3155	3187	3220	3259	3299	3338	3378	3417		/* 240 ~ 249 */
+			3457	3496	3536	3575	3615	3655						/* 250 ~ 255 */
+		>;
+
+	};
+};
+
+&mdss_dsi0 {
+	lge,esc-clk-rate = <16000000>;
+};

@@ -62,3 +62,295 @@ config FB_MSM_MDSS_XLOG_DEBUG
 	features to: Dump MDSS registers during driver errors, panic
 	driver during fatal errors and enable some display-driver logging
 	into an internal buffer (this avoids logging overhead).
+
+config LGE_DISPLAY_P2S_VSYNC_SKIP
+	bool "MDSS VSYNC Skip scheme"
+	default n
+	---help---
+	This feature provides VSYNC skip scheme.
+
+config LGE_MIPI_DSI_SHARP_NT35596_FHD_VIDEO_INCELL_LCD_PANEL
+	depends on FB_MSM_MDSS
+	bool "Support Sharp NT35596 FHD Video PANEL"
+	---help---
+	The SHARP Panel provides support for FHD video mode.
+	The fps is 60HZ and four lane for data is used.
+
+config LGE_MIPI_DSI_LGD_DB7400_HD_VIDEO_INCELL_LCD_PANEL
+	depends on FB_MSM_MDSS
+	bool "Support LGD DB7400 HD Video PANEL"
+	---help---
+	The LGD Panel provides support for HD video mode.
+	The fps is 60HZ and four lane for data is used.
+
+config LGE_MIPI_DSI_LGD_K7J_FHD_VIDEO_INCELL_LCD_PANEL
+	depends on FB_MSM_MDSS
+	bool "Support LGD FT8707 FHD Video PANEL"
+	---help---
+	The LGD Panel provides support for FHD video mode.
+	The fps is 60HZ and four lane for data is used.
+
+config LGE_DISPLAY_COMMON
+	depends on FB_MSM_MDSS
+	bool "Use LGE DISPLAY COMMON"
+	---help---
+	The LGE DISPLAY COMMON provides support for common display features
+	made by LGE.
+
+config LGE_DISPLAY_OVERRIDE_MDSS_DSI_CTRL_SHUTDOWN
+	depends on LGE_DISPLAY_COMMON
+	bool "Use OVERRIDE MDSS_DSI_CTRL_SHUTDOWN"
+	---help---
+	It provides support for
+	ovrriding mdss_dsi_ctrl_shutdown() function.
+
+config LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_RESET
+	depends on LGE_DISPLAY_COMMON
+	bool "Use OVERRIDE MDSS_DSI_PANEL_RESET"
+	---help---
+	It provides support for
+	ovrriding mdss_dsi_panel_reset() function.
+
+config LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_ON
+	depends on LGE_DISPLAY_COMMON
+	bool "Use OVERRIDE MDSS_DSI_PANEL_ON"
+	---help---
+	It provides support for
+	ovrriding mdss_dsi_panel_on() function.
+
+config LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_OFF
+	depends on LGE_DISPLAY_COMMON
+	bool "Use OVERRIDE MDSS_DSI_PANEL_OFF"
+	---help---
+	It provides support for
+	ovrriding mdss_dsi_panel_off() function.
+
+config LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_POWER_OFF
+	depends on LGE_DISPLAY_COMMON
+	bool "Use OVERRIDE MDSS_DSI_PANEL_POWER_OFF"
+	---help---
+	It provides support for
+	ovrriding mdss_dsi_panel_power_off() function.
+
+config LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_POWER_ON
+	depends on LGE_DISPLAY_COMMON
+	bool "Use OVERRIDE MDSS_DSI_PANEL_POWER_ON"
+	---help---
+	It provides support for
+	ovrriding mdss_dsi_panel_power_on() function.
+
+config LGE_DISPLAY_TOUCH_NOTIFIER_CALL_CHAIN
+	depends on LGE_DISPLAY_COMMON
+	bool "Use TOUCH_NOTIFIER_CALL_CHAIN"
+	---help---
+	It provides support for
+	calling touch_notifier_call_chain() function.
+
+config LGE_DISPLAY_PH2_GLOBAL_COM
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY PH2 GLOBAL COM"
+	---help---
+	The PH2 GLOBAL COM provides support for PH2 GLOBAL COM panel
+
+config LGE_DISPLAY_PH2_CMO_CN
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY PH2 CMO CN"
+	---help---
+	The PH2 CMO CN provides support for PH2 CMO CN panel
+
+config LGE_DISPLAY_PH2N_TMO_US
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY PH2N TMO US"
+	---help---
+	The PH2N TMO US provides support for PH2N TMO US panel
+
+config LGE_DISPLAY_L5_DCM_JP
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY L5 DCM JP"
+	---help---
+	The L5 DCM JP provides support for L5 DCM JP panel
+
+config LGE_DISPLAY_JSG_KDDI_JP
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY JSG KDDI JP"
+	---help---
+	The JSG KDDI JP provides support for JSG KDDI JP panel
+
+config LGE_DISPLAY_PH2N_GLOBAL_CA
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY PH2N GLOBAL CA"
+	---help---
+	The PH2N GLOBAL CA provides support for PH2N GLOBAL CA panel
+
+config LGE_DISPLAY_PH2N_MPCS_US
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY PH2N MPCS US"
+	---help---
+	The PH2N MPCS US provides support for PH2N MPCS US panel
+
+config LGE_DISPLAY_LGPS29_1
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY LGPS29_1"
+	---help---
+    It provides support for LGPS29_1 panel
+
+config LGE_DISPLAY_LV3_TIANMA_FT860X
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY LV3_TIANMA_FT860X"
+	---help---
+	It provides support for LV3_TIANMA_FT860X panel
+
+config LGE_DISPLAY_LV3_LGD_LG4894
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY LV3_LGD_LG4894"
+	---help---
+	It provides support for LV3_LGD_LG4894 panel
+
+config LGE_DISPLAY_LV7_TOVIS_TD4100
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY LV7_TOVIS_TD4100"
+	---help---
+	It provides support for LV7_TOVIS_TD4100 panel
+
+config LGE_DISPLAY_B6
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY B6"
+	---help---
+    It provides support for B6 panel
+
+config LGE_DISPLAY_LGPS33
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY LGPS33"
+	---help---
+    It provides support for LGPS33 panel
+
+config LGE_DISPLAY_SF340_TOVIS_TD4100
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY SF340_TOVIS_TD4100"
+	---help---
+    It provides support for SF340_TOVIS_TD4100 panel
+
+config LGE_DISPLAY_LV5_LGD_LG4894
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY LV5_LGD_LG4894"
+	---help---
+	It provides support for LV5_LGD_LG4894 panel
+
+config LGE_DISPLAY_SF3_LGD_TD4100
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY SF3_LGD_TD4100"
+	---help---
+    It provides support for SF3_LGD_TD4100 panel
+
+config LGE_DISPLAY_SF3F_LGD_TD4310
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY SF3F_LGD_TD4310"
+	---help---
+    It provides support for SF3F_LGD_TD4310 panel
+
+config LGE_DISPLAY_SF3F_LGD_SW49105
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY SF3F_LGD_TD4310"
+	---help---
+    It provides support for SF3F_LGD_TD4310 panel
+
+config LGE_DISPLAY_LV9_JDI_NT35596
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY LGE_DISPLAY_LV9_JDI_NT35596"
+	---help---
+	It provides support for LGE_DISPLAY_LV9_JDI_NT35596 panel
+
+config LGE_DISPLAY_TF8_INX_NT51021
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY LGE_DISPLAY_TF8_INX_NT51021"
+	---help---
+	It provides support for LGE_DISPLAY_TF8_INX_NT51021 panel
+
+config LGE_DISPLAY_MH
+	depends on LGE_DISPLAY_COMMON
+	bool "Use LGE DISPLAY MH"
+	---help---
+    It provides support for MH panel
+
+config LGE_DISPLAY_BL_USE_BLMAP
+	depends on FB_MSM_MDSS
+	bool "Use LGE BLMAP"
+	---help---
+	To get backlight level from backlight value[0~255],
+	It uses backlight map, instead of linear function.
+
+config LGE_DISPLAY_READER_MODE
+	depends on FB_MSM_MDSS
+	bool "LGE reader mode"
+	---help---
+	The reader mode provides support to change color temperature
+	by sending proper cmds to panel.
+
+config LGE_DISPLAY_DAYLIGHT_MODE
+	depends on FB_MSM_MDSS
+	bool "LGE daylight mode"
+	---help---
+	The daylight mode provides support to improve outdoor visibility
+	by sending proper cmds to panel.
+
+config LGE_DISPLAY_RECOVERY_ESD
+	bool "Enable a function for report panel dead"
+	default n
+
+config LGE_LCD_ESD_PANEL_POWER_RECOVERY
+	bool "Enable a function for report panel dead"
+	default n
+
+config LGE_DISPLAY_WITH_QCT_ESD
+        depends on LGE_DISPLAY_RECOVERY_ESD
+        bool "Use DISPLAY_WITH_QCT_ESD"
+        ---help---
+        It provides ESD Recovery with QCT recovery
+
+config LGE_DISPLAY_ESD_NOT_CHECK_WITH_FACTORY_CABLE
+	bool "ESD check disable when factory cable boot"
+	default n
+
+config LGE_DISPLAY_LV7_ESD_FLAG
+	bool "ESD status check flag for lv7"
+	default n
+
+config LGE_DISPLAY_MFTS
+	depends on FB_MSM_MDSS
+	bool "LGE display MFTS"
+	---help---
+	MFTS provides support panel power sequence in MFTS MODE.
+
+config LGE_DISPLAY_BL_DIMMING
+	bool "Enable LCD DIMMING for FOTA"
+	default n
+	---help---
+	Support for LCD DIMMING (for FOTA)
+
+config LGE_DISPLAY_BL_SP_MIRRORING
+	bool "SP_MIRRORING_CTRL_BL"
+	default n
+	select MACH_LGE
+	help
+	if you say yes here you get support for sp mirroring backlight control
+
+config LGE_DISPLAY_DEBUG
+	bool "DISPLAY_DEBUG"
+	default n
+	select MACH_LGE
+	help
+	if you say yes here you get support for display debug
+
+config LGE_HIGH_LUMINANCE_MODE
+	bool "LGE_HIGH_LUMINANCE_MODE"
+	default n
+	help
+	if you say yes here you get support for high luminance mode
+
+config LGE_DISPLAY_PRE_ACTIVE_AREA_DELAY
+	bool "PRE_ACTIVE_AREA_DELAY"
+	default n
+	select MACH_LGE
+	help
+	if you say yes here you get support for pre active area delay
+

@@ -17,7 +17,9 @@
 
 #include "mdss_dsi.h"
 #include "mdss_mdp.h"
-
+#if IS_ENABLED(CONFIG_LGE_TOUCH_LG4894)
+extern bool lg4894_check_finger(void);
+#endif
 /*
  * mdss_check_te_status() - Check the status of panel for TE based ESD.
  * @ctrl_pdata   : dsi controller data
@@ -116,6 +118,13 @@ void mdss_check_dsi_ctrl_status(struct work_struct *work, uint32_t interval)
 			goto status_dead;
 	}
 
+#if IS_ENABLED(CONFIG_LGE_TOUCH_LG4894)
+	if (lg4894_check_finger()) {
+		schedule_delayed_work(&pstatus_data->check_status,
+			msecs_to_jiffies(interval));
+		return;
+	}
+#endif
 
 	/*
 	 * TODO: Because mdss_dsi_cmd_mdp_busy has made sure DMA to

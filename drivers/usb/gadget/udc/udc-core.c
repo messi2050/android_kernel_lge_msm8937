@@ -29,6 +29,14 @@
 #include <linux/usb/gadget.h>
 #include <linux/usb.h>
 
+#ifdef CONFIG_MACH_LGE
+#include <soc/qcom/lge/board_lge.h>
+#endif
+#ifdef CONFIG_USB_MAUSB
+#include <linux/usb/mausb.h>
+static int enable_mausb;
+module_param(enable_mausb, int, S_IRUGO | S_IWUSR);
+#endif
 /**
  * struct usb_udc - describes one usb device controller
  * @driver - the gadget driver pointer. For use by the class code
@@ -416,7 +424,15 @@ static int udc_bind_to_driver(struct usb_udc *udc, struct usb_gadget_driver *dri
 	 *
 	 * usb_gadget_connect(udc->gadget);
 	 */
-
+	 //MAUSB LAF2
+	printk(KERN_INFO "udc->gadget->name: %s \n",udc->gadget->name);
+	if (lge_get_laf_mode() == LGE_LAF_MODE_LAF)
+	{
+		if ((!strcmp(driver->function,"laf_mausb")) && (!strcmp(udc->gadget->name,"mausb_udc"))) {
+			printk(KERN_INFO " usb_gadget_connect mausb_udc for mausb LAF2 \n");
+			usb_gadget_connect(udc->gadget);
+		}
+	}
 	kobject_uevent(&udc->dev.kobj, KOBJ_CHANGE);
 	return 0;
 err1:
@@ -455,19 +471,56 @@ out:
 }
 EXPORT_SYMBOL_GPL(udc_attach_driver);
 
+#ifdef CONFIG_USB_MAUSB
+int is_mausb_enabled(void)
+{
+	return enable_mausb;
+}
+EXPORT_SYMBOL_GPL(is_mausb_enabled);
+#endif
+
 int usb_gadget_probe_driver(struct usb_gadget_driver *driver)
 {
 	struct usb_udc		*udc = NULL;
 	int			ret;
-
+	int count =0;
+	int udc_flag = 0;
+	printk(KERN_INFO "%s \n",__func__);
 	if (!driver || !driver->bind || !driver->setup)
 		return -EINVAL;
 
 	mutex_lock(&udc_lock);
 	list_for_each_entry(udc, &udc_list, list) {
-		/* Match according to usb_core_id */
-		if (!udc->driver && udc->gadget
-		    && udc->gadget->usb_core_id == driver->usb_core_id)
+			printk(KERN_INFO "gadget name udc->gadget->name %s \n",udc->gadget->name);
+			count++;
+	}
+	printk(KERN_INFO "\n********************************************");
+	printk(KERN_INFO "\n No of UDCs: %d",count);
+	printk(KERN_INFO "\n driver->function: %s",driver->function);
+	printk(KERN_INFO "\n********************************************");
+	list_for_each_entry(udc, &udc_list, list) {
+#ifdef CONFIG_USB_MAUSB
+		if (enable_mausb == 1 && lge_get_laf_mode() == LGE_LAF_MODE_NORMAL) {
+			if (!strcmp(udc->gadget->name,"mausb_udc") && !udc->driver) {
+				printk(KERN_INFO "udc->gadget->name: %s \n",udc->gadget->name);
+				goto found;
+			}
+			continue;
+		}
+#endif
+		if ((udc->dev).init_name)
+			printk(KERN_INFO "\n UDC Name: %s",(udc->dev).init_name);
+		if (udc_flag == 0)
+			if ((!strcmp(driver->function,"printer")) || 
+				(!strcmp(driver->function,"mausb_diag")) ||
+				(!strcmp(driver->function,"laf_mausb")) ||
+				(!strcmp(driver->function,"adb"))) {
+					udc_flag = 1;
+					continue;	
+			}
+		printk(KERN_INFO "\n udc->gadget->usb_core_id : %d",udc->gadget->usb_core_id);
+		printk(KERN_INFO "\n driver->usb_core_id: %d \n",driver->usb_core_id);
+		if (!udc->driver )
 			goto found;
 	}
 

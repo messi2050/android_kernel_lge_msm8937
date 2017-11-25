@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "msm8937-ph2n_mpcs_us-pinctrl.dtsi"
+#include "msm8937-ph2n_mpcs_us-camera.dtsi"
+#include "msm8937-ph2n_mpcs_us-panel.dtsi"
+#include "msm8937-ph2n_mpcs_us-sound.dtsi"
+#include "msm8937-ph2n_mpcs_us-misc.dtsi"
+#include "msm8937-ph2n_mpcs_us-pm.dtsi"
+#include "msm8937-ph2n_mpcs_us-touch.dtsi"
+#include "msm8937-ph2n_mpcs_us-nfc.dtsi"
+
+/ {
+	reserved-memory {
+		/delete-node/ crash_fb_mem@AF700000;
+		crash_fb_mem: crash_fb_mem@AFB00000 {
+			linux,contiguous-region;
+			reg = <0 0xAFB00000 0 0x400000>;
+			label = "crash_fb_mem";
+		};
+
+		secure_mem: secure_region@0 {
+			status = "disabled";
+		};
+	};
+};
+
+&soc {
+	earjack-debugger {
+		compatible = "serial,earjack-debugger";
+		status = "ok";
+		interrupt-parent = <&tlmm>;
+		interrupts = <58 0x0>;
+		serial,irq-gpio = <&tlmm 58 0x00>;
+	};
+
+	crash_fb {
+		compatible = "crash_fb";
+		mem-addr = <0xAFB00000>;
+		mem-size = <0x400000>;
+	};
+
+	qcom,ion {
+		qcom,ion-heap@8 {
+			status = "disabled";
+		};
+	};
+};

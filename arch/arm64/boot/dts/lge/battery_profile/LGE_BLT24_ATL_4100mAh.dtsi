@@ -1,0 +1,49 @@
+
+qcom,LGE_BLT24_ATL_4100mAh{
+	/* #2674069_LGE_BLT24atl_4100mAh_averaged_MasterSlave_Nov2nd2016*/
+	qcom,max-voltage-uv = <4400000>;
+	qcom,nom-batt-capacity-mah = <4100>;
+	qcom,batt-id-kohm = <100000>;
+	qcom,battery-beta = <3435>;
+	qcom,battery-type = "LGE_BLT24_ATL_4100mAh";
+	qcom,chg-rslow-comp-c1 = <2931040>;
+	qcom,chg-rslow-comp-c2 = <4488567>;
+	qcom,chg-rs-to-rslow = <774909>;
+	qcom,chg-rslow-comp-thr = <0xAC>;
+	qcom,checksum = <0xB706>;
+	qcom,gui-version = "PMI8950GUI - 2.0.0.16";
+	qcom,fg-profile-data = [
+		 F0 83 6D 7D
+		 AA 81 43 7C
+		 5E 83 49 6D
+		 EC 83 0B 8E
+		 30 82 A9 99
+		 A0 BC 23 C9
+		 5B 0F 06 88
+		 FF 7D 01 82
+		 8C 7C 58 83
+		 F5 61 62 80
+		 67 8C 3C 82
+		 2B 9A 8A BD
+		 C0 CA 5A 0E
+		 F6 0F CC 5A
+		 14 70 71 FD
+		 8B 3F 9E 47
+		 31 49 00 00
+		 DD 4C 50 32
+		 77 41 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 CD 6B CE 6A
+		 BB 68 63 90
+		 5D 7C F1 70
+		 DF 74 E1 80
+		 1F 77 FB 6A
+		 5E 74 CA 9B
+		 20 2C 60 9E
+		 5C A0 71 0C
+		 28 00 FF 36
+		 F0 11 30 03
+		 00 00 00 0C
+	];
+};

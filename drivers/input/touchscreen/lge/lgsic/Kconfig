@@ -1,0 +1,31 @@
+#
+# LGE touch core configuration
+#
+if INPUT_TOUCHSCREEN
+
+menuconfig LGE_TOUCH_LGSIC_LG4945
+	bool "LGE Touch Core ODM Device Driver - LG4945"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device is lg4945, say Y
+
+menuconfig LGE_TOUCH_LGSIC_LG4946
+	bool "LGE Touch Core ODM Device Driver - LG4946"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device is lg4946, say Y
+
+menuconfig LGE_TOUCH_LG4894
+	bool "LGE Touch Core ODM Device Driver - LG4894"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device is lg4894, say Y
+
+menuconfig LGE_TOUCH_LGSIC_SW49106
+	bool "LGE Touch Core ODM Device Driver - SW49106"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device is sw49106, say Y
+
+# To Do : LGSIC Chipseet
+endif

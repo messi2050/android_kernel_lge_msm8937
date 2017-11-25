@@ -1,0 +1,527 @@
+config MACH_LGE
+	bool "Machine LGE"
+	help
+	  Support for machine LGE.
+
+menu "LGE Board Selection"
+
+config MACH_MSM8937_LGPS29
+	bool "MSM8937 LGPS29"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8937 LGPS29 device.
+
+config MACH_MSM8937_PH2_GLOBAL_COM
+	bool "MSM8937 PH2_GLOBAL_COM"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8937 PH2_GLOBAL_COM device.
+
+config MACH_MSM8937_PH2_CMO_CN
+	bool "MSM8937 PH2_CMO_CN"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8937 PH2_CMO_CN device.
+ 
+config MACH_MSM8937_PH2N_TMO_US
+	bool "MSM8937 PH2N_TMO_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8937 PH2N_TMO_US device.
+
+config MACH_MSM8937_PH2N_MPCS_US
+	bool "MSM8937 PH2N_MPCS_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8937 PH2N_MPCS_US device.	  
+
+config MACH_MSM8937_PH2N_GLOBAL_CA
+	bool "MSM8937 PH2N_GLOBAL_CA"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8937 PH2N_GLOBAL_CA device.
+
+config MACH_MSM8937_L5_DCM_JP
+	bool "MSM8937 L5_DCM_JP"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8937 L5_DCM_JP device.
+
+config MACH_MSM8937_JSG_KDDI_JP
+	bool "MSM8937 JSG_KDDI_JP"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8937 JSG_KDDI_JP device.
+
+config MACH_MSM8940_LGPS33
+	bool "MSM8940 LGPS33"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 LGPS33 device.
+
+config MACH_MSM8940_SF3_SPR_US
+	bool "MSM8940 SF3_SPR_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 SF3_SPR_US device.
+
+config MACH_MSM8940_SF3_TMO_US
+	bool "MSM8940 SF3_TMO_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 SF3_TMO_US device.
+
+config MACH_MSM8940_SF3_GLOBAL_CA
+	bool "MSM8940 SF3_GLOBAL_CA"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 SF3_GLOBAL_CA device.
+
+config MACH_MSM8940_TF8_TMO_US
+	bool "MSM8940 TF8_TMO_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 TF8_TMO_US device.
+
+config MACH_MSM8940_SF3_MPCS_US
+	bool "MSM8940 SF3_MPCS_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 SF3_MPCS_US device.
+
+config MACH_MSM8940_LV9_ATT_US
+	bool "MSM8940 LV9_ATT_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 LV9_ATT_US device.
+
+config MACH_MSM8940_LV9_NAO_US
+	bool "MSM8940 LV9_NAO_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 LV9_NAO_US device.
+
+config MACH_MSM8940_LV9_GLOBAL_COM
+	bool "MSM8940 LV9_GLOBAL_COM"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 LV9_GLOBAL_COM device.
+ 
+config MACH_MSM8940_MH_GLOBAL_COM
+	bool "MSM8940 MH_GLOBAL_COM"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_GLOBAL_COM device.
+
+config MACH_MSM8940_MH_TMO_US
+	bool "MSM8940 MH_TMO_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_TMO_US device.
+
+config MACH_MSM8940_MH_CRK_US
+	bool "MSM8940 MH_CRK_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_CRK_US device.
+
+config MACH_MSM8940_MH_MPCS_US
+	bool "MSM8940 MH_MPCS_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_MPCS_US device.
+
+config MACH_MSM8940_MH_TRF_US
+	bool "MSM8940 MH_TRF_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_TRF_US device.
+
+config MACH_MSM8940_MH_LGU_KR
+	bool "MSM8940 MH_LGU_KR"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_LGU_KR device.
+
+config MACH_MSM8940_MH_SKT_KR
+	bool "MSM8940 MH_SKT_KR"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_SKT_KR device.
+
+config MACH_MSM8940_MH_KT_KR
+	bool "MSM8940 MH_KT_KR"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_KT_KR device.
+
+config MACH_MSM8940_MH_GLOBAL_CA
+	bool "MSM8940 MH_GLOBAL_CA"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_GLOBAL_CA device.
+
+config MACH_MSM8940_MH_LAO_COM
+	bool "MSM8940 MH_LAO_COM"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_LAO_COM device.
+
+config MACH_MSM8940_MH_GLOBAL_LDU
+	bool "MSM8940 MH_GLOBAL_LDU"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8940 MH_GLOBAL_LDU device.
+
+ config MACH_MSM8917_LGPS29_1
+	bool "MSM8917 LGPS29_1"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LGPS29_1 device.
+
+config MACH_MSM8917_LV3_MPCS_US
+	bool "MSM8917 LV3_MPCS_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV3_MPCS_US device.
+
+config MACH_MSM8917_LV3_TMO_US
+	bool "MSM8917 LV3_TMO_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV3_TMO_US device.
+
+	  
+config MACH_MSM8917_LV3_USC_US
+	bool "MSM8917 LV3_USC_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV3_USC_US device.
+
+config MACH_MSM8917_LV3_LGU_KR
+	bool "MSM8917 LV3_LGU_KR"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV3_LGU_KR device.
+
+config MACH_MSM8917_LV3_SKT_KR
+	bool "MSM8917 LV3_SKT_KR"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV3_SKT_KR device.
+
+config MACH_MSM8917_LV3_KT_KR
+	bool "MSM8917 LV3_KT_KR"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV3_KT_KR device.
+
+config MACH_MSM8917_LV3_GLOBAL_COM
+	bool "MSM8917 LV3_GLOBAL_COM"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV3_GLOBAL_COM device.
+
+config MACH_MSM8917_B6_JCM_JP
+	bool "MSM8917 B6_JCM_JP"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 B6_JCM_JP device.
+
+config MACH_MSM8917_B6_LGU_KR
+	bool "MSM8917 B6_LGU_KR"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 B6_LGU_KR device.
+
+config MACH_MSM8917_LV7_TRF_US
+	bool "MSM8917 LV7_TRF_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV7_TRF_US device.
+
+config MACH_MSM8917_LV7_TRF_US_VZW
+	bool "MSM8917 LV7_TRF_US_VZW"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV7_TRF_US_VZW device.
+
+config MACH_MSM8917_LV7_CCT_US_VZW
+	bool "MSM8917 LV7_CCT_US_VZW"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV7_CCT_US_VZW device.
+
+config MACH_MSM8917_LV7_CRK_US
+	bool "MSM8917 LV7_CRK_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV7_CRK_US device.
+
+config MACH_MSM8917_LV7_GLOBAL_CA
+	bool "MSM8917 LV7_GLOBAL_CA"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV7_GLOBAL_CA device.
+
+config MACH_MSM8917_LV517N_ATT_US
+	bool "MSM8917 LV517N_ATT_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV517N_ATT_US device.
+
+config MACH_MSM8917_LV517_CRK_US
+	bool "MSM8917 LV517_CRK_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV517_CRK_US device.
+
+config MACH_MSM8917_LV517_CLR_PR
+	bool "MSM8917 LV517_CLR_PR"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV517_CLR_PR device.
+
+config MACH_MSM8917_LV517_TMO_US
+	bool "MSM8917 LV517_TMO_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV517_TMO_US device.
+
+config MACH_MSM8917_LV517_MPCS_US
+	bool "MSM8917 LV517_MPCS_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV517_MPCS_US device.	  
+
+config MACH_MSM8917_LV517_TRF_US
+	bool "MSM8917 LV517_TRF_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV517_TRF_US device.
+
+config MACH_MSM8917_LV517_VZW
+	bool "MSM8917 LV517_VZW"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 LV517_VZW device.
+
+config MACH_MSM8917_SF317_TRF_US
+	bool "MSM8917 SF317_TRF_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 SF317_TRF_US device.
+
+config MACH_MSM8917_SF317_TRF_US_VZW
+	bool "MSM8917 SF317_TRF_US_VZW"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 SF317_TRF_US_VZW device.
+
+config MACH_MSM8917_SF317_CRK_US
+	bool "MSM8917 SF317_CRK_US"
+	depends on ARCH_MSM8916
+	select MACH_LGE
+	help
+	  Support for the Qualcomm MSM8917 SF317_CRK_US device.
+endmenu
+
+menu "LGE Specific Patches"
+
+config LGE_HANDLE_PANIC
+	tristate "Support LGE Crash Handler"
+	default n
+	depends on MACH_LGE
+	help
+	  LGE Crash Handler
+
+config LGE_QSDL_SUPPORT
+	tristate "Support for Quality Statistics Data Logging"
+	default n
+	depends on MACH_LGE
+	help
+	  QSDL is a feature which notify infomation for quality statistics data logging of device.
+	  
+config LGE_BOOTLOADER_LOG
+	tristate "Support LGE bootloader log"
+	default n
+	depends on MACH_LGE
+	help
+	  LGE bootloader log
+
+config LGE_BOOT_LOCKUP_DETECT
+	bool "Support to detect lockup during powering on"
+	default n
+	depends on LGE_HANDLE_PANIC
+	help
+	  For detecting lockup in boot , use simple detector which
+	  raise crash when expired some period after boot.
+
+config LGE_BOOTLOADER_TIME_CHECKER
+	tristate "Supprt bootloader(LK, SBL) time"
+	default n
+	depends on MACH_LGE
+	help
+	  Check LK, SBL booting time at
+	  sys/module/lge_bootloader_time_checker/parameters/lk_time
+	  sys/module/lge_bootloader_time_checker/parameters/sbl_time
+
+config LGE_PM
+	tristate "Support LGE power-management"
+	default n
+	depends on MACH_LGE
+	help
+	  Global feature of LGE power-management
+
+config LGE_PM_DEBUG
+        tristate "Support LGE PM Debug Feature"
+        default n
+        depends on MACH_LGE
+        help
+	  LGE PM Debug Feature
+
+config LGE_PM_PSEUDO_BATTERY
+	tristate "Support pseudo battery mode"
+	depends on MACH_LGE
+	default n
+	help
+	  Say Y here to enable pseudo mode setting
+
+config LGE_PM_CHARGING_TEMP_SCENARIO
+	tristate "Support LGE PM Charging scenario"
+	default n
+	depends on MACH_LGE
+	help
+	  LGE PM Charing Scenario
+
+config LGE_PM_CHARGING_TEMP_SCENARIO_V2
+	tristate "Support LGE PM Charging scenario V2"
+	default n
+	depends on LGE_PM_CHARGING_TEMP_SCENARIO
+	help
+	  LGE PM Charging Scenario V2
+
+config LGE_UART_CONTROL
+	tristate "Support LGE uart control"
+	default n
+	depends on MACH_LGE && SERIAL_MSM_HSL
+	help
+	  This module controls uart console.
+
+config LGE_EARJACK_DEBUGGER
+	tristate "Earjack UART debugger support"
+	default n
+	depends on LGE_UART_CONTROL
+	help
+	  Support earjack type UART debugger cable
+
+config LGE_USE_DEFAULT_HARD_RESET
+	bool "On reboot, apply hard reset unless memory contents must be maintained"
+	default n
+	help
+	  Nobody can guarantee stablity upon continuous warm resets.
+
+config LGE_PM_CABLE_DETECTION
+    tristate "Support LGE PM Cable Detection"
+	default n
+	depends on MACH_LGE
+	help
+	  LGE PM Cable Detection
+
+config LGE_PM_TIME_TO_FULL
+    tristate "Support LGE PM Time To Full"
+	default n
+	depends on LGE_PM
+	help
+	  LGE PM Time To Full
+
+config LGE_PM_UNIFIED_NODE
+	bool "enable LGE PM Unified sysfs node"
+	default n
+	depends on MACH_LGE
+	help
+	  Support LGE PM Unified sysfs node
+
+config LGE_PM_ONBINARY_ORANGE
+        tristate "Support LGE PM Onebinary orange Detection"
+	default n
+	depends on LGE_PM
+	help
+	  LGE PM Onebinary Orange Detection
+
+config PRE_SELF_DIAGNOSIS
+	tristate "Support LGE self diagnosis for factory"
+	default n
+	depends on MACH_LGE
+	help
+	  LGE self diagnosis
+endmenu
+
+menu "LGE QFPROM Values"
+
+config LGE_QFPROM_INTERFACE
+	bool "Support qfprom interface"
+	default n
+	depends on MACH_LGE
+	help
+	  LGE QFPROM DRIVER.
+
+config LGE_QFPROM_SECHASH
+	string "Support qfprom sec hash"
+	default 0x0
+	depends on LGE_QFPROM_INTERFACE
+	help
+	  LGE QFPROM DRIVER-SEC partition's hash value.
+endmenu

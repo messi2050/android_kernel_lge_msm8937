@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -51,7 +51,13 @@
 #define CSID_VERSION_V40                      0x40000000
 #define MSM_CSID_DRV_NAME                    "msm_csid"
 
+#if 0 //QCT
 #define DBG_CSID                             0
+#else
+/* LGE_CHANGE, CST, enabled csid sof debug feature */
+#define DBG_CSID                             1
+#endif
+
 #define SHORT_PKT_CAPTURE                    0
 #define SHORT_PKT_OFFSET                     0x200
 #define ENABLE_3P_BIT                        1
@@ -61,6 +67,7 @@
 #define TRUE   1
 #define FALSE  0
 
+#define MAX_LANE_COUNT 4
 #define CSID_TIMEOUT msecs_to_jiffies(100)
 
 #undef CDBG
@@ -287,6 +294,12 @@ static int msm_csid_config(struct csid_device *csid_dev,
 		csid_params->lane_assign);
 	CDBG("%s csid_params phy_sel = %d\n", __func__,
 		csid_params->phy_sel);
+	if ((csid_params->lane_cnt == 0) ||
+		(csid_params->lane_cnt > MAX_LANE_COUNT)) {
+		pr_err("%s:%d invalid lane count = %d\n",
+			__func__, __LINE__, csid_params->lane_cnt);
+		return -EINVAL;
+	}
 
 	csid_dev->csid_lane_cnt = csid_params->lane_cnt;
 	rc = msm_csid_reset(csid_dev);
@@ -469,8 +482,20 @@ static irqreturn_t msm_csid_irq(int irq_num, void *data)
 
 	irq = msm_camera_io_r(csid_dev->base +
 		csid_dev->ctrl_reg->csid_reg.csid_irq_status_addr);
+
+#if 0 //QCT
 	pr_err_ratelimited("%s CSID%d_IRQ_STATUS_ADDR = 0x%x\n",
 		 __func__, csid_dev->pdev->id, irq);
+#else
+	/* LGE_CHANGE, CST, enabled csid sof debug feature */
+	if (csid_dev->csid_sof_debug == SOF_DEBUG_ENABLE)
+		pr_err("%s CSID%d_IRQ_STATUS_ADDR = 0x%x\n",
+		 __func__, csid_dev->pdev->id, irq);
+	else
+	    pr_err_ratelimited("%s CSID%d_IRQ_STATUS_ADDR = 0x%x\n",
+		 __func__, csid_dev->pdev->id, irq);
+#endif
+
 	if (irq & (0x1 <<
 		csid_dev->ctrl_reg->csid_reg.csid_rst_done_irq_bitshift))
 		complete(&csid_dev->reset_complete);

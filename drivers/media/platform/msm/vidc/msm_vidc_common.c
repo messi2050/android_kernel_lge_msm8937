@@ -1194,12 +1194,14 @@ static void handle_event_change(enum hal_command_response cmd, void *data)
 	 * ptr[2] = flag to indicate bit depth or/and pic struct changed
 	 * ptr[3] = bit depth
 	 * ptr[4] = pic struct (progressive or interlaced)
+	 * ptr[5] = colour space
 	 */
 
 	ptr = (u32 *)seq_changed_event.u.data;
 	ptr[2] = 0x0;
 	ptr[3] = inst->bit_depth;
 	ptr[4] = inst->pic_struct;
+	ptr[5] = inst->colour_space;
 
 	if (inst->bit_depth != event_notify->bit_depth) {
 		inst->bit_depth = event_notify->bit_depth;
@@ -1207,7 +1209,7 @@ static void handle_event_change(enum hal_command_response cmd, void *data)
 		ptr[3] = inst->bit_depth;
 		event = V4L2_EVENT_SEQ_CHANGED_INSUFFICIENT;
 		dprintk(VIDC_DBG,
-			"V4L2_EVENT_SEQ_CHANGED_INSUFFICIENT due to bit-depth change\n");
+				"V4L2_EVENT_SEQ_CHANGED_INSUFFICIENT due to bit-depth change\n");
 	}
 
 	if (inst->fmts[CAPTURE_PORT]->fourcc == V4L2_PIX_FMT_NV12 &&
@@ -1217,7 +1219,18 @@ static void handle_event_change(enum hal_command_response cmd, void *data)
 		ptr[2] |= V4L2_EVENT_PICSTRUCT_FLAG;
 		ptr[4] = inst->pic_struct;
 		dprintk(VIDC_DBG,
-			"V4L2_EVENT_SEQ_CHANGED_INSUFFICIENT due to pic-struct change\n");
+				"V4L2_EVENT_SEQ_CHANGED_INSUFFICIENT due to pic-struct change\n");
+	}
+
+	if (inst->bit_depth == MSM_VIDC_BIT_DEPTH_10
+		&& inst->colour_space !=
+		event_notify->colour_space) {
+		inst->colour_space = event_notify->colour_space;
+		event = V4L2_EVENT_SEQ_CHANGED_INSUFFICIENT;
+		ptr[2] |= V4L2_EVENT_COLOUR_SPACE_FLAG;
+		ptr[5] = inst->colour_space;
+		dprintk(VIDC_DBG,
+				"V4L2_EVENT_SEQ_CHANGED_INSUFFICIENT due to colour space change\n");
 	}
 
 	if (event == V4L2_EVENT_SEQ_CHANGED_INSUFFICIENT) {
@@ -1491,6 +1504,9 @@ static void handle_session_flush(enum hal_command_response cmd, void *data)
 {
 	struct msm_vidc_cb_cmd_done *response = data;
 	struct msm_vidc_inst *inst;
+	struct v4l2_event flush_event = {0};
+	u32 *ptr = NULL;
+	enum hal_flush flush_type;
 	int rc;
 
 	if (!response) {
@@ -1518,8 +1534,31 @@ static void handle_session_flush(enum hal_command_response cmd, void *data)
 		}
 	}
 	atomic_dec(&inst->in_flush);
-	dprintk(VIDC_DBG, "Notify flush complete to client\n");
-	msm_vidc_queue_v4l2_event(inst, V4L2_EVENT_MSM_VIDC_FLUSH_DONE);
+	flush_event.type = V4L2_EVENT_MSM_VIDC_FLUSH_DONE;
+	ptr = (u32 *)flush_event.u.data;
+
+	flush_type = response->data.flush_type;
+	switch (flush_type) {
+	case HAL_FLUSH_INPUT:
+		ptr[0] = V4L2_QCOM_CMD_FLUSH_OUTPUT;
+		break;
+	case HAL_FLUSH_OUTPUT:
+		ptr[0] = V4L2_QCOM_CMD_FLUSH_CAPTURE;
+		break;
+	case HAL_FLUSH_ALL:
+		ptr[0] |= V4L2_QCOM_CMD_FLUSH_CAPTURE;
+		ptr[0] |= V4L2_QCOM_CMD_FLUSH_OUTPUT;
+		break;
+	default:
+		dprintk(VIDC_ERR, "Invalid flush type received!");
+		goto exit;
+	}
+
+	dprintk(VIDC_DBG,
+		"Notify flush complete, flush_type: %x\n", flush_type);
+	v4l2_event_queue_fh(&inst->event_handler, &flush_event);
+
+exit:
 	put_inst(inst);
 }
 

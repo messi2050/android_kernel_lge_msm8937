@@ -33,6 +33,41 @@
 #include <linux/spinlock.h>
 #include <linux/pinctrl/consumer.h>
 #include <linux/syscore_ops.h>
+#include <linux/switch.h>
+#include <linux/wakelock.h>
+
+#if defined(CONFIG_LGE_HANDLE_PANIC)
+#include <soc/qcom/lge/lge_handle_panic.h>
+#endif
+
+#if defined(CONFIG_MACH_MSM8917_B6_JCM_JP) || defined(CONFIG_MACH_MSM8917_B6_LGU_KR) || defined(CONFIG_MACH_MSM8940_TF8_TMO_US)
+#include <soc/qcom/lge/board_lge.h>
+#endif
+
+struct switch_dev hallic_sdev = {
+	.name = "smartcover",
+};
+
+struct switch_dev stylus_pen_sdev = {
+	.name = "pen_state",
+};
+
+#if defined(CONFIG_MACH_MSM8917_B6_JCM_JP) || defined(CONFIG_MACH_MSM8917_B6_LGU_KR) || defined(CONFIG_MACH_MSM8940_TF8_TMO_US)
+static int hotkey_prev_state = 0;
+#endif
+
+#if defined(CONFIG_MACH_MSM8940_TF8_TMO_US)
+static int upkey_prev_state = 0;
+static int hallic_prev_state = 0;
+#endif
+
+#if defined(CONFIG_LGE_TOUCH_HALL_IC_COVER)
+static int is_smart_cover_closed = 0;
+int cradle_smart_cover_status(void)
+{
+	return is_smart_cover_closed;
+}
+#endif
 
 struct gpio_button_data {
 	const struct gpio_keys_button *button;
@@ -44,6 +79,7 @@ struct gpio_button_data {
 	spinlock_t lock;
 	bool disabled;
 	bool key_pressed;
+	struct wake_lock gpio_irq_wakelock;
 };
 
 struct gpio_keys_drvdata {
@@ -345,7 +381,90 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 		if (state)
 			input_event(input, type, button->code, button->value);
 	} else {
+#if defined(CONFIG_MACH_MSM8917_B6_JCM_JP) || defined(CONFIG_MACH_MSM8917_B6_LGU_KR) || defined(CONFIG_MACH_MSM8940_TF8_TMO_US)
+		/*
+		* HOT_KEY button is reported several times.
+		* Check state and discard Same state of HOT_KEY
+		* State 0 - HOT_KEY(0x179) Release,
+		* State 1 - HOT_KEY(0x179) Press
+		*/
+		if (button->code == 0x179 && hotkey_prev_state == state) {
+			printk(KERN_ERR "gpio_keys: Discard Wrong Hot Key\n");
+			return;
+		}
+		if (button->code == 0x179 ) {
+			hotkey_prev_state = state;
+		}
+#endif
+
+#if defined(CONFIG_MACH_MSM8940_TF8_TMO_US)
+		/*
+		* UP_KEY button is reported several times.
+		* Check state and discard Same state of UP_KEY
+		* State 0 - UP_KEY(0x73) Release,
+		* State 1 - UP_KEY(0x73) Press
+		*/
+		if (button->code == 0x73 && upkey_prev_state == state) {
+			printk(KERN_ERR "gpio_keys: Discard Wrong Up Key\n");
+			return;
+		}
+		if (button->code == 0x73 ) {
+			upkey_prev_state = state;
+		}
+
+		/*
+		* HALL_IC button is reported several times.
+		* Check state and discard Same state of HALL_IC
+		* State 0 - HALL_IC(0xde) Release,
+		* State 1 - HALL_IC(0xde) Press
+		*/
+		if (button->code == 0xde && hallic_prev_state == state) {
+			printk(KERN_ERR "gpio_keys: Discard Wrong Hall IC Key\n");
+			return;
+		}
+		if (button->code == 0xde ) {
+			hallic_prev_state = state;
+		}
+#endif
+
 		input_event(input, type, button->code, !!state);
+		pr_err("%s: code(%d) state(%d)\n", __func__, button->code, !!state);
+
+#if defined(CONFIG_LGE_HANDLE_PANIC)
+		lge_gen_key_panic(button->code, state);
+#endif
+
+#if defined(CONFIG_MACH_MSM8917_B6_JCM_JP) || defined(CONFIG_MACH_MSM8917_B6_LGU_KR) || defined(CONFIG_MACH_MSM8940_TF8_TMO_US)
+                printk(KERN_ERR "gpio_keys: code=%d%s, state=%d\n",
+                                 button->code,
+                                 (button->code == 0x179) ? "(HOT_KEY)" : "",
+                                 state);
+#endif
+
+		if (!strncmp(bdata->button->desc, "hall_ic", 7)) {
+			if (hallic_sdev.state != state) {
+				switch_set_state(&hallic_sdev, state);
+				pr_info("hall_ic state changed to %d\n", state);
+
+				if(hallic_sdev.state == 0) {
+					pr_info("Set hall_ic wakelock\n");
+					wake_lock_timeout(&bdata->gpio_irq_wakelock, msecs_to_jiffies(3000));
+				}
+			}
+		}
+
+		if (!strncmp(bdata->button->desc, "stylus_pen", 10)) {
+			pr_info("stylus_pen state = %d\n", state);
+			if (stylus_pen_sdev.state != state) {
+				switch_set_state(&stylus_pen_sdev, state);
+				pr_info("stylus_pen state changed to %d\n", state);
+
+				if(stylus_pen_sdev.state == 0) {
+					pr_info("Set stylus_pen wakelock\n");
+					wake_lock_timeout(&bdata->gpio_irq_wakelock, msecs_to_jiffies(3000));
+				}
+			}
+		}
 	}
 	input_sync(input);
 }
@@ -373,6 +492,11 @@ static irqreturn_t gpio_keys_gpio_isr(int irq, void *dev_id)
 	struct gpio_button_data *bdata = dev_id;
 
 	BUG_ON(irq != bdata->irq);
+
+#if defined(CONFIG_LGE_TOUCH_HALL_IC_COVER)
+	if (bdata->button->code == 222)
+		is_smart_cover_closed = !__gpio_get_value(bdata->button->gpio);
+#endif
 
 	if (bdata->button->wakeup)
 		pm_stay_awake(bdata->input->dev.parent);
@@ -478,6 +602,26 @@ static int gpio_keys_setup_key(struct platform_device *pdev,
 			if (error < 0)
 				bdata->timer_debounce =
 						button->debounce_interval;
+		}
+
+		if (!strncmp(desc, "hall_ic", 7)) {
+			if (switch_dev_register(&hallic_sdev) < 0) {
+				pr_err("hall_ic switch registration failed\n");
+				switch_dev_unregister(&hallic_sdev);
+			} else {
+				wake_lock_init(&bdata->gpio_irq_wakelock, WAKE_LOCK_SUSPEND, "hall_ic_wakelock");
+				pr_info("hall_ic switch registration succeeded\b");
+			}
+		}
+
+		if (!strncmp(desc, "stylus_pen", 10)) {
+			if (switch_dev_register(&stylus_pen_sdev) < 0) {
+				pr_err("stylus_pen switch registration failed\n");
+				switch_dev_unregister(&stylus_pen_sdev);
+			} else {
+				wake_lock_init(&bdata->gpio_irq_wakelock, WAKE_LOCK_SUSPEND, "styluspen_wakelock");
+				pr_info("stylus_pen switch registration succeeded\b");
+			}
 		}
 
 		irq = gpio_to_irq(button->gpio);
@@ -705,6 +849,14 @@ gpio_keys_get_devtree_pdata(struct device *dev)
 		if (of_property_read_u32(pp, "debounce-interval",
 					&button->debounce_interval))
 			button->debounce_interval = 5;
+#if defined(CONFIG_MACH_MSM8917_B6_JCM_JP) || defined(CONFIG_MACH_MSM8917_B6_LGU_KR) || defined(CONFIG_MACH_MSM8940_TF8_TMO_US)
+		if(!strncmp(button->desc, "hot_key", 7) && lge_get_factory_boot())
+		{
+			pr_info("%s:hot_key debounce_interval is 15 in factory mode, org value = %d\n",
+							__func__, button->debounce_interval);
+			button->debounce_interval = 15;
+		}
+#endif
 	}
 
 	if (pdata->nbuttons == 0)

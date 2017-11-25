@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+&i2c_3 { /* BLSP1 QUP3 */
+	status = "ok";
+	TD4100@20 {
+		compatible = "synaptics,TD4100";
+		reg = <0x20>;
+		status = "ok";
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0x2002>;
+		irqflags = <0x00000002>;
+		reset-gpio = <&tlmm 64 0x0>;
+		irq-gpio = <&tlmm 65 0x2002>;
+
+		pinctrl-names = "touch_pin_active", "touch_pin_sleep";   				/* Touch GPIO pin name setting */
+		pinctrl-0 = <&ts_int_active>;					/* Touch GPIO pin active setting */
+		pinctrl-1 = <&ts_int_suspend>;					/* Touch GPIO pin suspend setting */
+
+		/* Caps */
+		max_x = <720>;
+		max_y = <1280>;
+		max_pressure = <0xff>;
+		max_width = <15>;
+		max_orientation = <90>;
+		max_id = <10>;
+		hw_reset_delay = <150>;
+		sw_reset_delay = <150>;
+
+		/* Role */
+		use_lpwg = <1>;
+		use_lpwg_test = <1>;
+		hide_coordinate = <0>;
+
+		/* Firmware */
+		fw_image = "touch/lgps33/PLG623_V0.45_PR2414261_DS5.12.3.4.1023_2005712D.img",
+			"touch/lgps33/PLG623_V0.45_PR2414261_DS5.12.3.4.1023_2005712D.bin";
+		panel_spec = "touch/lgps33/ph1_limit.txt";
+		panel_spec_mfts_folder = "touch/lgps33/ph1_limit.txt";
+
+		/* ASC */
+		use_asc = <0>;
+		low_delta_thres = <350>;
+		high_delta_thres = <600>;
+		max_delta_cnt = <2>;
+	};
+};

@@ -1,0 +1,49 @@
+/*
+ * Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/dts-v1/;
+
+#include "../../qcom/msm8917.dtsi"
+#include "../../qcom/msm-pmi8940.dtsi"
+#include "../msm8917-lge-common/msm8917-lge-pmi8940.dtsi"
+#include "msm8917-lv3_kt_kr.dtsi"
+#include "msm8917-lv3_kt_kr-tdmb_rev-0.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. MSM8917-PMI8940 MTP";
+	compatible = "qcom,msm8917-mtp", "qcom,msm8917", "qcom,mtp";
+	qcom,board-id= <0x64 0>;
+	qcom,pmic-id = <0x10019 0x020040 0x0 0x0>;
+};
+
+&i2c_5 {
+        pn547@28 {
+                status = "disable";
+	};
+        pn547_rev0@28 {
+                status = "ok";
+        };
+};
+&int_codec {
+	qcom,msm-hs-micbias-type = "internal";
+	qcom,audio-routing =
+		"RX_BIAS", "MCLK",
+		"SPK_RX_BIAS", "MCLK",
+		"INT_LDO_H", "MCLK",
+		"MIC BIAS External", "Handset Mic",
+		"MIC BIAS Internal2", "Headset Mic",
+		"MIC BIAS External", "Secondary Mic",
+		"AMIC1", "MIC BIAS External",
+		"AMIC2", "MIC BIAS Internal2",
+		"AMIC3", "MIC BIAS External";
+};

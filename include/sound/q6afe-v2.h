@@ -330,4 +330,7 @@ int afe_send_custom_tdm_header_cfg(
 	u16 port_id);
 int afe_tdm_port_start(u16 port_id, struct afe_tdm_port_config *tdm_port,
 		u32 rate);
+#ifdef CONFIG_SND_SOC_MAXIM_DSM
+int32_t dsm_open(void *data);
+#endif /* CONFIG_SND_SOC_MAXIM_DSM */
 #endif /* __Q6AFE_V2_H__ */

@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -1613,7 +1613,9 @@ int mdss_dsi_clk_div_config(struct mdss_panel_info *panel_info,
 	if ((dsi_pclk_rate < 3300000) || (dsi_pclk_rate > 250000000))
 		dsi_pclk_rate = 35000000;
 	panel_info->mipi.dsi_pclk_rate = dsi_pclk_rate;
-
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_PRE_ACTIVE_AREA_DELAY)
+	lge_mdss_dsi_calc_pre_active_area_delay(panel_info);
+#endif
 	return 0;
 }
 
@@ -1796,8 +1798,10 @@ static int mdss_dsi_ulps_config(struct mdss_dsi_ctrl_pdata *ctrl,
 		 * to be in stop state.
 		 */
 		MIPI_OUTP(ctrl->ctrl_base + 0x0AC, active_lanes << 16);
+		wmb(); /* ensure lanes are put to stop state */
 
 		MIPI_OUTP(ctrl->ctrl_base + 0x0AC, 0x0);
+		wmb(); /* ensure lanes are in proper state */
 
 		/*
 		 * Wait for a short duration before enabling
@@ -2102,6 +2106,8 @@ int mdss_dsi_pre_clkoff_cb(void *priv,
 	pdata = &ctrl->panel_data;
 
 	if ((clk & MDSS_DSI_LINK_CLK) && (new_state == MDSS_DSI_CLK_OFF)) {
+		if (pdata->panel_info.mipi.force_clk_lane_hs)
+			mdss_dsi_cfg_lane_ctrl(ctrl, BIT(28), 0);
 		/*
 		 * If ULPS feature is enabled, enter ULPS first.
 		 * However, when blanking the panel, we should enter ULPS
@@ -2213,6 +2219,8 @@ int mdss_dsi_post_clkon_cb(void *priv,
 				goto error;
 			}
 		}
+		if (pdata->panel_info.mipi.force_clk_lane_hs)
+			mdss_dsi_cfg_lane_ctrl(ctrl, BIT(28), 1);
 	}
 error:
 	return rc;

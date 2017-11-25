@@ -1,0 +1,91 @@
+/*
+ * LG Electronics MH DTV device tree source
+ *
+ * Copyright (c) 2017 LG Electronics Co., Ltd.
+ *              http://www.lge.com
+ *
+ */
+
+
+/ {
+	aliases {
+		spi8 = &spi_8;
+	};
+
+	soc {
+		spi_8: spi@7af8000{    // BLSP8, BLSP-2 QUP-4
+			status = "ok";
+			compatible = "qcom,spi-qup-v2";
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			//reg-names = "spi_physical", "spi_bam_physical";
+			//reg = <0x7af8000 0x600>, <0x7AC4000 0x1f000>;
+			reg-names = "spi_physical";
+			reg = <0x7af8000 0x600>;
+
+			//interrupt-names = "spi_irq", "spi_bam_irq";
+			//interrupts = <0 302 0>, <0 239 0>;
+			interrupt-names = "spi_irq";
+			interrupts = <0 302 0>;
+
+                        spi-max-frequency = <50000000>;
+                        qcom,master-id = <84>;
+                        //qcom,master-id = <86>;
+
+			clock-names = "iface_clk", "core_clk";
+			clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
+				<&clock_gcc clk_gcc_blsp2_qup4_spi_apps_clk>;
+
+			/* Assign runtime functions to pins */
+			qcom,use-pinctrl;
+			pinctrl-names = "spi_default","spi_sleep";
+			pinctrl-0 = <&spi_isdbt_active>; // defined in msm8940-mh_global_com-pinctrl.dtsi
+			pinctrl-1 = <&spi_isdbt_suspend>; // defined in msm8940-mh_global_com-pinctrl.dtsi
+
+			qcom,gpio-mosi = <&tlmm 96 0x00>;
+			qcom,gpio-miso = <&tlmm 97 0x00>;
+			qcom,gpio-cs0 = <&tlmm 98 0x00>;
+			qcom,gpio-clk = <&tlmm 99 0x00>;
+			
+			//qcom,infinite-mode = <0>;
+			//qcom,use-bam;
+			//qcom,ver-reg-exists;
+			//qcom,bam-consumer-pipe-index = <18>;
+			//qcom,bam-producer-pipe-index = <19>;
+		};
+	};
+};
+
+&spi_8 {
+	isdbt@0 {
+		compatible = "fci,fc8180-spi";
+		reg = <0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <61 0x0>;
+
+                //spi-max-frequency = <9600000>;
+                //spi-max-frequency = <15000000>;
+                spi-max-frequency = <19200000>;
+                //spi-max-frequency = <25000000>;
+                //spi-max-frequency = <38400000>;
+                //spi-max-frequency = <50000000>;
+
+		clock-names = "isdbt_xo";
+		clocks = <&clock_gcc clk_rf_clk2>;
+                //isdbt_vdd_io-supply = <&pm8937_l5>;
+                //isdbt_vdd_io-supply = <&pm8940_l5>;
+                isdbt_ant_io-supply = <&pm8937_l10>;
+                //isdbt_ant_io-supply = <&pm8940_l10>;
+
+		pinctrl-names = "isdbt_gpio"; // defined in msm8940-mh_global_com-pinctrl.dtsi
+		//pinctrl-0 = <&isdbt_ctrl &isdbt_int &tdmb_ant &isdbt_ext_lna0 &isdbt_ext_lna1>; // defined in msm8940-mh_global_com-pinctrl.dtsi
+		pinctrl-0 = <&isdbt_ctrl &isdbt_int &tdmb_ant>; // defined in msm8940-mh_global_com-pinctrl.dtsi
+		fci_spi_fc8180,en-gpio = <&tlmm 129 0x00>;
+		fci_spi_fc8180,irq-gpio = <&tlmm 61 0x00>;
+		fci_spi_fc8180,ant-gpio = <&tlmm 45 0x00>;
+                //fci_spi_fc8180,ext_lna0-gpio = <&tlmm 59 0x00>;
+                //fci_spi_fc8180,ext_lna1-gpio = <&tlmm 60 0x00>;
+	};
+};

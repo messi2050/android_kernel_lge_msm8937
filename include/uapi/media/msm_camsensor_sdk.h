@@ -47,6 +47,8 @@
 
 #define MSM_EEPROM_MEMORY_MAP_MAX_SIZE  80
 #define MSM_EEPROM_MAX_MEM_MAP_CNT      8
+#define MSM_OTP_MEMORY_MAP_MAX_SIZE  80
+#define MSM_OTP_MAX_MEM_MAP_CNT      8
 
 enum msm_sensor_camera_id_t {
 	CAMERA_0,
@@ -113,6 +115,15 @@ enum msm_sensor_power_seq_gpio_t {
 	SENSOR_GPIO_CUSTOM2,
 	SENSOR_GPIO_MAX,
 };
+
+enum msm_ir_cut_filter_gpio_t {
+	IR_CUT_FILTER_GPIO_P = 0,
+	IR_CUT_FILTER_GPIO_M,
+	IR_CUT_FILTER_GPIO_MAX,
+};
+#define IR_CUT_FILTER_GPIO_P IR_CUT_FILTER_GPIO_P
+#define IR_CUT_FILTER_GPIO_M IR_CUT_FILTER_GPIO_M
+#define R_CUT_FILTER_GPIO_MAX IR_CUT_FILTER_GPIO_MAX
 
 enum msm_camera_vreg_name_t {
 	CAM_VDIG,
@@ -182,6 +193,28 @@ enum msm_flash_cfg_type_t {
 	CFG_FLASH_HIGH,
 };
 
+enum msm_ir_led_cfg_type_t {
+	CFG_IR_LED_INIT = 0,
+	CFG_IR_LED_RELEASE,
+	CFG_IR_LED_OFF,
+	CFG_IR_LED_ON,
+};
+#define CFG_IR_LED_INIT CFG_IR_LED_INIT
+#define CFG_IR_LED_RELEASE CFG_IR_LED_RELEASE
+#define CFG_IR_LED_OFF CFG_IR_LED_OFF
+#define CFG_IR_LED_ON CFG_IR_LED_ON
+
+enum msm_ir_cut_cfg_type_t {
+	CFG_IR_CUT_INIT = 0,
+	CFG_IR_CUT_RELEASE,
+	CFG_IR_CUT_OFF,
+	CFG_IR_CUT_ON,
+};
+#define CFG_IR_CUT_INIT CFG_IR_CUT_INIT
+#define CFG_IR_CUT_RELEASE CFG_IR_CUT_RELEASE
+#define CFG_IR_CUT_OFF CFG_IR_CUT_OFF
+#define CFG_IR_CUT_ON CFG_IR_CUT_ON
+
 enum msm_sensor_output_format_t {
 	MSM_SENSOR_BAYER,
 	MSM_SENSOR_YCBCR,
@@ -239,6 +272,18 @@ struct msm_eeprom_memory_map_array {
 	uint32_t msm_size_of_max_mappings;
 };
 
+struct msm_otp_mem_map_t {
+	int slave_addr;
+	struct msm_camera_reg_settings_t
+		mem_settings[MSM_OTP_MEMORY_MAP_MAX_SIZE];
+	int memory_map_size;
+};
+
+struct msm_otp_memory_map_array {
+	struct msm_otp_mem_map_t memory_map[MSM_OTP_MAX_MEM_MAP_CNT];
+	uint32_t msm_size_of_max_mappings;
+};
+
 struct msm_sensor_init_params {
 	/* mask of modes supported: 2D, 3D */
 	int                 modes_supported;
@@ -260,6 +305,7 @@ struct msm_camera_sensor_slave_info {
 	char actuator_name[32];
 	char ois_name[32];
 	char flash_name[32];
+	char otp_name[32];
 	enum msm_sensor_camera_id_t camera_id;
 	unsigned short slave_addr;
 	enum i2c_freq_mode_t i2c_freq_mode;

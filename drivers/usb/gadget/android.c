@@ -35,7 +35,24 @@
 #include <linux/qcom/diag_dload.h>
 
 #include "gadget_chips.h"
+#ifdef CONFIG_LGE_USB_FACTORY
+#include <linux/platform_data/lge_android_usb.h>
+#include <soc/qcom/lge/board_lge.h>
+#endif
 
+#ifdef CONFIG_LGE_USB_EMBEDDED_BATTERY
+#include <linux/reboot.h>
+#include <soc/qcom/restart.h>
+#include <soc/qcom/lge/lge_cable_detection.h>
+#endif
+#ifdef CONFIG_USB_MAUSB
+#include <linux/usb/mausb.h>
+#endif
+
+#ifdef CONFIG_MEDIA_SUPPORT
+#include "f_uvc.h"
+#include "u_uvc.h"
+#endif
 #include "u_fs.h"
 #include "u_ecm.h"
 #include "u_ncm.h"
@@ -57,6 +74,9 @@
 #include "f_mtp.c"
 #include "f_accessory.c"
 #include "f_charger.c"
+#ifdef CONFIG_LGE_USB_G_ANDROID
+#include "f_charge_only.c"
+#endif
 #define USB_ETH_RNDIS y
 #include "f_rndis.c"
 #include "rndis.c"
@@ -71,15 +91,24 @@
 #include "f_mass_storage.h"
 
 USB_ETHERNET_MODULE_PARAMETERS();
+#ifdef CONFIG_MEDIA_SUPPORT
+USB_VIDEO_MODULE_PARAMETERS();
+#endif
 #include "debug.h"
 
+#ifdef CONFIG_LGE_USB_G_LAF
+#include "f_laf.c"
+#endif
 MODULE_AUTHOR("Mike Lockwood");
 MODULE_DESCRIPTION("Android Composite USB Driver");
 MODULE_LICENSE("GPL");
 MODULE_VERSION("1.0");
 
 static const char longname[] = "Gadget Android";
-
+#ifdef CONFIG_USB_MAUSB
+extern int is_mausb_enabled(void);
+static int mausb_state=1;
+#endif
 /* Default vendor and product IDs, overridden by userspace */
 #define VENDOR_ID		0x18D1
 #define PRODUCT_ID		0x0001
@@ -213,6 +242,20 @@ struct android_dev {
 
 	/* A list node inside the android_dev_list */
 	struct list_head list_item;
+#ifdef CONFIG_LGE_USB_FACTORY
+	bool check_pif;
+	bool check_qem;
+#endif
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	bool ffs_binding_fail;
+#endif
+#ifdef CONFIG_MACH_MSM8917_B6_LGU_KR
+	struct delayed_work boot_work;
+	bool check_adock;
+#endif
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	bool acc_wait_check;
+#endif
 };
 
 struct android_configuration {
@@ -237,6 +280,15 @@ static struct android_configuration *alloc_android_config
 						(struct android_dev *dev);
 static void free_android_config(struct android_dev *dev,
 				struct android_configuration *conf);
+#ifdef CONFIG_LGE_USB_FACTORY
+#define LGE_PIF_VID 0x1004
+#define LGE_PIF_PID 0x6000
+#define LGE_PIF_SN 0
+
+static void android_lge_factory_bind(struct usb_composite_dev *cdev);
+#endif
+
+static bool video_enabled;
 
 /* string IDs are assigned dynamically */
 #define STRING_MANUFACTURER_IDX		0
@@ -247,11 +299,24 @@ static char manufacturer_string[256];
 static char product_string[256];
 static char serial_string[256];
 
+#ifdef CONFIG_LGE_USB_G_ANDROID
+#define CHARGE_ONLY_STRING_IDX		3
+static char charge_only_string[256];
+#endif
+
+#ifdef CONFIG_MACH_MSM8917_B6_LGU_KR
+extern int audio_source_started;
+int boot_cmplt = 0;
+#endif
+
 /* String Table */
 static struct usb_string strings_dev[] = {
 	[STRING_MANUFACTURER_IDX].s = manufacturer_string,
 	[STRING_PRODUCT_IDX].s = product_string,
 	[STRING_SERIAL_IDX].s = serial_string,
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	[CHARGE_ONLY_STRING_IDX].s = charge_only_string,
+#endif
 	{  }			/* end of list */
 };
 
@@ -283,6 +348,32 @@ enum android_device_state {
 	USB_RESUMED
 };
 
+// MAUSB
+#ifdef CONFIG_USB_MAUSB
+void android_mausb_connect(int connect)
+{
+	struct android_dev *dev = list_entry(android_dev_list.prev,
+			struct android_dev, list_item);
+	char *configured[2]   = { "USB_STATE=CONFIGURED", NULL };
+	//char *disconnected[2] = { "USB_STATE=DISCONNECTED", NULL };
+	char *tcperror[2]	 = 	{ "USB_STATE=TCPERROR", NULL };
+	char **uevent_envp = NULL;
+	pr_info("%s:connect:%d \n", __func__,connect);
+	if (dev != NULL) {
+		if (connect == 1)
+			uevent_envp	= configured;
+		else
+		{
+			mausb_state=0;
+			uevent_envp = tcperror;
+		}
+		kobject_uevent_env(&dev->dev->kobj, KOBJ_CHANGE,
+								uevent_envp);
+	pr_info("%s:uevent set connect:%d  \n", __func__,connect);							
+	}
+}
+EXPORT_SYMBOL_GPL(android_mausb_connect);
+#endif
 static const char *pm_qos_to_string(enum android_pm_qos_state state)
 {
 	switch (state) {
@@ -402,6 +493,11 @@ static void android_pm_qos_work(struct work_struct *data)
 			msecs_to_jiffies(1000*next_sample_delay_sec));
 }
 
+#ifdef CONFIG_LGE_USB_EMBEDDED_BATTERY
+static void android_disable(struct android_dev *);
+static int check_firstboot = 1;
+#endif
+
 static void android_work(struct work_struct *data)
 {
 	struct android_dev *dev = container_of(data, struct android_dev, work);
@@ -437,7 +533,9 @@ static void android_work(struct work_struct *data)
 	dev->sw_connected = dev->connected;
 	dev->sw_suspended = dev->suspended;
 	spin_unlock_irqrestore(&cdev->lock, flags);
-
+#ifdef CONFIG_USB_MAUSB
+	if (is_mausb_enabled() != 1) {
+#endif
 	if (pdata->pm_qos_latency[0] && pm_qos_vote == 1) {
 		cancel_delayed_work_sync(&dev->pm_qos_work);
 		android_pm_qos_update_latency(dev, pdata->pm_qos_latency[WFI]);
@@ -449,6 +547,9 @@ static void android_work(struct work_struct *data)
 		android_pm_qos_update_latency(dev, PM_QOS_DEFAULT_VALUE);
 		dev->curr_pm_qos_state = NO_USB_VOTE;
 	}
+#ifdef CONFIG_USB_MAUSB
+	}
+#endif
 
 	if (uevent_envp) {
 		/*
@@ -480,10 +581,57 @@ static void android_work(struct work_struct *data)
 			last_uevent = next_state;
 		}
 		pr_info("%s: sent uevent %s\n", __func__, uevent_envp[0]);
+#ifdef CONFIG_USB_MAUSB
+		/* Bind MAUSB if enabled */
+		if (is_mausb_enabled()==1 && uevent_envp == configured)
+		{
+			mausb_state=1;
+			pr_info("%s: mausb enabled mausb_state :%d \n", __func__,mausb_state);
+		}
+#endif
 	} else {
-		pr_info("%s: did not send uevent (%d %d %p)\n", __func__,
+		pr_info("%s: did not send uevent (%d %d %pK)\n", __func__,
 			 dev->connected, dev->sw_connected, cdev->config);
 	}
+
+#ifdef CONFIG_LGE_USB_EMBEDDED_BATTERY
+	if (uevent_envp == connected) {
+		if (lge_pm_get_cable_type() == CABLE_56K &&
+				lge_get_boot_mode() == LGE_BOOT_MODE_NORMAL &&
+				uevent_envp == connected) {
+			android_disable(dev);
+			pr_info("PIF_56K detected with LGE_BOOT_MODE_NORMAL, restart!!!\n");
+			msleep(2000);
+			kernel_restart(NULL);
+		}
+
+		else if (lge_pm_get_cable_type() == CABLE_910K &&
+				(lge_smem_cable_type() != 11 || !check_firstboot) &&
+				!lge_get_laf_mode()) {
+					android_disable(dev);
+					pr_info("[FACTORY] reset due to 910K cable, pm: %d, sbl : %d, check_firstboot : %d\n",
+							lge_pm_get_cable_type(), lge_smem_cable_type(), check_firstboot);
+					msleep(50);
+					msm_set_restart_mode(RESTART_DLOAD);
+					kernel_restart(NULL);
+		}
+	}
+	if (uevent_envp ==  configured) {
+		pr_info("complete down check_firstboot\n");
+		check_firstboot = 0;
+	}
+#endif
+
+#ifdef CONFIG_MACH_MSM8917_B6_LGU_KR
+	if (lge_pm_get_cable_type() == CABLE_270K &&
+			lge_get_boot_mode() == LGE_BOOT_MODE_NORMAL &&
+			uevent_envp == configured) {
+		pr_info("PIF_270K detected, this means A070 Dock attached\n");
+		dev->check_adock = true;
+	}
+	else
+		dev->check_adock = false;
+#endif
 }
 
 #define MIN_DISCONNECT_DELAY_MS	30
@@ -498,6 +646,9 @@ static int android_enable(struct android_dev *dev)
 	if (WARN_ON(!dev->disable_depth))
 		return err;
 
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	pr_info("%s: checked disable_depth(%d)\n", __func__, dev->disable_depth);
+#endif
 	if (--dev->disable_depth == 0) {
 
 		list_for_each_entry(conf, &dev->configs, list_item) {
@@ -506,6 +657,10 @@ static int android_enable(struct android_dev *dev)
 			if (err < 0) {
 				pr_err("%s: usb_add_config failed : err: %d\n",
 						__func__, err);
+#ifdef CONFIG_LGE_USB_G_ANDROID
+				dev->disable_depth++;
+				dev->ffs_binding_fail = true;
+#endif
 				return err;
 			}
 		}
@@ -520,7 +675,17 @@ static int android_enable(struct android_dev *dev)
 		if (ktime_to_ms(diff) < MIN_DISCONNECT_DELAY_MS)
 			msleep(MIN_DISCONNECT_DELAY_MS - ktime_to_ms(diff));
 
-		usb_gadget_connect(cdev->gadget);
+#ifdef CONFIG_LGE_USB_G_ANDROID
+		if (dev->acc_wait_check) {
+			dev->acc_wait_check = false;
+			acc_wait_event();
+		}
+#endif
+		/* Userspace UVC driver will trigger connect for video */
+		if (!video_enabled)
+			usb_gadget_connect(cdev->gadget);
+		else
+			pr_debug("defer gadget connect until usersapce opens video device\n");
 	}
 
 	return err;
@@ -530,9 +695,23 @@ static void android_disable(struct android_dev *dev)
 {
 	struct usb_composite_dev *cdev = dev->cdev;
 	struct android_configuration *conf;
+	bool do_put = false;
 
+#ifdef CONFIG_LGE_USB_FACTORY
+	if (dev->check_pif) {
+		pr_info("%s: pif cable is plugged, not permitted\n", __func__);
+		return;
+	}
+#endif
+
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	pr_info("%s: checked disable_depth(%d)\n", __func__, dev->disable_depth);
+#endif
 	if (dev->disable_depth++ == 0) {
-		usb_gadget_autopm_get(cdev->gadget);
+		if (cdev->suspended && cdev->config) {
+			usb_gadget_autopm_get(cdev->gadget);
+			do_put = true;
+		}
 		if (gadget_is_dwc3(cdev->gadget)) {
 			/* Cancel pending control requests */
 			usb_ep_dequeue(cdev->gadget->ep0, cdev->req);
@@ -551,7 +730,8 @@ static void android_disable(struct android_dev *dev)
 			list_for_each_entry(conf, &dev->configs, list_item)
 				usb_remove_config(cdev, &conf->usb_config);
 		}
-		usb_gadget_autopm_put_async(cdev->gadget);
+		if (do_put)
+			usb_gadget_autopm_put_async(cdev->gadget);
 	}
 }
 
@@ -607,7 +787,16 @@ static void ffs_function_enable(struct android_usb_function *f)
 	struct android_dev *dev = f->android_dev;
 	struct functionfs_config *config = f->config;
 
+#ifdef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
+	if (config->enabled)
+		return;
+#endif
+
 	config->enabled = true;
+
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	pr_info("%s: config->opened(%d)\n", __func__, config->opened);
+#endif
 
 	/* Disable the gadget until the function is ready */
 	if (!config->opened)
@@ -619,7 +808,16 @@ static void ffs_function_disable(struct android_usb_function *f)
 	struct android_dev *dev = f->android_dev;
 	struct functionfs_config *config = f->config;
 
+#ifdef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
+	if (!config->enabled)
+		return;
+#endif
+
 	config->enabled = false;
+
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	pr_info("%s: config->opened(%d)\n", __func__, config->opened);
+#endif
 
 	/* Balance the disable that was called in closed_callback */
 	if (!config->opened)
@@ -641,8 +839,10 @@ static int ffs_function_bind_config(struct android_usb_function *f,
 		pr_err("%s(): usb_add_function() fails (err:%d) for ffs\n",
 							__func__, ret);
 
+#ifndef CONFIG_LGE_USB_G_ANDROID
 		usb_put_function(config->func);
 		config->func = NULL;
+#endif
 	}
 
 	return ret;
@@ -713,12 +913,27 @@ static int functionfs_ready_callback(struct ffs_data *ffs)
 	if (!dev)
 		return -ENODEV;
 
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	pr_info("%s: config->enabled(%d), dev(%p)\n", __func__, config->enabled, dev);
+#endif
+
 	mutex_lock(&dev->mutex);
 	config->data = ffs;
 	config->opened = true;
 
 	if (config->enabled && dev)
 		android_enable(dev);
+
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	if (dev) {
+		if (dev->ffs_binding_fail) {
+			dev->ffs_binding_fail = false;
+			dev->connected = 1;
+			android_enable(dev);
+			dev->enabled = true;
+		}
+	}
+#endif
 
 	mutex_unlock(&dev->mutex);
 	return 0;
@@ -731,6 +946,10 @@ static void functionfs_closed_callback(struct ffs_data *ffs)
 
 	if (dev)
 		mutex_lock(&dev->mutex);
+
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	pr_info("%s: config->enabled(%d), dev(%p)\n", __func__, config->enabled, dev);
+#endif
 
 	if (config->enabled && dev)
 		android_disable(dev);
@@ -747,6 +966,78 @@ static void functionfs_closed_callback(struct ffs_data *ffs)
 		mutex_unlock(&dev->mutex);
 
 }
+
+#ifdef CONFIG_LGE_USB_G_LAF
+/* laf */
+struct laf_data {
+	bool opened;
+	bool enabled;
+};
+
+static int
+laf_function_init(struct android_usb_function *f,
+		struct usb_composite_dev *cdev)
+{
+	f->config = kzalloc(sizeof(struct laf_data), GFP_KERNEL);
+	if (!f->config)
+		return -ENOMEM;
+
+	return laf_setup();
+}
+
+static void laf_function_cleanup(struct android_usb_function *f)
+{
+	laf_cleanup();
+	kfree(f->config);
+}
+
+static int
+laf_function_bind_config(struct android_usb_function *f,
+		struct usb_configuration *c)
+{
+	return laf_bind_config(c);
+}
+
+static void laf_android_function_enable(struct android_usb_function *f)
+{
+	struct laf_data *data = f->config;
+
+	data->enabled = true;
+
+	pr_err("laf_android_function_enable");
+}
+
+static void laf_android_function_disable(struct android_usb_function *f)
+{
+	struct laf_data *data = f->config;
+
+	data->enabled = false;
+}
+
+static struct android_usb_function laf_function = {
+	.name		= "laf",
+	.enable		= laf_android_function_enable,
+	.disable	= laf_android_function_disable,
+	.init		= laf_function_init,
+	.cleanup	= laf_function_cleanup,
+	.bind_config	= laf_function_bind_config,
+};
+
+static void laf_ready_callback(void)
+{
+	struct laf_data *data = laf_function.config;
+
+	data->opened = true;
+}
+
+static void laf_closed_callback(void)
+{
+	struct laf_data *data = laf_function.config;
+
+	data->opened = false;
+}
+
+#endif
 
 /* ACM */
 static char acm_transports[32];	/*enabled ACM ports - "tty[,sdio]"*/
@@ -796,7 +1087,11 @@ acm_function_bind_config(struct android_usb_function *f,
 	static int acm_initialized, ports;
 	struct acm_function_config *config = f->config;
 
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	if (acm_initialized && ports)
+#else
 	if (acm_initialized)
+#endif
 		goto bind_config;
 
 	acm_initialized = 1;
@@ -1103,7 +1398,11 @@ ncm_function_init(struct android_usb_function *f, struct usb_composite_dev *c)
 
 	f->config = config;
 
+#ifdef CONFIG_LGE_USB_G_NCM
+	return ncm_init();
+#else
 	return 0;
+#endif
 }
 
 static void ncm_function_cleanup(struct android_usb_function *f)
@@ -1116,8 +1415,14 @@ static void ncm_function_cleanup(struct android_usb_function *f)
 
 	kfree(f->config);
 	f->config = NULL;
+#ifdef CONFIG_LGE_USB_G_NCM
+	ncm_cleanup();
+#endif
 }
 
+#ifdef CONFIG_LGE_USB_G_NCM
+static char host_addr2[14];
+#endif
 static int
 ncm_function_bind_config(struct android_usb_function *f,
 				struct usb_configuration *c)
@@ -1140,11 +1445,21 @@ ncm_function_bind_config(struct android_usb_function *f,
 		return PTR_ERR(ncm->fi);
 
 	ncm_opts = container_of(ncm->fi, struct f_ncm_opts, func_inst);
+#ifdef CONFIG_LGE_USB_G_NCM
+	strlcpy(ncm_opts->net->name, "usb%d", sizeof(ncm_opts->net->name));
+#else
 	strlcpy(ncm_opts->net->name, "ncm%d", sizeof(ncm_opts->net->name));
+#endif
 
 	gether_set_qmult(ncm_opts->net, qmult);
+
+#ifdef CONFIG_LGE_USB_G_NCM
+	if (!gether_set_host_addr(ncm_opts->net, host_addr2))
+		pr_info("using host ethernet address: %s", host_addr2);
+#else
 	if (!gether_set_host_addr(ncm_opts->net, host_addr))
 		pr_info("using host ethernet address: %s", host_addr);
+#endif
 	if (!gether_set_dev_addr(ncm_opts->net, dev_addr))
 		pr_info("using self ethernet address: %s", dev_addr);
 
@@ -1157,6 +1472,9 @@ ncm_function_bind_config(struct android_usb_function *f,
 
 	ncm_opts->bound = true;
 	gether_get_host_addr_u8(ncm_opts->net, ncm->ethaddr);
+#ifdef CONFIG_LGE_USB_G_NCM
+	gether_get_host_addr_cdc(ncm_opts->net, host_addr2, sizeof(host_addr2));
+#endif
 
 	ncm->func = usb_get_function(ncm->fi);
 	if (IS_ERR(ncm->func)) {
@@ -1174,6 +1492,24 @@ static void ncm_function_unbind_config(struct android_usb_function *f,
 
 	usb_put_function_instance(ncm->fi);
 }
+
+#ifdef CONFIG_LGE_USB_G_NCM
+static int ncm_function_ctrlrequest(struct android_usb_function *f,
+					struct usb_composite_dev *cdev,
+					const struct usb_ctrlrequest *c)
+{
+	return ncm_ctrlrequest(cdev, c);
+}
+
+static ssize_t ncm_start_requested_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", get_ncm_start_requested());
+}
+
+static DEVICE_ATTR(ncm_start_requested, S_IRUGO, ncm_start_requested_show, NULL);
+#endif
+
 
 static ssize_t ncm_ethaddr_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -1203,6 +1539,9 @@ static DEVICE_ATTR(ncm_ethaddr, S_IRUGO | S_IWUSR, ncm_ethaddr_show,
 					       ncm_ethaddr_store);
 static struct device_attribute *ncm_function_attributes[] = {
 	&dev_attr_ncm_ethaddr,
+#ifdef CONFIG_LGE_USB_G_NCM
+	&dev_attr_ncm_start_requested,
+#endif
 	NULL
 };
 
@@ -1212,6 +1551,9 @@ static struct android_usb_function ncm_function = {
 	.cleanup	= ncm_function_cleanup,
 	.bind_config	= ncm_function_bind_config,
 	.unbind_config	= ncm_function_unbind_config,
+#ifdef CONFIG_LGE_USB_G_NCM
+	.ctrlrequest	= ncm_function_ctrlrequest,
+#endif
 	.attributes	= ncm_function_attributes,
 };
 
@@ -1496,6 +1838,185 @@ static struct android_usb_function audio_function = {
 };
 #endif
 
+/* PERIPHERAL uac2 */
+struct uac2_function_config {
+	struct usb_function *func;
+	struct usb_function_instance *fi;
+};
+
+static int uac2_function_init(struct android_usb_function *f,
+			       struct usb_composite_dev *cdev)
+{
+	struct uac2_function_config *config;
+
+	f->config = kzalloc(sizeof(*config), GFP_KERNEL);
+	if (!f->config)
+		return -ENOMEM;
+
+	config = f->config;
+
+	config->fi = usb_get_function_instance("uac2");
+	if (IS_ERR(config->fi))
+		return PTR_ERR(config->fi);
+
+	config->func = usb_get_function(config->fi);
+	if (IS_ERR(config->func)) {
+		usb_put_function_instance(config->fi);
+		return PTR_ERR(config->func);
+	}
+
+	return 0;
+}
+
+static void uac2_function_cleanup(struct android_usb_function *f)
+{
+	struct uac2_function_config *config = f->config;
+
+	if (config) {
+		usb_put_function(config->func);
+		usb_put_function_instance(config->fi);
+	}
+
+	kfree(f->config);
+	f->config = NULL;
+}
+
+static int uac2_function_bind_config(struct android_usb_function *f,
+					  struct usb_configuration *c)
+{
+	struct uac2_function_config *config = f->config;
+
+	return usb_add_function(c, config->func);
+}
+
+static struct android_usb_function uac2_function = {
+	.name		= "uac2_func",
+	.init		= uac2_function_init,
+	.cleanup	= uac2_function_cleanup,
+	.bind_config	= uac2_function_bind_config,
+};
+
+#ifdef CONFIG_MEDIA_SUPPORT
+/* PERIPHERAL VIDEO */
+struct video_function_config {
+	struct usb_function *func;
+	struct usb_function_instance *fi;
+};
+
+static int video_function_init(struct android_usb_function *f,
+			       struct usb_composite_dev *cdev)
+{
+	struct f_uvc_opts *uvc_opts;
+	struct video_function_config *config;
+
+	f->config = kzalloc(sizeof(*config), GFP_KERNEL);
+	if (!f->config)
+		return -ENOMEM;
+
+	config = f->config;
+
+	config->fi = usb_get_function_instance("uvc");
+	if (IS_ERR(config->fi))
+		return PTR_ERR(config->fi);
+
+	uvc_opts = container_of(config->fi, struct f_uvc_opts, func_inst);
+
+	uvc_opts->streaming_interval = streaming_interval;
+	uvc_opts->streaming_maxpacket = streaming_maxpacket;
+	uvc_opts->streaming_maxburst = streaming_maxburst;
+	uvc_set_trace_param(trace);
+
+	uvc_opts->fs_control = uvc_fs_control_cls;
+	uvc_opts->ss_control = uvc_ss_control_cls;
+	uvc_opts->fs_streaming = uvc_fs_streaming_cls;
+	uvc_opts->hs_streaming = uvc_hs_streaming_cls;
+	uvc_opts->ss_streaming = uvc_ss_streaming_cls;
+
+	config->func = usb_get_function(config->fi);
+	if (IS_ERR(config->func)) {
+		usb_put_function_instance(config->fi);
+		return PTR_ERR(config->func);
+	}
+
+	return 0;
+}
+
+static void video_function_cleanup(struct android_usb_function *f)
+{
+	struct video_function_config *config = f->config;
+
+	if (config) {
+		usb_put_function(config->func);
+		usb_put_function_instance(config->fi);
+	}
+
+	kfree(f->config);
+	f->config = NULL;
+}
+
+static int video_function_bind_config(struct android_usb_function *f,
+					  struct usb_configuration *c)
+{
+	struct video_function_config *config = f->config;
+
+	return usb_add_function(c, config->func);
+}
+
+static void video_function_enable(struct android_usb_function *f)
+{
+	video_enabled = true;
+}
+
+static void video_function_disable(struct android_usb_function *f)
+{
+	video_enabled = false;
+}
+
+static struct android_usb_function video_function = {
+	.name		= "video",
+	.init		= video_function_init,
+	.cleanup	= video_function_cleanup,
+	.bind_config	= video_function_bind_config,
+	.enable		= video_function_enable,
+	.disable	= video_function_disable,
+};
+
+int video_ready_callback(struct usb_function *function)
+{
+	struct android_dev *dev = video_function.android_dev;
+	struct usb_composite_dev *cdev;
+
+	if (!dev) {
+		pr_err("%s: dev is NULL\n", __func__);
+		return -ENODEV;
+	}
+
+	cdev = dev->cdev;
+
+	pr_debug("%s: connect\n", __func__);
+	usb_gadget_connect(cdev->gadget);
+
+	return 0;
+}
+
+int video_closed_callback(struct usb_function *function)
+{
+	struct android_dev *dev = video_function.android_dev;
+	struct usb_composite_dev *cdev;
+
+	if (!dev) {
+		pr_err("%s: dev is NULL\n", __func__);
+		return -ENODEV;
+	}
+
+	cdev = dev->cdev;
+
+	pr_debug("%s: disconnect\n", __func__);
+	usb_gadget_disconnect(cdev->gadget);
+
+	return 0;
+}
+#endif
 
 /* DIAG */
 static char diag_clients[32];	    /*enabled DIAG clients- "diag[,diag_mdm]" */
@@ -1503,6 +2024,14 @@ static ssize_t clients_store(
 		struct device *device, struct device_attribute *attr,
 		const char *buff, size_t size)
 {
+#ifdef CONFIG_LGE_USB_FACTORY
+	struct android_dev *dev = list_entry(android_dev_list.prev,
+			struct android_dev, list_item);
+	if (dev->check_pif) {
+		pr_info("%s: pif cable is plugged, not permitted\n", __func__);
+		return -EPERM;
+	}
+#endif
 	strlcpy(diag_clients, buff, sizeof(diag_clients));
 
 	return size;
@@ -1925,6 +2454,7 @@ static int serial_function_bind_config(struct android_usb_function *f,
 	err = gport_setup(c);
 	if (err) {
 		pr_err("serial: Cannot setup transports");
+		gserial_deinit_port();
 		goto out;
 	}
 
@@ -2573,6 +3103,10 @@ static struct android_usb_function ecm_function = {
 	.attributes	= ecm_function_attributes,
 };
 
+#ifdef CONFIG_LGE_USB_G_ANDROID
+static const char lge_vendor_name[] = "LGE";
+static const char lge_product_name[] = "Android Platform";
+#endif
 struct mass_storage_function_config {
 	struct usb_function *f_ms;
 	struct usb_function_instance *f_ms_inst;
@@ -2610,6 +3144,9 @@ static int mass_storage_function_init(struct android_usb_function *f,
 
 	fsg_mod_data.removable[0] = true;
 	fsg_config_from_params(&m_config, &fsg_mod_data, fsg_num_buffers);
+#ifdef CONFIG_LGE_USB_G_AUTORUN
+	m_config.lun_name_format = NULL;
+#endif
 	fsg_opts = fsg_opts_from_func_inst(config->f_ms_inst);
 	ret = fsg_common_set_num_buffers(fsg_opts->common, fsg_num_buffers);
 	if (ret) {
@@ -2758,6 +3295,231 @@ static struct android_usb_function mass_storage_function = {
 	.attributes	= mass_storage_function_attributes,
 };
 
+#ifdef CONFIG_LGE_USB_G_AUTORUN
+static struct fsg_module_parameters csg_mod_data;
+
+/* virtual cdrom usb gadget for autorun */
+struct cdrom_storage_function_config {
+	struct usb_function *f_ms;
+	struct usb_function_instance *f_ms_inst;
+	char inquiry_string[INQUIRY_MAX_LEN];
+};
+
+static const char cdrom_storage_kthread_name[] = "kcdrom-storaged";
+static const char cdrom_lun_format[] = "clun%d";
+
+static int cdrom_storage_function_init(struct android_usb_function *f,
+		struct usb_composite_dev *cdev)
+{
+	struct cdrom_storage_function_config *config;
+	int ret;
+	struct fsg_opts *fsg_opts;
+	struct fsg_config m_config;
+
+	pr_debug("%s(): Inside\n", __func__);
+	config = kzalloc(sizeof(struct cdrom_storage_function_config),
+								GFP_KERNEL);
+	if (!config)
+		return -ENOMEM;
+	f->config = config;
+
+	config->f_ms_inst = usb_get_function_instance("cdrom_storage");
+	if (IS_ERR(config->f_ms_inst)) {
+		ret = PTR_ERR(config->f_ms_inst);
+		goto err_usb_get_function_instance;
+	}
+
+	config->f_ms = usb_get_function(config->f_ms_inst);
+	if (IS_ERR(config->f_ms)) {
+		ret = PTR_ERR(config->f_ms);
+		goto err_usb_get_function;
+	}
+
+	csg_mod_data.luns = 1;
+	csg_mod_data.cdrom[0] = true; /* cdrom(read only) flag */
+	csg_mod_data.removable[0] = true;
+	csg_mod_data.ro[0] = true;
+	fsg_config_from_params(&m_config, &csg_mod_data, fsg_num_buffers);
+
+	m_config.vendor_name = lge_vendor_name;
+	m_config.product_name = lge_product_name;
+	m_config.lun_name_format = cdrom_lun_format;
+
+	fsg_opts = fsg_opts_from_func_inst(config->f_ms_inst);
+
+	ret = fsg_common_set_nluns(fsg_opts->common, m_config.nluns);
+	if (ret) {
+		pr_err("%s(): error(%d) for fsg_common_set_nluns\n",
+						__func__, ret);
+		goto err_set_nluns;
+	}
+
+	ret = fsg_common_set_cdev(fsg_opts->common, cdev,
+						m_config.can_stall);
+	if (ret) {
+		pr_err("%s(): error(%d) for fsg_common_set_cdev\n",
+						__func__, ret);
+		goto err_set_cdev;
+	}
+
+	fsg_common_set_sysfs(fsg_opts->common, true);
+	ret = fsg_common_create_luns(fsg_opts->common, &m_config);
+	if (ret) {
+		pr_err("%s(): error(%d) for fsg_common_create_luns\n",
+						__func__, ret);
+		goto err_create_luns;
+	}
+
+	/* use default one currently */
+	fsg_common_set_inquiry_string(fsg_opts->common, m_config.vendor_name,
+							m_config.product_name);
+
+	ret = fsg_sysfs_update(fsg_opts->common, f->dev, true);
+	if (ret)
+		pr_err("%s(): error(%d) for creating sysfs\n", __func__, ret);
+
+	fsg_common_set_thread_name(fsg_opts->common, cdrom_storage_kthread_name);
+
+	return 0;
+
+err_create_luns:
+err_set_cdev:
+	fsg_common_free_luns(fsg_opts->common);
+err_set_nluns:
+	fsg_common_free_buffers(fsg_opts->common);
+
+err_usb_get_function:
+	usb_put_function_instance(config->f_ms_inst);
+
+err_usb_get_function_instance:
+	return ret;
+}
+
+static int cdrom_storage_function_bind_config(struct android_usb_function *f,
+		struct usb_configuration *c)
+{
+	struct cdrom_storage_function_config *config = f->config;
+	int ret = 0;
+	int i;
+	struct fsg_opts *fsg_opts;
+	struct fsg_config m_config;
+
+	ret = usb_add_function(c, config->f_ms);
+	if (ret) {
+		pr_err("Could not bind ms%u config\n", i);
+		goto err_usb_add_function;
+	}
+
+	fsg_config_from_params(&m_config, &fsg_mod_data, fsg_num_buffers);
+	fsg_opts = fsg_opts_from_func_inst(config->f_ms_inst);
+	fsg_opts->no_configfs = true;
+
+	ret = fsg_common_set_num_buffers(fsg_opts->common, fsg_num_buffers);
+	if (ret) {
+		pr_err("%s(): error(%d) for fsg_common_set_num_buffers\n",
+						__func__, ret);
+		goto err_set_num_buffers;
+	}
+
+	return 0;
+err_set_num_buffers:
+	usb_remove_function(c, config->f_ms);
+err_usb_add_function:
+	return ret;
+}
+
+static void cdrom_storage_function_unbind_config(struct android_usb_function *f,
+					       struct usb_configuration *c)
+{
+	pr_debug("%s(): Do nothing here...\n", __func__);
+}
+
+static void cdrom_storage_function_cleanup(struct android_usb_function *f)
+{
+	struct cdrom_storage_function_config *config = f->config;
+	struct fsg_opts *fsg_opts;
+
+	pr_debug("%s(): Inside\n", __func__);
+	usb_put_function(config->f_ms);
+	usb_put_function_instance(config->f_ms_inst);
+	kfree(f->config);
+	f->config = NULL;
+
+	fsg_opts = fsg_opts_from_func_inst(config->f_ms_inst);
+	fsg_sysfs_update(fsg_opts->common, f->dev, false);
+	fsg_common_free_luns(fsg_opts->common);
+}
+
+static ssize_t cdrom_storage_inquiry_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct android_usb_function *f = dev_get_drvdata(dev);
+	struct cdrom_storage_function_config *config = f->config;
+
+	return snprintf(buf, PAGE_SIZE, "%s\n", config->inquiry_string);
+}
+
+static ssize_t cdrom_storage_inquiry_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct android_usb_function *f = dev_get_drvdata(dev);
+	struct cdrom_storage_function_config *config = f->config;
+
+	if (size >= sizeof(config->inquiry_string))
+		return -EINVAL;
+
+	if (sscanf(buf, "%28s", config->inquiry_string) != 1)
+		return -EINVAL;
+
+	return size;
+}
+
+static DEVICE_ATTR(cdrom_inquiry_string, S_IRUGO | S_IWUSR,
+		cdrom_storage_inquiry_show,
+		cdrom_storage_inquiry_store);
+
+/* we borrow another parts from mass storage function driver */
+static struct device_attribute *cdrom_storage_function_attributes[] = {
+	&dev_attr_cdrom_inquiry_string,
+	NULL
+};
+
+static struct android_usb_function cdrom_storage_function = {
+	.name		= "cdrom_storage",
+	.init		= cdrom_storage_function_init,
+	.cleanup	= cdrom_storage_function_cleanup,
+	.bind_config	= cdrom_storage_function_bind_config,
+	.unbind_config	= cdrom_storage_function_unbind_config,
+	.attributes	= cdrom_storage_function_attributes,
+};
+#endif /* CONFIG_LGE_USB_G_AUTORUN */
+
+#ifdef CONFIG_LGE_USB_G_ANDROID
+/* charge only mode */
+static int charge_only_function_init(struct android_usb_function *f,
+		struct usb_composite_dev *cdev)
+{
+	return charge_only_setup();
+}
+
+static void charge_only_function_cleanup(struct android_usb_function *f)
+{
+	charge_only_cleanup();
+}
+
+static int charge_only_function_bind_config(struct android_usb_function *f,
+		struct usb_configuration *c)
+{
+	return charge_only_bind_config(c);
+}
+
+static struct android_usb_function charge_only_function = {
+	.name		= "charge_only",
+	.init		= charge_only_function_init,
+	.cleanup	= charge_only_function_cleanup,
+	.bind_config	= charge_only_function_bind_config,
+};
+#endif /* CONFIG_LGE_USB_G_ANDROID */
 
 static int accessory_function_init(struct android_usb_function *f,
 					struct usb_composite_dev *cdev)
@@ -3083,12 +3845,19 @@ static struct android_usb_function *default_functions[] = {
 	&ecm_qc_function,
 #ifdef CONFIG_SND_PCM
 	&audio_function,
+	&uac2_function,
+#endif
+#ifdef CONFIG_MEDIA_SUPPORT
+	&video_function,
 #endif
 	&rmnet_function,
 	&gps_function,
 	&diag_function,
 	&qdss_function,
 	&serial_function,
+#ifdef CONFIG_LGE_USB_G_LAF
+	&laf_function,
+#endif
 	&ccid_function,
 	&acm_function,
 	&mtp_function,
@@ -3098,6 +3867,12 @@ static struct android_usb_function *default_functions[] = {
 	&ecm_function,
 	&ncm_function,
 	&mass_storage_function,
+#ifdef CONFIG_LGE_USB_G_AUTORUN
+	&cdrom_storage_function,
+#endif
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	&charge_only_function,
+#endif
 	&accessory_function,
 	&audio_source_function,
 	&charger_function,
@@ -3402,6 +4177,17 @@ functions_store(struct device *pdev, struct device_attribute *attr,
 		return -EBUSY;
 	}
 
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	dev_info(dev->dev, "LGE-USB request function list: %s\n", buff);
+#endif
+#ifdef CONFIG_LGE_USB_FACTORY
+	if (dev->check_pif) {
+		pr_info("%s: pif cable is plugged, not permitted\n", __func__);
+		mutex_unlock(&dev->mutex);
+		return -EPERM;
+	}
+#endif
+
 	/* Clear previous enabled list */
 	list_for_each_entry(conf, &dev->configs, list_item) {
 		while (conf->enabled_functions.next !=
@@ -3420,10 +4206,19 @@ functions_store(struct device *pdev, struct device_attribute *attr,
 	b = strim(buf);
 
 	while (b) {
+#ifdef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
+		ffs_enabled = 0;
+#endif
 		conf_str = strsep(&b, ":");
 		if (!conf_str)
 			continue;
-
+#ifdef CONFIG_USB_MAUSB
+		if(b && is_mausb_enabled() == 1 && !lge_get_laf_mode())
+		{
+			printk(KERN_INFO"mausb skipping before colon string enumeration problem\n");
+			continue;
+		}
+#endif
 		/* If the next not equal to the head, take it */
 		if (curr_conf->next != &dev->configs)
 			conf = list_entry(curr_conf->next,
@@ -3501,11 +4296,34 @@ static ssize_t enable_store(struct device *pdev, struct device_attribute *attr,
 	bool audio_enabled = false;
 	static DEFINE_RATELIMIT_STATE(rl, 10*HZ, 1);
 	int err = 0;
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	static bool accessory_enabled = false;
+#endif
 
 	if (!cdev)
 		return -ENODEV;
 
 	mutex_lock(&dev->mutex);
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	dev_info(dev->dev, "gadget enable(%s)\n", buff);
+#endif
+
+#ifdef CONFIG_LGE_USB_FACTORY
+	if (sscanf(buff, "%d", &enabled) != 1)
+		return -EINVAL;
+	if (dev->check_pif) {
+		if (enabled && !dev->enabled) {
+			android_enable(dev);
+			dev->enabled = true;
+			mutex_unlock(&dev->mutex);
+			pr_info("%s: pif cable is plugged, enable\n", __func__);
+			return size;
+		}
+		mutex_unlock(&dev->mutex);
+		pr_info("%s: pif cable is plugged, not permitted\n", __func__);
+		return -EPERM;
+	}
+#endif
 
 	sscanf(buff, "%d", &enabled);
 	if (enabled && !dev->enabled) {
@@ -3520,6 +4338,26 @@ static ssize_t enable_store(struct device *pdev, struct device_attribute *attr,
 		cdev->desc.bDeviceClass = device_desc.bDeviceClass;
 		cdev->desc.bDeviceSubClass = device_desc.bDeviceSubClass;
 		cdev->desc.bDeviceProtocol = device_desc.bDeviceProtocol;
+#ifdef CONFIG_LGE_USB_G_ANDROID
+		cdev->desc.iSerialNumber =
+			strings_dev[STRING_SERIAL_IDX].id;
+		cdev->desc.iProduct =
+			strings_dev[STRING_PRODUCT_IDX].id;
+#endif
+#ifdef CONFIG_LGE_USB_FACTORY
+		if (cdev->desc.idVendor == LGE_PIF_VID &&
+				cdev->desc.idProduct == LGE_PIF_PID) {
+
+			cdev->desc.iSerialNumber = 0;
+		}
+#endif
+
+#ifdef CONFIG_LGE_USB_G_ANDROID
+		if (accessory_enabled) {
+			accessory_enabled = false;
+			dev->acc_wait_check = true;
+		}
+#endif
 
 		/* Audio dock accessory is unable to enumerate device if
 		 * pull-up is enabled immediately. The enumeration is
@@ -3533,6 +4371,11 @@ static ssize_t enable_store(struct device *pdev, struct device_attribute *attr,
 				if (!strncmp(f_holder->f->name,
 						"audio_source", 12))
 					audio_enabled = true;
+#ifdef CONFIG_LGE_USB_G_ANDROID
+				if (!strncmp(f_holder->f->name,
+						"accessory", 9))
+					accessory_enabled = true;
+#endif
 			}
 		if (audio_enabled)
 			msleep(100);
@@ -3600,6 +4443,17 @@ static ssize_t state_show(struct device *pdev, struct device_attribute *attr,
 	char *state = "DISCONNECTED";
 	unsigned long flags;
 
+#ifdef CONFIG_USB_MAUSB
+	if (is_mausb_enabled() == 1 && !mausb_state) {
+		spin_lock_irqsave(&cdev->lock, flags);
+		if(cdev->config || dev->connected)
+			state = "TCPERROR";
+		spin_unlock_irqrestore(&cdev->lock, flags);
+		mausb_state = 1;
+		goto out;
+	}
+#endif
+
 	if (!cdev)
 		goto out;
 
@@ -3612,6 +4466,44 @@ static ssize_t state_show(struct device *pdev, struct device_attribute *attr,
 out:
 	return snprintf(buf, PAGE_SIZE, "%s\n", state);
 }
+
+#ifdef CONFIG_LGE_USB_FACTORY
+static ssize_t lock_show(struct device *pdev,
+			struct device_attribute *attr, char *buf)
+{
+	struct android_dev *dev = dev_get_drvdata(pdev);
+	return snprintf(buf, PAGE_SIZE, "%d\n", dev->check_pif);
+}
+
+static ssize_t lock_store(struct device *pdev,
+		struct device_attribute *attr, const char *buff, size_t size)
+{
+	struct android_dev *dev = dev_get_drvdata(pdev);
+	int lock = 0;
+
+	mutex_lock(&dev->mutex);
+	if (sscanf(buff, "%d", &lock) == 1)
+		dev->check_pif = lock;
+	mutex_unlock(&dev->mutex);
+
+	return size;
+}
+#endif
+
+#ifdef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
+static ssize_t config_num_show(struct device *pdev,
+		struct device_attribute *attr,
+		char *buf)
+{
+	struct android_dev *dev = dev_get_drvdata(pdev);
+	u8 config_num = 0;
+
+	if (dev->cdev->config)
+		config_num = dev->cdev->config->bConfigurationValue;
+
+	return snprintf(buf, PAGE_SIZE, "%d\n", config_num);
+}
+#endif
 
 #define ANDROID_DEV_ATTR(field, format_string)				\
 static ssize_t								\
@@ -3638,6 +4530,54 @@ field ## _store(struct device *pdev, struct device_attribute *attr,	\
 }									\
 static DEVICE_ATTR(field, S_IRUGO | S_IWUSR, field ## _show, field ## _store);
 
+#ifdef CONFIG_LGE_USB_FACTORY
+/* if pif cable is plugged, not allow request from user space */
+#define DESCRIPTOR_ATTR(field, format_string)				\
+static ssize_t								\
+field ## _show(struct device *dev, struct device_attribute *attr,	\
+		char *buf)						\
+{									\
+	return snprintf(buf, PAGE_SIZE,					\
+			format_string, device_desc.field);		\
+}									\
+static ssize_t								\
+field ## _store(struct device *dev, struct device_attribute *attr,	\
+		const char *buf, size_t size)				\
+{									\
+	int value;							\
+	struct android_dev *adev = dev_get_drvdata(dev);		\
+	if (adev->check_pif)						\
+		return -EPERM;						\
+	if (sscanf(buf, format_string, &value) == 1) {			\
+		device_desc.field = value;				\
+		return size;						\
+	}								\
+	return -EINVAL;							\
+}									\
+static DEVICE_ATTR(field, S_IRUGO | S_IWUSR, field ## _show, field ## _store);
+
+#define DESCRIPTOR_STRING_ATTR(field, buffer)				\
+static ssize_t								\
+field ## _show(struct device *dev, struct device_attribute *attr,	\
+		char *buf)						\
+{									\
+	return snprintf(buf, PAGE_SIZE, "%s", buffer);			\
+}									\
+static ssize_t								\
+field ## _store(struct device *dev, struct device_attribute *attr,	\
+		const char *buf, size_t size)				\
+{									\
+	struct android_dev *adev = dev_get_drvdata(dev);		\
+	if (adev->check_pif && adev->check_qem)				\
+		return -EPERM;						\
+	if (size >= sizeof(buffer))					\
+		return -EINVAL;						\
+	strlcpy(buffer, buf, sizeof(buffer));				\
+	strim(buffer);							\
+	return size;							\
+}									\
+static DEVICE_ATTR(field, S_IRUGO | S_IWUSR, field ## _show, field ## _store);
+#else /* CONFIG_LGE_USB_FACTORY */
 #define DESCRIPTOR_ATTR(field, format_string)				\
 static ssize_t								\
 field ## _show(struct device *dev, struct device_attribute *attr,	\
@@ -3677,6 +4617,78 @@ field ## _store(struct device *dev, struct device_attribute *attr,	\
 	return size;							\
 }									\
 static DEVICE_ATTR(field, S_IRUGO | S_IWUSR, field ## _show, field ## _store);
+#endif /* CONFIG_LGE_USB_FACTORY */
+
+#ifdef CONFIG_MACH_MSM8917_B6_LGU_KR
+static ssize_t adock_show(struct device *pdev, struct device_attribute *attr,
+		char *buf)
+{
+	struct android_dev *dev = dev_get_drvdata(pdev);
+	pr_info("%s: enter\n",__func__);
+
+	return snprintf(buf, PAGE_SIZE, "%d\n", dev->check_adock);
+}
+
+static ssize_t adock_store(struct device *pdev, struct device_attribute *attr,
+		const char *buff, size_t size)
+{
+	struct android_dev *dev = dev_get_drvdata(pdev);
+	int adock = 0;
+
+	pr_info("%s: enter (%s)\n",__func__, buff);
+
+	mutex_lock(&dev->mutex);
+	sscanf(buff, "%d", &adock);
+	dev->check_adock = adock;
+	mutex_unlock(&dev->mutex);
+
+	pr_info("%s: adock=%d\n",__func__,adock);
+
+	return size;
+}
+
+static void boot_complete_work(struct work_struct *data)
+{
+	struct android_dev *dev = container_of(data, struct android_dev, boot_work.work);
+	struct device *pdev = dev->dev;
+
+	pr_info("%s: check boot complete work\n", __func__);
+
+	if (dev->connected) {
+		enable_store(pdev, NULL, "0", (size_t)1);
+		enable_store(pdev, NULL, "1", (size_t)1);
+	}
+}
+
+static ssize_t boot_completed_show(struct device *pdev, struct device_attribute *attr,
+		char *buf)
+{
+	pr_info("%s: enter\n",__func__);
+
+	return snprintf(buf, PAGE_SIZE, "%d\n", boot_cmplt);
+}
+
+#define CHECK_BOOT_DELAY	5 * HZ
+static ssize_t boot_completed_store(struct device *pdev, struct device_attribute *attr,
+		const char *buff, size_t size)
+{
+	struct android_dev *dev = dev_get_drvdata(pdev);
+	int b_comp = 0;
+	pr_info("%s: enter (%s)\n",__func__, buff);
+
+	mutex_lock(&dev->mutex);
+	sscanf(buff, "%d", &b_comp);
+	boot_cmplt = b_comp;
+	mutex_unlock(&dev->mutex);
+
+	if (boot_cmplt && audio_source_started) {
+		schedule_delayed_work(&dev->boot_work, CHECK_BOOT_DELAY);
+	}
+	pr_info("%s: boot_completed=%d\n",__func__,b_comp);
+
+        return size;
+}
+#endif
 
 
 DESCRIPTOR_ATTR(idVendor, "%04x\n")
@@ -3704,6 +4716,19 @@ ANDROID_DEV_ATTR(idle_pc_rpm_no_int_secs, "%u\n");
 static DEVICE_ATTR(state, S_IRUGO, state_show, NULL);
 static DEVICE_ATTR(remote_wakeup, S_IRUGO | S_IWUSR,
 		remote_wakeup_show, remote_wakeup_store);
+#ifdef CONFIG_LGE_USB_FACTORY
+static DEVICE_ATTR(lock, S_IRUGO | S_IWUSR, lock_show, lock_store);
+#endif
+
+#ifdef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
+static DEVICE_ATTR(config_num, S_IRUGO, config_num_show, NULL);
+#endif
+
+#ifdef CONFIG_MACH_MSM8917_B6_LGU_KR
+static DEVICE_ATTR(adock, S_IRUGO | S_IWUSR, adock_show, adock_store);
+static DEVICE_ATTR(boot_completed, S_IRUGO | S_IWUSR, boot_completed_show, boot_completed_store);
+#endif
+
 
 static struct device_attribute *android_usb_attributes[] = {
 	&dev_attr_idVendor,
@@ -3726,11 +4751,116 @@ static struct device_attribute *android_usb_attributes[] = {
 	&dev_attr_pm_qos_state,
 	&dev_attr_state,
 	&dev_attr_remote_wakeup,
+#ifdef CONFIG_LGE_USB_FACTORY
+	&dev_attr_lock,
+#endif
+#ifdef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
+	&dev_attr_config_num,
+#endif
+#ifdef CONFIG_MACH_MSM8917_B6_LGU_KR
+	&dev_attr_adock,
+	&dev_attr_boot_completed,
+#endif
 	NULL
 };
 
 /*-------------------------------------------------------------------------*/
 /* Composite driver */
+
+#ifdef CONFIG_LGE_USB_FACTORY
+static void android_lge_factory_bind(struct usb_composite_dev *cdev)
+{
+	struct android_dev *dev = cdev_to_android_dev(cdev);
+	struct list_head *curr_conf = &dev->configs;
+	struct android_configuration *conf;
+	struct android_usb_function_holder *f_holder;
+	char lge_factory_composition[256];
+	char *conf_str;
+	char *name, *b;
+	int ret, err, value;
+
+	/* update values in composite driver's copy of device descriptor */
+	value = lgeusb_get_vendor_id();
+	if (value < 0)
+		value = LGE_PIF_VID;
+	device_desc.idVendor = value;
+
+	value = lgeusb_get_factory_pid();
+	if (value < 0)
+		value = LGE_PIF_PID;
+	device_desc.idProduct = value;
+
+	value = lgeusb_get_serial_number();
+	if (value < 0)
+		value = LGE_PIF_SN;
+	device_desc.iSerialNumber = value;
+
+	/*XXX: should we create sysfs with below 3 field? */
+	device_desc.bDeviceClass = 2;
+	device_desc.bDeviceSubClass = 0;
+	device_desc.bDeviceProtocol = 0;
+
+	cdev->desc.idVendor = device_desc.idVendor;
+	cdev->desc.idProduct = device_desc.idProduct;
+	cdev->desc.bcdDevice = device_desc.bcdDevice;
+	cdev->desc.bDeviceClass = device_desc.bDeviceClass;
+	cdev->desc.bDeviceSubClass = device_desc.bDeviceSubClass;
+	cdev->desc.bDeviceProtocol = device_desc.bDeviceProtocol;
+
+	/*XXX: modem & diag specific configuration */
+	strlcpy(acm_transports, "tty", sizeof(acm_transports));
+	strlcpy(diag_clients, "diag", sizeof(diag_clients));
+
+	/* Clear previous enabled list */
+	list_for_each_entry(conf, &dev->configs, list_item) {
+		while (conf->enabled_functions.next !=
+				&conf->enabled_functions) {
+			f_holder = list_entry(conf->enabled_functions.next,
+					typeof(*f_holder),
+					enabled_list);
+			f_holder->f->android_dev = NULL;
+			list_del(&f_holder->enabled_list);
+			kfree(f_holder);
+		}
+		INIT_LIST_HEAD(&conf->enabled_functions);
+	}
+
+	ret = lgeusb_get_factory_composition(lge_factory_composition);
+	if (ret)
+		strlcpy(lge_factory_composition, "acm,diag",
+				sizeof(lge_factory_composition) - 1);
+	if (lge_get_laf_mode()) {
+		strlcpy(lge_factory_composition, "acm,laf",
+				sizeof(lge_factory_composition) - 1);
+	}
+
+	b = strim(lge_factory_composition);
+	while (b) {
+		conf_str = strsep(&b, ":");
+		if (conf_str) {
+			/* If the next not equal to the head, take it */
+			if (curr_conf->next != &dev->configs)
+				conf = list_entry(curr_conf->next,
+						struct android_configuration,
+						list_item);
+			else
+				conf = alloc_android_config(dev);
+
+			curr_conf = curr_conf->next;
+		}
+
+		while (conf_str) {
+			name = strsep(&conf_str, ",");
+			if (name) {
+				err = android_enable_function(dev, conf, name);
+				if (err)
+					pr_err("android_usb: Cannot enable %s",
+							name);
+			}
+		}
+	}
+}
+#endif /* CONFIG_LGE_USB_FACTORY */
 
 static int android_bind_config(struct usb_configuration *c)
 {
@@ -3756,7 +4886,10 @@ static int android_bind(struct usb_composite_dev *cdev)
 	struct android_dev *dev;
 	struct usb_gadget	*gadget = cdev->gadget;
 	int			id, ret;
-
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	char lge_product[256];
+	char lge_manufacturer[256];
+#endif
 	/* Bind to the last android_dev that was probed */
 	dev = list_entry(android_dev_list.prev, struct android_dev, list_item);
 
@@ -3786,10 +4919,29 @@ static int android_bind(struct usb_composite_dev *cdev)
 	strings_dev[STRING_PRODUCT_IDX].id = id;
 	device_desc.iProduct = id;
 
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	/* Default string as LGE products */
+	ret = lgeusb_get_manufacturer_name(lge_manufacturer);
+	if (!ret)
+		strlcpy(manufacturer_string, lge_manufacturer,
+				sizeof(manufacturer_string) - 1);
+	else
+		strlcpy(manufacturer_string, "LG Electronics Inc.",
+				sizeof(manufacturer_string) - 1);
+
+	ret = lgeusb_get_product_name(lge_product);
+	if (!ret)
+		strlcpy(product_string, lge_product,
+				sizeof(product_string) - 1);
+	else
+	strlcpy(product_string, "LGE Android Phone",
+				sizeof(product_string) - 1);
+#else
 	/* Default strings - should be updated by userspace */
 	strlcpy(manufacturer_string, "Android",
 		sizeof(manufacturer_string) - 1);
 	strlcpy(product_string, "Android", sizeof(product_string) - 1);
+#endif
 	strlcpy(serial_string, "0123456789ABCDEF", sizeof(serial_string) - 1);
 
 	id = usb_string_id(cdev);
@@ -3800,6 +4952,22 @@ static int android_bind(struct usb_composite_dev *cdev)
 
 	dev->cdev = cdev;
 
+#ifdef CONFIG_LGE_USB_G_ANDROID
+	id = usb_string_id(cdev);
+	if (id < 0)
+		return id;
+	strings_dev[CHARGE_ONLY_STRING_IDX].id = id;
+	strlcpy(charge_only_string, "USB Charge Only Interface",
+			sizeof(charge_only_string) - 1);
+#endif
+
+#ifdef CONFIG_LGE_USB_FACTORY
+	if (dev->check_pif) {
+		pr_info("%s: pif cable is plugged, bind factory composition\n",
+						 __func__);
+		android_lge_factory_bind(cdev);
+	}
+#endif
 	/* Init the supported functions only once, on the first android_dev */
 	if (android_dev_count == 1) {
 		ret = android_init_functions(dev->functions, cdev);
@@ -3819,6 +4987,9 @@ static int android_usb_unbind(struct usb_composite_dev *cdev)
 	serial_string[0] = '0';
 	cancel_work_sync(&dev->work);
 	cancel_delayed_work_sync(&dev->pm_qos_work);
+#ifdef CONFIG_MACH_MSM8917_B6_LGU_KR
+	cancel_delayed_work_sync(&dev->boot_work);
+#endif
 	android_cleanup_functions(dev->functions);
 	return 0;
 }
@@ -3854,10 +5025,22 @@ android_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *c)
 			f = f_holder->f;
 			if (f->ctrlrequest) {
 				value = f->ctrlrequest(f, cdev, c);
+#ifndef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
 				if (value >= 0)
 					break;
+#else
+				if (value >= 0) {
+					if (!strcmp(f->name, "mtp"))
+						goto list_exit;
+					else
+						break;
+				}
+#endif
 			}
 		}
+#ifdef CONFIG_LGE_USB_G_MULTIPLE_CONFIGURATION
+list_exit:
+#endif
 
 	/*
 	 * skip the  work when 2nd set config arrives
@@ -3865,6 +5048,12 @@ android_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *c)
 	 */
 	if (cdev->config)
 		prev_configured = true;
+
+#ifdef CONFIG_LGE_USB_G_NCM
+	if (value < 0)
+		value = ncm_ctrlrequest(cdev, c);
+#endif
+
 	/* Special case the accessory function.
 	 * It needs to handle control requests before it is enabled.
 	 */
@@ -4042,7 +5231,7 @@ static int usb_diag_update_pid_and_serial_num(u32 pid, const char *snum)
 		return -ENODEV;
 	}
 
-	pr_debug("%s: dload:%p pid:%x serial_num:%s\n",
+	pr_debug("%s: dload:%pK pid:%x serial_num:%s\n",
 				__func__, diag_dload, pid, snum);
 
 	/* update pid */
@@ -4164,7 +5353,27 @@ static int android_probe(struct platform_device *pdev)
 	INIT_LIST_HEAD(&android_dev->configs);
 	INIT_WORK(&android_dev->work, android_work);
 	INIT_DELAYED_WORK(&android_dev->pm_qos_work, android_pm_qos_work);
+#ifdef CONFIG_MACH_MSM8917_B6_LGU_KR
+	INIT_DELAYED_WORK(&android_dev->boot_work, boot_complete_work);
+#endif
 	mutex_init(&android_dev->mutex);
+
+#ifdef CONFIG_LGE_USB_FACTORY
+	if (lgeusb_get_factory_cable()) {
+		android_dev->check_pif = true;
+
+		switch (lge_get_boot_mode()) {
+		case LGE_BOOT_MODE_QEM_56K:
+		case LGE_BOOT_MODE_QEM_130K:
+		case LGE_BOOT_MODE_QEM_910K:
+			android_dev->check_qem = true;
+			break;
+
+		default:
+			break;
+		}
+	}
+#endif
 
 	android_dev->pdata = pdata;
 

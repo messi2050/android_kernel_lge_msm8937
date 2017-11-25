@@ -1,0 +1,43 @@
+#
+# LGE touch core configuration
+#
+
+if INPUT_TOUCHSCREEN
+
+menuconfig LGE_TOUCH_SYNAPTICS_S3330
+	bool "LGE Touch Core ODM Device Driver - Synaptics(s3330)"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device is synaptics(s3330), say Y
+
+menuconfig LGE_TOUCH_SYNAPTICS_S3330_LV9
+	bool "LGE Touch Core ODM Device Driver - Synaptics(LV9 - s3330)"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device is synaptics(s3330), say Y
+
+menuconfig LGE_TOUCH_SYNAPTICS_TD4100
+	bool "LGE Touch Core ODM Device Driver - Synaptics(td4100)"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device is synaptics(td4100), say Y
+
+menuconfig LGE_TOUCH_TOVIS_SYNAPTICS_TD4100
+	bool "LGE Touch Core ODM Device Driver - Tovis & Synaptics(td4100)"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device is synaptics(td4100), say Y
+
+menuconfig LGE_TOUCH_SYNAPTICS_TD4310
+	bool "LGE Touch Core ODM Device Driver - Synaptics(td4310)"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device is synaptics(td4310), say Y
+
+menuconfig LGE_TOUCH_TOVIS_PANEL
+	bool "LGE Touch Core ODM Device Driver - Tovis panel"
+	depends on LGE_TOUCH_CORE_BASE
+	help
+	  If your device panel is tovis, say Y
+
+endif

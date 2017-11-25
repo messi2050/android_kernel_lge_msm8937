@@ -294,7 +294,6 @@
 #define dsi1_0phypll_source_val         3   /* byte0_clk & pclk0_clk */
 #define dsi1_1phypll_source_val         1   /* byte1_clk & pclk1_clk */
 
-
 #define F(f, s, div, m, n) \
 	{ \
 		.freq_hz = (f), \

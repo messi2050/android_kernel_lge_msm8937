@@ -1,0 +1,116 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+ &i2c_3 { /* BLSP1 QUP3 */
+	status = "ok";
+	sharp_lr388k6@18 {
+		compatible = "sharp,lr388k6";
+		status = "disable";
+
+		reg = <0x18>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0x2001>; // ONESHOT HIGH
+
+		pinctrl-names = "touch_pin_active","touch_pin_sleep";	/*Touch GPIO pin name setting*/
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;		/*Touch GPIO pin active setting*/
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;	/*Touch GPIO pin suspend setting*/
+
+		reset-gpio = <&tlmm 64 0x0>;
+		irq-gpio = <&tlmm 65 0x2001>;
+		vdd-gpio = <&tlmm 3 0x0>;
+		vio-gpio = <&tlmm 46 0x0>;
+
+		irqflags = <0x2002>;
+
+		hw_reset_delay = <0>;
+
+		/*Caps*/
+		max_x = <1080>;
+		max_y = <1920>;
+		max_pressure = <0xff>;
+		max_width = <15>;
+		max_orientation = <1>;
+		max_id = <10>;
+	};
+
+	synaptics_s3330@20 {
+		compatible = "synaptics,s3330";
+		status = "disable";
+
+		reg = <0x20>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0x2008>;
+
+		pinctrl-names = "touch_pin_active","touch_pin_sleep";	/*Touch GPIO pin name setting*/
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;		/*Touch GPIO pin active setting*/
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;	/*Touch GPIO pin suspend setting*/
+
+		reset-gpio = <&tlmm 64 0x0>;
+		irq-gpio = <&tlmm 65 0x2008>;
+		vdd-gpio = <&tlmm 3 0x0>;
+		vio-gpio = <&tlmm 46 0x0>;
+
+		irqflags = <0x2002>;
+
+		hw_reset_delay = <80>;
+		use_lpwg = <1>;
+		hide_coordinate = <1>;
+
+		/*Caps*/
+		max_x = <1080>;
+		max_y = <1920>;
+		max_pressure = <0xff>;
+		max_width = <15>;
+		max_orientation = <1>;
+		max_id = <10>;
+
+		/* Role */
+		use_lpwg_test = <1>;
+		use_fw_upgrade = <1>;
+
+		/* firmware & panel_spec path */
+		fw_image = "touch/ph2/synaptics/PLG591-V1.07-PR2486757-DS5.2.20.1.1052_40057187.img";
+		panel_spec = "touch/ph2/synaptics/ph2_limit.txt";
+		panel_spec_mfts_folder = "touch/ph2/synaptics/ph2_limit_mfts.txt";
+	};
+
+	melfas_mit300@34 {
+		compatible = "unified_driver4,mit300";
+		status = "disable";
+
+		reg = <0x34>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0x2>;
+
+		pinctrl-names = "touch_pin_active","touch_pin_sleep";	/*Touch GPIO pin name setting*/
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;		/*Touch GPIO pin active setting*/
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;	/*Touch GPIO pin suspend setting*/
+
+		reset-gpio = <&tlmm 64 0x0>;
+		irq-gpio = <&tlmm 65 0x2001>;
+		vdd-gpio = <&tlmm 3 0x0>;
+		vio-gpio = <&tlmm 46 0x0>;
+
+		irqflags = <0x2002>;
+
+		hw_reset_delay = <0>;
+
+		/*Caps*/
+		max_x = <1080>;
+		max_y = <1920>;
+		max_pressure = <0xff>;
+		max_width = <15>;
+		max_orientation = <1>;
+		max_id = <10>;
+	};
+};

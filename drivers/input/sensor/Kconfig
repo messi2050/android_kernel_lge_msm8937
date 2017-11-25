@@ -1,0 +1,28 @@
+#
+# Input misc drivers configuration
+#
+menuconfig INPUT_SENSOR
+	bool "Sensor devices"
+	help
+	  Say Y here, and a list of Sensor input drivers will be displayed.
+	  Everything that didn't fit into the other categories is here. This option
+	  doesn't affect the kernel.
+
+	  If unsure, say Y.
+
+config SENSOR_ATMF04
+       bool "ATMF04 support"
+       depends on I2C
+       help
+         Support ATMF04 as an input device.
+
+config LGE_USE_CAP_SENSOR
+       bool "Capsensor device"
+       help
+         Support Capsensor for this model.
+
+config SENSOR_ATMF04_2ND
+       bool "Secondary ATMF04 support"
+       depends on I2C
+       help
+         Support Secondary ATMF04 as an input device.

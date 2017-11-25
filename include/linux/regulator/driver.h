@@ -189,6 +189,11 @@ struct regulator_ops {
 
 	/* set regulator suspend operating mode (defined in consumer.h) */
 	int (*set_suspend_mode) (struct regulator_dev *, unsigned int mode);
+
+#if IS_ENABLED(CONFIG_LGE_MIPI_DSI_LGD_K7J_FHD_VIDEO_INCELL_LCD_PANEL)
+	/* enable/disable ttw */
+	int (*ctrl_ttw_mode) (struct regulator_dev *, int enable);
+#endif
 };
 
 /*

@@ -20,6 +20,12 @@
 #define LP55XX_CLOCK_INT	1
 #define LP55XX_CLOCK_EXT	2
 
+#if IS_ENABLED(CONFIG_LGE_LEDS_LP5523)
+#define LP5523_NUM_ENGINE 3
+#define LP5523_NUM_INST_MEM 192  // 96 instrcuion * 2byte
+#define LP5523_MAX_LEDS	9
+#endif
+
 struct lp55xx_led_config {
 	const char *name;
 	const char *default_trigger;
@@ -28,6 +34,13 @@ struct lp55xx_led_config {
 	u8 max_current;
 };
 
+#if IS_ENABLED(CONFIG_LGE_LEDS_LP5523)
+struct lp5523_predef_pattern {
+	u8 pattern_idx;
+	u8 *hex_of_pattern;
+	u8 *start_addr;
+};
+#else
 struct lp55xx_predef_pattern {
 	const u8 *r;
 	const u8 *g;
@@ -36,6 +49,7 @@ struct lp55xx_predef_pattern {
 	u8 size_g;
 	u8 size_b;
 };
+#endif
 
 enum lp8501_pwr_sel {
 	LP8501_ALL_VDD,		/* D1~9 are connected to VDD */
@@ -71,11 +85,21 @@ struct lp55xx_platform_data {
 	int enable_gpio;
 
 	/* Predefined pattern data */
+#if IS_ENABLED(CONFIG_LGE_LEDS_LP5523)
+	struct lp5523_predef_pattern **patterns;
+	u8 pattern_play_id;
+	u8 is_enabled;
+	u8* channels_of_each_led;
+#else
 	struct lp55xx_predef_pattern *patterns;
+#endif
 	unsigned int num_patterns;
 
 	/* LP8501 specific */
 	enum lp8501_pwr_sel pwr_sel;
+
+	/* GPIO number for INT pin*/
+	int irq_gpio;
 };
 
 #endif /* _LEDS_LP55XX_H */

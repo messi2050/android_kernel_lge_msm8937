@@ -1,0 +1,46 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/dts-v1/;
+
+#include "../../qcom/msm8937.dtsi"
+#include "../../qcom/msm-pmi8950.dtsi"
+#include "../msm8937-lge-common/msm8937-lge.dtsi"
+#include "msm8937-ph2_cmo_cn.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. MSM8937-PMI8950 MTP";
+	compatible = "qcom,msm8937-mtp", "qcom,msm8937", "qcom,mtp";
+	qcom,board-id= <0x160 0>;
+	qcom,pmic-id = <0x10019 0x010011 0x0 0x0>;
+};
+
+&cci {
+	qcom,camera@1 {
+		cam_vana-supply = <&pm8937_l22>;
+		qcom,cam-vreg-name = "cam_vdig", "cam_vana";
+		qcom,cam-vreg-min-voltage = <1200000 2850000>;
+		qcom,cam-vreg-max-voltage = <1200000 2850000>;
+		qcom,cam-vreg-op-mode = <300000 300000>;
+		gpios = <&tlmm 27 0>,
+			<&tlmm 40 0>,
+			<&pm8937_gpios 7 0>;
+		qcom,gpio-reset = <1>;
+		qcom,gpio-vio = <2>;
+		qcom,gpio-req-tbl-num = <0 1 2>;
+		qcom,gpio-req-tbl-flags = <1 0 0>;
+		qcom,gpio-req-tbl-label = "CAMIF_MCLK1",
+			"CAM_RESET1",
+			"CAM_VIO1";
+	};
+};

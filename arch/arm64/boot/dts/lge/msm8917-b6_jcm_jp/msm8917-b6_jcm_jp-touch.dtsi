@@ -1,0 +1,51 @@
+/*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+
+&i2c_3 { /* BLSP1 QUP3 */
+	qcom,clk-freq-out = <400000>;
+
+	atmel_t1066@4a {
+		compatible = "atmel,t1066";
+		status = "ok";
+		reg = <0x4a>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0x2>;							/*interrupt pin number*/
+
+		pinctrl-names = "pmx_ts_active","pmx_ts_suspend";       /*Touch GPIO pin name setting*/
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;          /*Touch GPIO pin active setting*/
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;        /*Touch GPIO pin suspend setting*/
+
+		atmel,avdd-gpio = <&tlmm 3 0x00>;
+		atmel,dvdd-gpio = <&tlmm 61 0x00>;
+		atmel,vio-gpio = <&tlmm 128 0x00>;
+		atmel,reset-gpio = <&tlmm 64 0x00>;
+		atmel,irq-gpio = <&tlmm 65 0x00>;
+		atmel,numtouch = <10>;							/*multi-touch count*/
+		atmel,irqflags = <0x00000002>;
+		atmel,t15_num_keys = <0>;
+		atmel,fw_name = "atmel/b6/B6J_v0.08.fw";
+		atmel,knock_on_type = <1>;
+		atmel,global_access_pixel = <0>;
+		atmel,use_mfts = <1>; // Enable for CoF type only
+		atmel,lcd_x = <800>;
+		atmel,lcd_y = <1280>;
+		atmel,butt_check_enable = <0>;
+		atmel,use_debug_reason = <1>;
+		atmel,use_lpwg_test = <1>;
+		atmel,hide_coordinate = <1>;
+	};
+
+};
+
+

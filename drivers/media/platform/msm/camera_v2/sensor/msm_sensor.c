@@ -132,6 +132,7 @@ int msm_sensor_power_down(struct msm_sensor_ctrl_t *s_ctrl)
 			__func__, __LINE__, power_info, sensor_i2c_client);
 		return -EINVAL;
 	}
+    pr_err("%s for %s\n", __func__, s_ctrl->sensordata->sensor_name);
 	return msm_camera_power_down(power_info, sensor_device_type,
 		sensor_i2c_client);
 }
@@ -185,7 +186,7 @@ int msm_sensor_power_up(struct msm_sensor_ctrl_t *s_ctrl)
 			break;
 		}
 	}
-
+    pr_err("%s for %s\n", __func__, s_ctrl->sensordata->sensor_name);
 	return rc;
 }
 
@@ -240,8 +241,8 @@ int msm_sensor_match_id(struct msm_sensor_ctrl_t *s_ctrl)
 		return rc;
 	}
 
-	pr_debug("%s: read id: 0x%x expected id 0x%x:\n",
-			__func__, chipid, slave_info->sensor_id);
+	pr_err("%s: read id: 0x%x expected id 0x%x:\n",
+			__func__, chipid, slave_info->sensor_id); //LGE_UPDATE
 	if (msm_sensor_id_by_mask(s_ctrl, chipid) != slave_info->sensor_id) {
 		pr_err("%s chip id %x does not match %x\n",
 				__func__, chipid, slave_info->sensor_id);

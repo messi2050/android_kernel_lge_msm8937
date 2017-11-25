@@ -1,0 +1,92 @@
+/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
+*
+* This program is free software; you can redistribute it and/or modify
+*it under the terms of the GNU General Public License version 2 and
+* only version 2 as published by the Free Software Foundation.
+*
+* This program is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    * GNU General Public License for more details.
+    */
+/ {
+	aliases {
+		i2c6 = &i2c_6;
+	};
+};
+
+&soc {
+	i2c_6: i2c@7af6000 { /* BLSP2 QUP2 */
+		compatible = "qcom,i2c-msm-v2";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "qup_phys_addr";
+		reg = <0x7af6000 0x600>;
+		interrupt-names = "qup_irq";
+		interrupts = <0 300 0>;
+		//qcom,clk-freq-out = <400000>;
+		qcom,clk-freq-out = <100000>; // I2C writing issue for cap sensor
+		qcom,clk-freq-in  = <19200000>;
+		clock-names = "iface_clk", "core_clk";
+		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
+			 <&clock_gcc clk_gcc_blsp2_qup2_i2c_apps_clk>;
+
+		pinctrl-names = "i2c_active", "i2c_sleep";
+		pinctrl-0 = <&i2c_6_active>;
+		pinctrl-1 = <&i2c_6_sleep>;
+		qcom,noise-rjct-scl = <0>;
+		qcom,noise-rjct-sda = <0>;
+		qcom,master-id = <84>;
+		dmas = <&dma_blsp2 6 64 0x20000020 0x20>,
+			<&dma_blsp2 7 32 0x20000020 0x20>;
+		dma-names = "tx", "rx";
+	};
+};
+
+&i2c_5 {
+	qcom,clk-freq-out = <100000>; // I2C writing issue for cap sensor
+	qcom,clk-freq-in  = <19200000>;
+	adsemicon_atmf04@5a {
+			//revision = "rev_b...";
+			compatible = "adsemicon,atmf04";
+			status = "ok";
+			reg = <0x5a>;
+			interrupt-parent = <&tlmm>;
+			interrupts = <17 0x2>;
+			pinctrl-names = "default", "sleep";
+			pinctrl-0 = <&atmf04_int_active>;
+			pinctrl-1 = <&atmf04_int_suspend>;
+			Adsemicon,vdd_ana-supply = <&pm8937_l15>;
+			Adsemicon,irq-gpio = <&tlmm 17 0x00>;	/* Interrupt Pin */
+			Adsemicon,vdd_ana_supply_min = <1800000>;
+			Adsemicon,vdd_ana_supply_max = <1800000>;
+			Adsemicon,vdd_ana_load_ua = <15000>;
+			Adsemicon,chip_enable = <&tlmm 16 0x00>;  /* enable pin */
+			Adsemicon,chip_enable2 = <&tlmm 126 0x00>;  /* enable pin - to control 2ND */
+			Adsemicon,InputPinsNum = <1>;
+			Adsemicon,fw_name = "atmf04/atmf04_V0.66.fw";
+		};
+};
+
+&i2c_6 {
+  	adsemicon_atmf04@5a {
+			//revision = "rev_b...";
+			compatible = "adsemicon,atmf04_2nd";
+			status = "ok";
+			reg = <0x5a>;
+			interrupt-parent = <&tlmm>;
+			interrupts = <127 0x2>;
+			pinctrl-names = "default", "sleep";
+			pinctrl-0 = <&atmf04_2nd_int_active>;
+			pinctrl-1 = <&atmf04_2nd_int_suspend>;
+			Adsemicon,vdd_ana-supply = <&pm8937_l15>;
+			Adsemicon,irq-gpio = <&tlmm 127 0x00>;	/* Interrupt Pin */
+			Adsemicon,vdd_ana_supply_min = <1800000>;
+			Adsemicon,vdd_ana_supply_max = <1800000>;
+			Adsemicon,vdd_ana_load_ua = <15000>;
+			Adsemicon,chip_enable = <&tlmm 126 0x00>;  /* enable pin */
+			Adsemicon,InputPinsNum = <1>;
+			Adsemicon,fw_name = "atmf04/atmf04_V0.66.fw";
+		};
+};
+

@@ -282,6 +282,9 @@ struct msm_fb_data_type {
 
 	u32 dst_format;
 	int panel_power_state;
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_COMMON)
+	int panel_shutdown_state;
+#endif
 	struct disp_info_type_suspend suspend;
 
 	struct dma_buf *dbuf;
@@ -450,4 +453,27 @@ u32 mdss_fb_get_mode_switch(struct msm_fb_data_type *mfd);
 void mdss_fb_report_panel_dead(struct msm_fb_data_type *mfd);
 void mdss_panelinfo_to_fb_var(struct mdss_panel_info *pinfo,
 						struct fb_var_screeninfo *var);
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_RECOVERY_ESD)
+enum {
+	ESDRC_OK = 0,
+	ESDRC_LCD_OFF,
+	ESDRC_UNBLANK_TIMEOUT,
+};
+int lge_mdss_report_panel_dead(void);
+
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_WITH_QCT_ESD)
+extern void init_esd_status(void);
+extern void set_esd_status(int esd_detection);
+extern int get_esd_status(void);
+#endif
+#endif
+#if IS_ENABLED(CONFIG_LGE_LCD_ESD_PANEL_POWER_RECOVERY)
+enum esd_state_flag {
+	ESD_OK = 0,
+	ESD_NOK,
+	ESD_POWEROFF_PENDING,
+};
+extern int get_esd_power_recovery(void);
+extern void set_esd_power_recovery(int esd_detection);
+#endif
 #endif /* MDSS_FB_H */

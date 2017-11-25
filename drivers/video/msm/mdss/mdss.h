@@ -161,6 +161,7 @@ enum mdss_hw_quirk {
 	MDSS_QUIRK_FMT_PACK_PATTERN,
 	MDSS_QUIRK_NEED_SECURE_MAP,
 	MDSS_QUIRK_SRC_SPLIT_ALWAYS,
+	MDSS_QUIRK_HDR_SUPPORT_ENABLED,
 	MDSS_QUIRK_MAX,
 };
 
@@ -504,6 +505,15 @@ struct mdss_data_type {
 	u32 bcolor0;
 	u32 bcolor1;
 	u32 bcolor2;
+#ifdef CONFIG_LGE_DISPLAY_P2S_VSYNC_SKIP
+	char enable_skip_vsync;
+	ulong skip_value;
+	ulong weight;
+	ulong bucket;
+	ulong skip_count;
+	int skip_ratio;
+	bool skip_first;
+#endif
 	struct mdss_scaler_block *scaler_off;
 };
 

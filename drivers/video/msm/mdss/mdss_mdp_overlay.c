@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -37,6 +37,10 @@
 #include "mdss_smmu.h"
 #include "mdss_mdp_wfd.h"
 #include "mdss_dsi_clk.h"
+
+#if defined(CONFIG_TOUCHSCREEN_UNIFIED_DRIVER_3) && defined(CONFIG_LGE_DYNAMIC_FPS)
+#include <linux/input/unified_driver_3/lgtp_common_notify.h>
+#endif
 
 #define VSYNC_PERIOD 16
 #define BORDERFILL_NDX	0x0BF000BF
@@ -1456,6 +1460,21 @@ static void mdss_mdp_overlay_update_pm(struct mdss_overlay_private *mdp5_data)
 	activate_event_timer(mdp5_data->cpu_pm_hdl, wakeup_time);
 }
 
+static void __unstage_pipe_and_clean_buf(struct msm_fb_data_type *mfd,
+		struct mdss_mdp_pipe *pipe, struct mdss_mdp_data *buf)
+{
+
+	pr_debug("unstaging pipe:%d rect:%d buf:%d\n",
+			pipe->num, pipe->multirect.num, !buf);
+	MDSS_XLOG(pipe->num, pipe->multirect.num, !buf);
+	mdss_mdp_mixer_pipe_unstage(pipe, pipe->mixer_left);
+	mdss_mdp_mixer_pipe_unstage(pipe, pipe->mixer_right);
+	pipe->dirty = true;
+
+	if (buf)
+		__pipe_buf_mark_cleanup(mfd, buf);
+}
+
 static int __overlay_queue_pipes(struct msm_fb_data_type *mfd)
 {
 	struct mdss_overlay_private *mdp5_data = mfd_to_mdp5_data(mfd);
@@ -1567,7 +1586,6 @@ static int __overlay_queue_pipes(struct msm_fb_data_type *mfd)
 				pipe->num);
 			ret = -EINVAL;
 		}
-
 		/*
 		 * if we reach here without errors and buf == NULL
 		 * then solid fill will be set
@@ -1576,14 +1594,36 @@ static int __overlay_queue_pipes(struct msm_fb_data_type *mfd)
 			ret = mdss_mdp_pipe_queue_data(pipe, buf);
 
 		if (IS_ERR_VALUE(ret)) {
-			pr_warn("Unable to queue data for pnum=%d\n",
-					pipe->num);
-			mdss_mdp_mixer_pipe_unstage(pipe, pipe->mixer_left);
-			mdss_mdp_mixer_pipe_unstage(pipe, pipe->mixer_right);
-			pipe->dirty = true;
+			pr_warn("Unable to queue data for pnum=%d rect=%d\n",
+					pipe->num, pipe->multirect.num);
 
-			if (buf)
-				__pipe_buf_mark_cleanup(mfd, buf);
+			/*
+			 * If we fail for a multi-rect pipe, unstage both rects
+			 * so we don't leave the pipe configured in multi-rect
+			 * mode with only one rectangle staged.
+			 */
+			if (pipe->multirect.mode !=
+					MDSS_MDP_PIPE_MULTIRECT_NONE) {
+				struct mdss_mdp_pipe *next_pipe =
+					(struct mdss_mdp_pipe *)
+					pipe->multirect.next;
+
+				if (next_pipe) {
+					struct mdss_mdp_data *next_buf =
+						list_first_entry_or_null(
+							&next_pipe->buf_queue,
+							struct mdss_mdp_data,
+							pipe_list);
+
+					__unstage_pipe_and_clean_buf(mfd,
+							next_pipe, next_buf);
+				} else {
+					pr_warn("cannot find rect pnum=%d\n",
+							pipe->num);
+				}
+			}
+
+			__unstage_pipe_and_clean_buf(mfd, pipe, buf);
 		}
 	}
 
@@ -1959,6 +1999,42 @@ set_roi:
 	mdss_mdp_set_roi(ctl, &l_roi, &r_roi);
 }
 
+static int __config_secure_display(struct mdss_overlay_private *mdp5_data)
+{
+	int panel_type = mdp5_data->ctl->panel_data->panel_info.type;
+	int sd_enable = -1; /* Since 0 is a valid state, initialize with -1 */
+	int ret = 0;
+
+	if (panel_type == MIPI_CMD_PANEL)
+		mdss_mdp_display_wait4pingpong(mdp5_data->ctl, true);
+
+	/*
+	 * Start secure display session if we are transitioning from non secure
+	 * to secure display.
+	 */
+	if (mdp5_data->sd_transition_state ==
+			SD_TRANSITION_NON_SECURE_TO_SECURE)
+		sd_enable = 1;
+
+	/*
+	 * For command mode panels, if we are trasitioning from secure to
+	 * non secure session, disable the secure display, as we've already
+	 * waited for the previous frame transfer.
+	 */
+	if ((panel_type == MIPI_CMD_PANEL) &&
+			(mdp5_data->sd_transition_state ==
+			 SD_TRANSITION_SECURE_TO_NON_SECURE))
+		sd_enable = 0;
+
+	if (sd_enable != -1) {
+		ret = mdss_mdp_secure_display_ctrl(mdp5_data->mdata, sd_enable);
+		if (!ret)
+			mdp5_data->sd_enabled = sd_enable;
+	}
+
+	return ret;
+}
+
 int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
 				struct mdp_display_commit *data)
 {
@@ -1966,10 +2042,10 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
 	struct mdss_mdp_pipe *pipe, *tmp;
 	struct mdss_mdp_ctl *ctl = mfd_to_ctl(mfd);
 	int ret = 0;
-	int sd_in_pipe = 0;
 	struct mdss_mdp_commit_cb commit_cb;
+	u8 sd_transition_state = 0;
 
-	if (!ctl)
+	if (!ctl || !ctl->mixer_left)
 		return -ENODEV;
 
 	ATRACE_BEGIN(__func__);
@@ -1999,30 +2075,6 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
 	}
 	mutex_lock(&mdp5_data->list_lock);
 
-	/*
-	 * check if there is a secure display session
-	 */
-	list_for_each_entry(pipe, &mdp5_data->pipes_used, list) {
-		if (pipe->flags & MDP_SECURE_DISPLAY_OVERLAY_SESSION) {
-			sd_in_pipe = 1;
-			pr_debug("Secure pipe: %u : %08X\n",
-					pipe->num, pipe->flags);
-		}
-	}
-
-	/*
-	 * start secure display session if there is secure display session and
-	 * sd_enabled is not true.
-	 */
-	if (!mdp5_data->sd_enabled && sd_in_pipe) {
-		if (!mdss_get_sd_client_cnt())
-			ret = mdss_mdp_secure_display_ctrl(1);
-		if (!ret) {
-			mdp5_data->sd_enabled = 1;
-			mdss_update_sd_client(mdp5_data->mdata, true);
-		}
-	}
-
 	if (!ctl->shared_lock)
 		mdss_mdp_ctl_notify(ctl, MDP_NOTIFY_FRAME_BEGIN);
 
@@ -2034,6 +2086,15 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
 
 	if (ctl->ops.wait_pingpong && mdp5_data->mdata->serialize_wait4pp)
 		mdss_mdp_display_wait4pingpong(ctl, true);
+
+	sd_transition_state = mdp5_data->sd_transition_state;
+	if (sd_transition_state != SD_TRANSITION_NONE) {
+		ret = __config_secure_display(mdp5_data);
+		if (IS_ERR_VALUE(ret)) {
+			pr_err("Secure session config failed\n");
+			goto commit_fail;
+		}
+	}
 
 	/*
 	 * Setup pipe in solid fill before unstaging,
@@ -2111,17 +2172,14 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
 
 	mutex_lock(&mdp5_data->ov_lock);
 	/*
-	 * If there is no secure display session and sd_enabled, disable the
-	 * secure display session
+	 * If we are transitioning from secure to non-secure display,
+	 * disable the secure display.
 	 */
-	if (mdp5_data->sd_enabled && !sd_in_pipe && !ret) {
-		/* disable the secure display on last client */
-		if (mdss_get_sd_client_cnt() == 1)
-			ret = mdss_mdp_secure_display_ctrl(0);
-		if (!ret) {
-			mdss_update_sd_client(mdp5_data->mdata, false);
+	if (mdp5_data->sd_enabled && (sd_transition_state ==
+			SD_TRANSITION_SECURE_TO_NON_SECURE)) {
+		ret = mdss_mdp_secure_display_ctrl(mdp5_data->mdata, 0);
+		if (!ret)
 			mdp5_data->sd_enabled = 0;
-		}
 	}
 
 	mdss_fb_update_notify_update(mfd);
@@ -2670,6 +2728,9 @@ static void mdss_mdp_overlay_handle_vsync(struct mdss_mdp_ctl *ctl,
 {
 	struct msm_fb_data_type *mfd = NULL;
 	struct mdss_overlay_private *mdp5_data = NULL;
+#ifdef CONFIG_LGE_DISPLAY_P2S_VSYNC_SKIP
+	struct mdss_data_type *mdata = NULL;
+#endif
 
 	if (!ctl) {
 		pr_err("ctl is NULL\n");
@@ -2688,10 +2749,44 @@ static void mdss_mdp_overlay_handle_vsync(struct mdss_mdp_ctl *ctl,
 		return;
 	}
 
+#ifdef CONFIG_LGE_DISPLAY_P2S_VSYNC_SKIP
+	mdata = mfd_to_mdata(mfd);
+	if (!mdata) {
+		pr_err("mdata is NULL\n");
+		return;
+	}
+
+	if (mdata->enable_skip_vsync) {
+		mdata->bucket += mdata->weight;
+		if (mdata->skip_first == false) {
+			mdata->skip_first = true;
+
+			pr_debug("vsync on fb%d play_cnt=%d\n", mfd->index, ctl->play_cnt);
+
+			mdp5_data->vsync_time = t;
+			sysfs_notify_dirent(mdp5_data->vsync_event_sd);
+		} else {
+			if (mdata->skip_value <= mdata->bucket) {
+				pr_debug("vsync on fb%d play_cnt=%d\n", mfd->index, ctl->play_cnt);
+				mdp5_data->vsync_time = t;
+				sysfs_notify_dirent(mdp5_data->vsync_event_sd);
+				mdata->bucket -= mdata->skip_value;
+			} else {
+				mdata->skip_count++;
+			}
+		}
+	} else {
+		pr_debug("vsync on fb%d play_cnt=%d\n", mfd->index, ctl->play_cnt);
+
+		mdp5_data->vsync_time = t;
+		sysfs_notify_dirent(mdp5_data->vsync_event_sd);
+	}
+#else /* qct original */
 	pr_debug("vsync on fb%d play_cnt=%d\n", mfd->index, ctl->play_cnt);
 
 	mdp5_data->vsync_time = t;
 	sysfs_notify_dirent(mdp5_data->vsync_event_sd);
+#endif
 }
 
 /* function is called in irq context should have minimum processing */
@@ -3032,6 +3127,9 @@ static ssize_t dynamic_fps_sysfs_wta_dfps(struct device *dev,
 		pr_err("failed to set dfps params\n");
 		return rc;
 	}
+#if defined(CONFIG_TOUCHSCREEN_UNIFIED_DRIVER_3) && defined(CONFIG_LGE_DYNAMIC_FPS)
+		touch_notifier_call_chain(LCD_EVENT_FPS_CHANGED,NULL);
+#endif
 
 	return count;
 } /* dynamic_fps_sysfs_wta_dfps */
@@ -3813,12 +3911,21 @@ static int mdss_mdp_hw_cursor_pipe_update(struct msm_fb_data_type *mfd,
 		start_y = 0;
 	}
 
+	if ((img->width > mdata->max_cursor_size) ||
+		(img->height > mdata->max_cursor_size) ||
+		(img->depth != 32) || (start_x >= xres) ||
+		(start_y >= yres)) {
+		pr_err("Invalid cursor image coordinates\n");
+		ret = -EINVAL;
+		goto done;
+	}
+
 	roi.w = min(xres - start_x, img->width - roi.x);
 	roi.h = min(yres - start_y, img->height - roi.y);
 
 	if ((roi.w > mdata->max_cursor_size) ||
-		(roi.h > mdata->max_cursor_size) ||
-		(img->depth != 32) || (start_x >= xres) || (start_y >= yres)) {
+		(roi.h > mdata->max_cursor_size)) {
+		pr_err("Invalid cursor ROI size\n");
 		ret = -EINVAL;
 		goto done;
 	}
@@ -3849,6 +3956,12 @@ static int mdss_mdp_hw_cursor_pipe_update(struct msm_fb_data_type *mfd,
 	req->transp_mask = img->bg_color & ~(0xff << var->transp.offset);
 
 	if (mfd->cursor_buf && (cursor->set & FB_CUR_SETIMAGE)) {
+		if (img->width * img->height * 4 > cursor_frame_size) {
+			pr_err("cursor image size is too large\n");
+			ret = -EINVAL;
+			goto done;
+		}
+
 		ret = copy_from_user(mfd->cursor_buf, img->data,
 				     img->width * img->height * 4);
 		if (ret) {

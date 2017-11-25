@@ -130,21 +130,28 @@ struct gadget_config_name {
 	struct list_head list;
 };
 
+#define MAX_USB_STRING_LEN	126
+#define MAX_USB_STRING_WITH_NULL_LEN	(MAX_USB_STRING_LEN+1)
+
 static int usb_string_copy(const char *s, char **s_copy)
 {
 	int ret;
 	char *str;
 	char *copy = *s_copy;
 	ret = strlen(s);
-	if (ret > 126)
+	if (ret > MAX_USB_STRING_LEN)
 		return -EOVERFLOW;
 
-	str = kstrdup(s, GFP_KERNEL);
-	if (!str)
-		return -ENOMEM;
+	if (copy) {
+		str = copy;
+	} else {
+		str = kmalloc(MAX_USB_STRING_WITH_NULL_LEN, GFP_KERNEL);
+		if (!str)
+			return -ENOMEM;
+	}
+	strncpy(str, s, MAX_USB_STRING_WITH_NULL_LEN);
 	if (str[ret - 1] == '\n')
 		str[ret - 1] = '\0';
-	kfree(copy);
 	*s_copy = str;
 	return 0;
 }
@@ -436,11 +443,6 @@ static int config_usb_cfg_link(
 	}
 
 	f = usb_get_function(fi);
-	if (f == NULL) {
-		/* Are we trying to symlink PTP without MTP function? */
-		ret = -EINVAL; /* Invalid Configuration */
-		goto out;
-	}
 	if (IS_ERR(f)) {
 		ret = PTR_ERR(f);
 		goto out;
@@ -1326,7 +1328,7 @@ static void purge_configs_funcs(struct gadget_info *gi)
 			list_move_tail(&f->list, &cfg->func_list);
 			if (f->unbind) {
 				dev_err(&gi->cdev.gadget->dev, "unbind function"
-						" '%s'/%p\n", f->name, f);
+						" '%s'/%pK\n", f->name, f);
 				f->unbind(c, f);
 			}
 		}
@@ -1511,7 +1513,7 @@ static void android_work(struct work_struct *data)
 	}
 
 	if (!uevent_sent) {
-		pr_info("%s: did not send uevent (%d %d %p)\n", __func__,
+		pr_info("%s: did not send uevent (%d %d %pK)\n", __func__,
 			gi->connected, gi->sw_connected, cdev->config);
 	}
 }
@@ -1782,7 +1784,9 @@ void unregister_gadget_item(struct config_item *item)
 {
 	struct gadget_info *gi = to_gadget_info(item);
 
+	mutex_lock(&gi->lock);
 	unregister_gadget(gi);
+	mutex_unlock(&gi->lock);
 }
 EXPORT_SYMBOL_GPL(unregister_gadget_item);
 

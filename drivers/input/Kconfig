@@ -162,6 +162,13 @@ config INPUT_EVBUG
 	  To compile this driver as a module, choose M here: the
 	  module will be called evbug.
 
+config INPUT_MAG_PEN
+	tristate "input_mag_pen"
+	help
+	  To compile this driver as a module, choose M here: the
+	  module will be called evbug.
+
+
 config INPUT_APMPOWER
 	tristate "Input Power Event -> APM Bridge" if EXPERT
 	depends on INPUT && APM_EMULATION
@@ -193,6 +200,15 @@ config INPUT_KEYCOMBO
 	  To compile this driver as a module, choose M here: the
 	  module will be called keycombo.
 
+config INPUT_EPACK
+	tristate "epack"
+	depends on INPUT
+	---help---
+	  Say Y here if you want to take action when some keys are pressed;
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called keycombo.
+
 comment "Input Device Drivers"
 
 source "drivers/input/keyboard/Kconfig"
@@ -206,6 +222,11 @@ source "drivers/input/tablet/Kconfig"
 source "drivers/input/touchscreen/Kconfig"
 
 source "drivers/input/misc/Kconfig"
+
+source "drivers/input/sensor/Kconfig"
+
+
+source "drivers/input/fingerprint/Kconfig"
 
 endif
 

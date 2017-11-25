@@ -138,7 +138,15 @@ static void lp55xx_set_brightness(struct led_classdev *cdev,
 			     enum led_brightness brightness)
 {
 	struct lp55xx_led *led = cdev_to_lp55xx_led(cdev);
+#if IS_ENABLED(CONFIG_LGE_LEDS_LP5523)
+	struct lp55xx_chip *chip = led->chip;
+	struct device *dev = &chip->cl->dev;
 
+	if (!led->chip->pdata->is_enabled) {
+		dev_err(dev, "device is not initialized\n");
+		return;
+	}
+#endif
 	led->brightness = (u8)brightness;
 	schedule_work(&led->brightness_work);
 }
@@ -223,7 +231,7 @@ static int lp55xx_request_firmware(struct lp55xx_chip *chip)
 	const char *name = chip->cl->name;
 	struct device *dev = &chip->cl->dev;
 
-	return request_firmware_nowait(THIS_MODULE, true, name, dev,
+	return request_firmware_nowait(THIS_MODULE, false, name, dev,
 				GFP_KERNEL, chip, lp55xx_firmware_loaded);
 }
 
@@ -399,7 +407,8 @@ int lp55xx_init_device(struct lp55xx_chip *chip)
 
 	if (gpio_is_valid(pdata->enable_gpio)) {
 		ret = devm_gpio_request_one(dev, pdata->enable_gpio,
-					    GPIOF_DIR_OUT, "lp5523_enable");
+			GPIOF_DIR_OUT, "lp5523_enable");
+
 		if (ret < 0) {
 			dev_err(dev, "could not acquire enable gpio (err=%d)\n",
 				ret);
@@ -432,7 +441,10 @@ int lp55xx_init_device(struct lp55xx_chip *chip)
 		dev_err(dev, "post init device err: %d\n", ret);
 		goto err_post_init;
 	}
-
+#if IS_ENABLED(CONFIG_LGE_LEDS_LP5523)
+	chip->pdata->is_enabled = true;
+	dev_info(dev, "device initialized\n");
+#endif
 	return 0;
 
 err_post_init:
@@ -451,6 +463,11 @@ void lp55xx_deinit_device(struct lp55xx_chip *chip)
 
 	if (gpio_is_valid(pdata->enable_gpio))
 		gpio_set_value(pdata->enable_gpio, 0);
+#if IS_ENABLED(CONFIG_LGE_LEDS_LP5523)
+	dev_info(&chip->cl->dev, "device deinitialized\n");
+	gpio_free(pdata->enable_gpio);
+	chip->pdata->is_enabled = false;
+#endif
 }
 EXPORT_SYMBOL_GPL(lp55xx_deinit_device);
 
@@ -543,7 +560,99 @@ void lp55xx_unregister_sysfs(struct lp55xx_chip *chip)
 }
 EXPORT_SYMBOL_GPL(lp55xx_unregister_sysfs);
 
-int lp55xx_of_populate_pdata(struct device *dev, struct device_node *np)
+#if IS_ENABLED(CONFIG_LGE_LEDS_LP5523)
+struct lp55xx_platform_data *lp55xx_of_populate_pattern_pdata(struct lp55xx_platform_data *pdata,
+						      struct device_node *np)
+{
+		int i, rc;
+		u8 *array, tmp;
+		char buf[256];
+		int j;
+
+		rc = of_property_read_u8(np, "lge,num-patterns", &tmp);
+		pdata->num_patterns = (!rc ? tmp : 0);
+
+		pdata->channels_of_each_led = kzalloc(sizeof(u8) * LP5523_MAX_LEDS, GFP_KERNEL);
+		if (!pdata->channels_of_each_led)
+			return ERR_PTR(-ENOMEM);
+
+		rc = of_property_read_u8_array(np,
+			"lge,current_weight", pdata->channels_of_each_led, LP5523_MAX_LEDS);
+		if (rc) {
+			pr_err("%s:%d, unable to read start_addr\n",
+					__func__, __LINE__);
+			return ERR_PTR(-ENOMEM);
+		}
+
+		if (pdata->num_patterns) {
+			pdata->pattern_play_id = 0;
+			pdata->patterns =  kzalloc(sizeof(struct lp5523_predef_pattern*) * pdata->num_patterns,
+							GFP_KERNEL);
+			if (!pdata->patterns)
+				return ERR_PTR(-ENOMEM);
+
+			for (i = 0; i < pdata->num_patterns ; i++) {
+
+				pdata->patterns[i] = kzalloc(sizeof(struct lp5523_predef_pattern)
+					, GFP_KERNEL);
+				if (!pdata->patterns[i])
+					return ERR_PTR(-ENOMEM);
+
+				snprintf(buf, sizeof(buf), "lge,pattern-idx-%d", i+1);
+				rc = of_property_read_u8(np, buf, &tmp);
+				pdata->patterns[i]->pattern_idx = (!rc ? tmp : 0);
+
+				array = kzalloc(sizeof(u8) * LP5523_NUM_ENGINE, GFP_KERNEL);
+				if (!array)
+					return ERR_PTR(-ENOMEM);
+
+				snprintf(buf, sizeof(buf), "lge,start_addr-%d", i+1);
+				rc = of_property_read_u8_array(np,
+					buf, array, LP5523_NUM_ENGINE);
+				if (rc) {
+					pr_err("%s:%d, unable to read start_addr[%d]\n",
+							__func__, __LINE__, i);
+					return ERR_PTR(-ENOMEM);
+				}
+
+				pdata->patterns[i]->start_addr = kzalloc(sizeof(u8) * LP5523_NUM_ENGINE, GFP_KERNEL);
+				if (!pdata->patterns[i]->start_addr)
+					return ERR_PTR(-ENOMEM);
+
+				for(j = 0 ; j < LP5523_NUM_ENGINE; j++) {
+					pdata->patterns[i]->start_addr[j] = array[j];
+				}
+				kfree(array);
+
+				array = kzalloc(sizeof(u8) * LP5523_NUM_INST_MEM, GFP_KERNEL);
+				if (!array)
+					return ERR_PTR(-ENOMEM);
+
+				snprintf(buf, sizeof(buf), "lge,pattern-%d", i+1);
+				rc = of_property_read_u8_array(np,
+					buf, array, LP5523_NUM_INST_MEM);
+				if (rc) {
+					pr_err("%s:%d, unable to read patterns[%d]\n",
+							__func__, __LINE__, i);
+					return ERR_PTR(-ENOMEM);
+				}
+
+				pdata->patterns[i]->hex_of_pattern = kzalloc(sizeof(u8) * LP5523_NUM_INST_MEM, GFP_KERNEL);
+				if (!pdata->patterns[i]->hex_of_pattern)
+					return ERR_PTR(-ENOMEM);
+
+				for(j = 0 ; j < LP5523_NUM_INST_MEM; j++) {
+					pdata->patterns[i]->hex_of_pattern[j] = array[j];
+				}
+				kfree(array);
+			}
+		}
+		return pdata;
+}
+#endif
+
+struct lp55xx_platform_data *lp55xx_of_populate_pdata(struct device *dev,
+						      struct device_node *np)
 {
 	struct device_node *child;
 	struct lp55xx_platform_data *pdata;
@@ -553,17 +662,17 @@ int lp55xx_of_populate_pdata(struct device *dev, struct device_node *np)
 
 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
 	if (!pdata)
-		return -ENOMEM;
+		return ERR_PTR(-ENOMEM);
 
 	num_channels = of_get_child_count(np);
 	if (num_channels == 0) {
 		dev_err(dev, "no LED channels\n");
-		return -EINVAL;
+		return ERR_PTR(-EINVAL);
 	}
 
 	cfg = devm_kzalloc(dev, sizeof(*cfg) * num_channels, GFP_KERNEL);
 	if (!cfg)
-		return -ENOMEM;
+		return ERR_PTR(-ENOMEM);
 
 	pdata->led_config = &cfg[0];
 	pdata->num_channels = num_channels;
@@ -584,13 +693,23 @@ int lp55xx_of_populate_pdata(struct device *dev, struct device_node *np)
 	of_property_read_u8(np, "clock-mode", &pdata->clock_mode);
 
 	pdata->enable_gpio = of_get_named_gpio(np, "enable-gpio", 0);
+	pdata->irq_gpio = of_get_named_gpio(np, "int-gpios", 0);
 
 	/* LP8501 specific */
 	of_property_read_u8(np, "pwr-sel", (u8 *)&pdata->pwr_sel);
+#if IS_ENABLED(CONFIG_LGE_LEDS_LP5523)
+{
+	struct lp55xx_platform_data *rpdata;
 
-	dev->platform_data = pdata;
+	rpdata = lp55xx_of_populate_pattern_pdata(pdata, np);
+	if(!rpdata) {
+		pr_err("%s: lp55xx_of_populate_pattern_pdata failed\n",__func__);
+		return ERR_PTR(-ENOMEM);
+	}
+}
+#endif
 
-	return 0;
+	return pdata;
 }
 EXPORT_SYMBOL_GPL(lp55xx_of_populate_pdata);
 

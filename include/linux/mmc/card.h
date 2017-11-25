@@ -16,6 +16,7 @@
 #include <linux/mod_devicetable.h>
 #include <linux/notifier.h>
 
+#define LGE_MMC_WP  1
 #define MMC_CARD_CMDQ_BLK_SIZE 512
 
 struct mmc_cid {
@@ -40,6 +41,9 @@ struct mmc_csd {
 	unsigned int		r2w_factor;
 	unsigned int		max_dtr;
 	unsigned int		erase_size;		/* In sectors */
+#if LGE_MMC_WP
+	unsigned int        write_protect_size; /* Write Protect Group Size in sectors */
+#endif
 	unsigned int		read_blkbits;
 	unsigned int		write_blkbits;
 	unsigned int		capacity;

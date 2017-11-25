@@ -1,0 +1,422 @@
+/* Copyright (c) 2014, Code Aurora Forum. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&mdss_mdp {
+	dsi_lgd_incell_db7400_vid: qcom,mdss_dsi_lgd_incell_db7400_hd_video {
+		compatible = "qcom,mdss-dsi-panel";
+		qcom,mdss-dsi-panel-name = "LGD DONGBU HITEK INCELL HD video mode dsi panel";
+		qcom,mdss-dsi-panel-controller = <&mdss_dsi0>;
+		qcom,mdss-dsi-panel-type = "dsi_video_mode";
+		qcom,mdss-dsi-panel-destination = "display_1";
+		qcom,mdss-dsi-panel-framerate = <60>;
+		qcom,mdss-dsi-virtual-channel-id = <0>;
+		qcom,mdss-dsi-stream = <0>;
+		qcom,mdss-dsi-lp11-init;
+
+		qcom,mdss-dsi-panel-width = <720>;
+		qcom,mdss-dsi-panel-height = <1280>;
+		qcom,mdss-dsi-h-front-porch = <72>;
+		qcom,mdss-dsi-h-back-porch = <120>;
+		qcom,mdss-dsi-h-pulse-width = <4>;
+		qcom,mdss-dsi-h-sync-skew = <0>;
+		qcom,mdss-dsi-v-back-porch = <11>;
+		qcom,mdss-dsi-v-front-porch = <580>;
+		qcom,mdss-dsi-v-pulse-width = <1>;
+
+		qcom,mdss-pan-physical-width-dimension = <71>;
+		qcom,mdss-pan-physical-height-dimension = <126>;
+
+		qcom,mdss-dsi-h-left-border = <0>;
+		qcom,mdss-dsi-h-right-border = <0>;
+		qcom,mdss-dsi-v-top-border = <0>;
+		qcom,mdss-dsi-v-bottom-border = <0>;
+		qcom,mdss-dsi-bpp = <24>;
+		qcom,mdss-dsi-color-order = "rgb_swap_rgb";
+		qcom,mdss-dsi-underflow-color = <0xff>;
+		qcom,mdss-dsi-border-color = <0>;
+
+		lge,pre-on-cmds-delay = <30>; /* min 20ms (OTP auto read) */
+
+		qcom,mdss-dsi-on-command = [
+			15 01 00 00 00 00 02 /* address_mode_set */
+			36 00
+
+			15 01 00 00 00 00 02 /* manufacturer_command_access */
+			B0 00
+
+			29 01 00 00 00 00 03 /* rgb_interface_set */
+			B1 00 30
+
+			29 01 00 00 00 00 07 /* module_characteristics_set */
+			B2 50 00 0C 00 00 00
+
+			29 01 00 00 00 00 05 /* internal_timing_set */
+			B3 4F 80 32 56
+
+			29 01 00 00 00 00 07 /* channel_control_set */
+			B4 05 04 0A 00 11 00
+
+			29 01 00 00 00 00 37 /* gip_control_set */
+			B5 19 04 1C 22 2F 80
+			2F 1F 04 40 05 05 00
+			20 09 04 40 05 05 00
+			A5 0D 2F 28 3F FF 3F
+			FF 01 7C 00 03 78 23
+			40 15 6C CB BA A9 97
+			8D 1F 23 40 15 6C CB
+			BA A9 97 8D 1F 00
+
+			29 01 00 00 00 00 03 /* touch_enable_set */
+			B6 01 01
+
+			29 01 00 00 00 00 04 /* gvddp_control_set */
+			B7 00 3C 3E
+
+			29 01 00 00 00 00 03 /* vcom_control_set */
+			BA 00 43
+
+			29 01 00 00 00 00 10 /* vghl_control_set */
+			BB 00 94 8B 00 00 00
+			00 00 00 00 00 00 00
+			00 13
+
+			29 01 00 00 00 00 03 /* sap_set */
+			BD 03 31
+
+			15 01 00 00 00 00 02 /* vci1_control_set */
+			BE 44
+
+			29 01 00 00 00 00 07 /* dsi_control_set */
+			95 00 08 10 00 00 00
+
+			29 01 00 00 00 00 03 /* mipi_parameter_set */
+			C6 08 00
+
+			29 01 00 00 00 00 02 /* add_temp_set */
+			CF 07
+
+			29 01 00 00 00 00 1B /* touch_gip_control_set */
+			D7 00 03 FF 00 00 04
+			14 CC 01 00 00 00 00
+			40 01 57 57 16 28 28
+			69 00 00 00 00 00
+
+			15 01 00 00 00 00 02 /* contrast_off */
+			83 00
+
+			39 01 00 00 00 00 2F /* color_enhancement_00 */
+			77 03 00 00 00 11 05
+			10 D1 0B 20 EE 05 20
+			B2 18 30 11 05 50 D1
+			0B 60 B2 18 70 B2 18
+			70 B2 18 70 B2 18 70
+			B2 18 70 B2 18 70 B2
+			18 70 B2 18 70
+
+			39 01 00 00 00 00 42 /* color_enhancement_01 */
+			78 25 29 FF FD E1 5F
+			91 FE DB FF FB 2D 01
+			25 81 3E 03 E0 BF 10
+			03 D8 1F 09 C3 00 1D
+			71 FF FD DB 8F 91 FE
+			77 E0 F6 2D 01 25 29
+			FF FD E1 5F 91 FE DB
+			FF FB 2D 01 25 29 FF
+			FD E1 5F 91 FE DB FF
+			FB 2D 01
+
+			39 01 00 00 00 00 42 /* color_enhancement_02 */
+			79 25 29 FF FD E1 5F
+			91 FE DB FF FB 2D 01
+			25 29 FF FD E1 5F 91
+			FE DB FF FB 2D 01 25
+			29 FF FD E1 5F 91 FE
+			DB FF FB 2D 01 25 29
+			FF FD E1 5F 91 FE DB
+			FF FB 2D 01 25 29 FF
+			FD E1 5F 91 FE DB FF
+			FB 2D 01
+
+			39 01 00 00 00 00 46 /* color_enhancement_03 */
+			7A 25 29 FF FD E1 5F
+			91 FE DB FF FB 2D 01
+			25 29 FF FD E1 5F 91
+			FE DB FF FB 2D 01 25
+			29 FF FD E1 5F 91 FE
+			DB FF FB 2D 01 25 29
+			FF FD E1 5F 91 FE DB
+			FF FB 2D 01 00 00 00
+			00 00 00 00 00 00 00
+			00 00 00 80 00 00 00
+
+			29 01 00 00 00 00 06 /* sharpness_control */
+			81 00 22 00 04 04
+
+			29 01 00 00 00 00 06 /* db_check_need */
+			F5 00 06 00 00 80
+
+			29 01 00 00 00 00 02 /* vdd1_regulator */
+			F6 06
+
+			29 01 00 00 00 00 24 /* pwr_sequence_control_set */
+			F0 18 00 00 14 00 00
+			00 01 00 03 2B 01 02
+			53 58 5D 62 A6 AB B0
+			B0 B0 AF B0 AD 85 B0
+			B0 5D 58 53 4E 0A 05
+			00
+
+			29 01 00 00 00 00 0A /* positive_gamma_red_set */
+			D0 53 04 02 03 00 00
+			42 01 02
+
+			29 01 00 00 00 00 0A /* negative_gamma_red_set */
+			D1 52 03 53 02 00 00
+			42 12 01
+
+			29 01 00 00 00 00 0A /* positive_gamma_green_set */
+			D2 42 04 62 03 00 00
+			42 01 02
+
+			29 01 00 00 00 00 0A /* negative_gamma_green_set */
+			D3 41 03 63 02 00 00
+			42 12 01
+
+			29 01 00 00 00 00 0A /* positive_gamma_blue_set */
+			D4 45 04 62 03 00 00
+			42 01 02
+
+			29 01 00 00 00 00 0A /* negative_gamma_blue_set */
+			D5 44 03 63 02 00 00
+			42 12 01
+
+			05 01 00 00 A0 00 01 /*exit sleep*/
+			11
+
+			05 01 00 00 28 00 01 /*display on*/
+			29
+		];
+		qcom,mdss-dsi-off-command = [
+			05 01 00 00 28 00 01 /*display off*/
+			28
+			05 01 00 00 28 00 01 /*Sleep in*/
+			10
+		];
+
+		lge,mdss-dsi-extra-command-names = "off2";
+		lge,mdss-dsi-extra-command-off2 = [
+			29 01 00 00 00 00 1E /*34->1C GIP Control Set*/
+			B5 19 04 1C 22 2F 80
+			2F 1F 04 40 05 05 00
+			20 09 04 40 05 05 00
+			A5 0D 2F 1F 04 00 04
+			00 00
+
+			29 01 00 00 00 00 06/*Touch LFD Control set*/
+			F5 00 06 00 00 C0
+
+			29 01 00 00 5A 00 03 /*mipi lane floating*/
+			C8 01 00
+		];
+		lge,mdss-dsi-extra-command-state-off2 = "dsi_lp_mode";
+
+		qcom,panel-reader-mode-initial-step1-command = [
+			29 01 00 00 00 00 0E /* reader mode 1 */
+			89 10 FF FF E9 00 00
+			00 FF FF DE 00 00 00
+		];
+		qcom,panel-reader-mode-initial-step2-command = [
+			29 01 00 00 00 00 0E /* reader mode 2 */
+			89 10 FF FF DE 00 00
+			00 FF FF DE 00 00 00
+		];
+		qcom,panel-reader-mode-initial-step3-command = [
+			29 01 00 00 00 00 0E /* reader mode 3 */
+			89 10 FF FF CE 00 00
+			00 FF FF DE 00 00 00
+		];
+
+		qcom,panel-reader-mode-step1-command = [
+			29 01 00 00 00 00 0E /* reader mode 1 */
+			89 10 FF FF E9 00 00
+			00 FF FF DE 00 00 00
+		];
+		qcom,panel-reader-mode-step2-command = [
+			29 01 00 00 00 00 0E /* reader mode 2 */
+			89 10 FF FF DE 00 00
+			00 FF FF DE 00 00 00
+		];
+		qcom,panel-reader-mode-step3-command = [
+			29 01 00 00 00 00 0E /* reader mode 3 */
+			89 10 FF FF CE 00 00
+			00 FF FF DE 00 00 00
+		];
+
+		qcom,panel-reader-mode-off-command = [
+			29 01 00 00 00 00 02 /* reader mode off */
+			89 00
+		];
+		qcom,panel-reader-mode-mono-enable-command = [
+			39 01 00 00 00 00 2F /*ief 1*/
+			77 03 00 00 00 11 05
+			10 D1 0B 20 EE 05 20
+			B2 18 30 11 05 50 D1
+			0B 60 B2 18 70 B2 18
+			70 B2 18 70 B2 18 70
+			B2 18 70 B2 18 70 B2
+			18 70 B2 18 70
+
+			39 01 00 00 00 00 42 /*ief 2*/
+			78 59 B0 44 07 9C 60
+			89 0E 98 C0 12 1D 00
+			59 90 85 00 9C 90 89
+			0D 98 60 08 71 00 63
+			60 44 07 9C 50 89 0E
+			18 C0 16 1D 00 4C 18
+			45 07 98 70 89 0E 34
+			E1 0D 1D 00 4C 18 45
+			07 98 70 89 0E 34 E1
+			0D 1D 00
+
+			39 01 00 00 00 00 42 /*ief 3*/
+			79 4D B0 84 0A 9A 60
+			09 0F 30 C1 12 F7 07
+			4D B0 84 0A 9A 60 09
+			0F 30 C1 12 F7 07 4D
+			B0 84 0A 9A 60 09 0F
+			30 C1 12 F7 07 4D B0
+			84 0A 9A 60 09 0F 30
+			C1 12 F7 07 4D B0 84
+			0A 9A 60 09 0F 30 C1
+			12 F7 07
+
+			39 01 00 00 00 00 46 /*ief 4*/
+			7A 4D B0 84 0A 9A 60
+			09 0F 30 C1 12 F7 07
+			4D B0 84 0A 9A 60 09
+			0F 30 C1 12 F7 07 4D
+			B0 84 0A 9A 60 09 0F
+			30 C1 12 F7 07 4D B0
+			84 0A 9A 60 09 0F 30
+			C1 12 F7 07 00 00 00
+			00 00 00 00 00 00 00
+			00 00 00 80 00 00 00
+		];
+		qcom,panel-reader-mode-mono-disable-command = [
+			39 01 00 00 00 00 2F /*ief 1*/
+			77 03 00 00 00 11 05
+			10 d1 0b 20 ee 05 20
+			b2 18 30 11 05 50 d1
+			0b 60 b2 18 70 b2 18
+			70 b2 18 70 b2 18 70
+			b2 18 70 b2 18 70 b2
+			18 70 b2 18 70
+
+			39 01 00 00 00 00 42 /*ief 2*/
+			78 25 29 ff fd e1 5f
+			91 fe db ff fb 2d 01
+			25 81 3e 03 e0 bf 10
+			03 d8 1f 09 c3 00 1d
+			71 ff fd db 8f 91 fe
+			77 e0 f6 2d 01 25 29
+			ff fd e1 5f 91 fe db
+			ff fb 2d 01 25 29 ff
+			fd e1 5f 91 fe db ff
+			fb 2d 01
+
+			39 01 00 00 00 00 42 /*ief 3*/
+			79 25 29 ff fd e1 5f
+			91 fe db ff fb 2d 01
+			25 29 ff fd e1 5f 91
+			fe db ff fb 2d 01 25
+			29 ff fd e1 5f 91 fe
+			db ff fb 2d 01 25 29
+			ff fd e1 5f 91 fe db
+			ff fb 2d 01 25 29 ff
+			fd e1 5f 91 fe db ff
+			fb 2d 01
+
+			39 01 00 00 00 00 46 /*ief 4*/
+			7a 25 29 ff fd e1 5f
+			91 fe db ff fb 2d 01
+			25 29 ff fd e1 5f 91
+			fe db ff fb 2d 01 25
+			29 ff fd e1 5f 91 fe
+			db ff fb 2d 01 25 29
+			ff fd e1 5f 91 fe db
+			ff fb 2d 01 00 00 00
+			00 00 00 00 00 00 00
+			00 00 00 80 00 00 00
+		];
+		/* reader mode command end */
+
+		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
+		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
+		qcom,mdss-dsi-reader-mode-command-state = "dsi_hs_mode";
+		qcom,mdss-dsi-h-sync-pulse = <0>;
+		qcom,mdss-dsi-lane-map = "lane_map_0123";
+		qcom,mdss-dsi-bllp-eof-power-mode;
+		//qcom,mdss-dsi-bllp-power-mode;
+		qcom,mdss-dsi-last-line-interleave;
+		qcom,mdss-dsi-lane-0-state;
+		qcom,mdss-dsi-lane-1-state;
+		qcom,mdss-dsi-lane-2-state;
+		qcom,mdss-dsi-lane-3-state;
+		qcom,mdss-dsi-panel-timings = [A8 26 1A 00 50 54 1E 2A 1E 03 04 00];
+
+		qcom,mdss-dsi-reset-sequence = <0 0>, <0 0>, <1 5>;
+		qcom,mdss-dsi-t-clk-post = <0x3>;
+		qcom,mdss-dsi-t-clk-pre = <0x21>;
+		qcom,mdss-dsi-dma-trigger = "trigger_sw";
+
+		/* KYH 20150904 modified from none to trigger_sw */
+		qcom,mdss-dsi-mdp-trigger = "trigger_sw";
+
+		qcom,cont-splash-enabled;
+		//qcom,mdss-dsi-force-clock-lane-hs;
+
+		/* KYH 20150904 modified from DSI_NON_BURST_SYNCH_PULSE to DSI_NON_BURST_SYNCH_EVENT */
+		qcom,mdss-dsi-traffic-mode = "non_burst_sync_event";
+
+		qcom,mdss-dsi-post-init-delay = <1>;
+
+		lge,blmap-size = <256>;
+		lge,blmap = <
+			0 30 30 30 30 30 30 30 30 30                        /* 0 ~ 9 */
+			30 54 59 64 66 68 70 72 74 76                       /* 10 ~ 19 */
+			78 80 82 84 86 88 90 92 94 96                       /* 20 ~ 29 */
+			98 100 102 104 106 108 110 112 114 116              /* 30 ~ 39 */
+			118 120 122 124 126 128 130 132 134 136             /* 40 ~ 49 */
+			138 140 142 144 146 148 150 152 154 156             /* 50 ~ 59 */
+			158 159 166 173 180 187 194 201 208 215             /* 60 ~ 69 */
+			222 228 233 240 247 254 261 269 277 285             /* 70 ~ 79 */
+			293 301 309 317 325 334 343 352 361 370             /* 80 ~ 89 */
+			379 388 397 406 416 426 436 437 438 451             /* 90 ~ 99 */
+			464 477 490 503 516 529 542 556 570 571             /* 100 ~ 109 */
+			583 595 608 621 634 647 660 673 686 699             /* 110 ~ 119 */
+			712 725 726 742 758 774 790 806 822 838             /* 120 ~ 129 */
+			854 870 886 902 903 918 933 948 963 978             /* 130 ~ 139 */
+			993 1008 1023 1038 1053 1068 1084 1100 1122 1144    /* 140 ~ 149 */
+			1166 1189 1212 1235 1258 1281 1304 1327 1328 1329   /* 150 ~ 159 */
+			1351 1373 1396 1419 1442 1465 1470 1475 1510 1545   /* 160 ~ 169 */
+			1580 1581 1606 1631 1656 1681 1706 1731 1756 1782   /* 170 ~ 179 */
+			1808 1834 1860 1861 1888 1915 1942 1969 1996 2023   /* 180 ~ 189 */
+			2050 2077 2104 2132 2160 2161 2192 2223 2254 2285   /* 190 ~ 199 */
+			2315 2345 2375 2405 2435 2465 2495 2523 2551 2579   /* 200 ~ 209 */
+			2607 2635 2663 2691 2719 2747 2775 2803 2831 2860   /* 210 ~ 219 */
+			2861 2895 2929 2963 2997 3031 3065 3100 3135 3170   /* 220 ~ 229 */
+			3205 3240 3241 3278 3315 3352 3389 3427 3465 3503   /* 230 ~ 239 */
+			3541 3579 3617 3655 3691 3727 3763 3799 3836 3873   /* 240 ~ 249 */
+			3910 3947 3984 4021 4058 4095>;                     /* 250 ~ 255 */
+
+	};
+};

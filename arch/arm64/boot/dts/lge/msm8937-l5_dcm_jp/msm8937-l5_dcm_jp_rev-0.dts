@@ -1,0 +1,113 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/dts-v1/;
+
+#include "../../qcom/msm8937.dtsi"
+#include "../../qcom/msm-pmi8950.dtsi"
+#include "../msm8937-lge-common/msm8937-lge.dtsi"
+#include "msm8937-l5_dcm_jp.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. MSM8937-PMI8950 MTP";
+	compatible = "qcom,msm8937-mtp", "qcom,msm8937", "qcom,mtp";
+	qcom,board-id= <0x60 0>;
+	qcom,pmic-id = <0x10019 0x010011 0x0 0x0>;
+};
+&soc {
+	tlmm: pinctrl@1000000 {
+		hallic_gpio {
+			mux {
+				pins = "gpio9";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio9";
+				bias-pull-up; /* PULL UP */
+				drive-strength = <2>; /* 2 MA */
+			};
+		};
+
+	};
+
+	gpio_keys {
+		hall_ic {
+			label = "hall_ic";
+			gpios = <&tlmm 9 0x1>;
+			linux,input-type = <5>;
+			linux,code = <222>;
+			gpio-key,wakeup;
+			debounce-interval = <15>;
+		};
+	};
+};
+&soc {
+        dsi_extra_pwr_supply: dsi_extra_pwr_supply {
+                qcom,panel-supply-entry@0 {
+                        reg = <0>;
+                        qcom,supply-name = "lab";
+                        qcom,supply-min-voltage = <4600000>;
+                        qcom,supply-max-voltage = <6000000>;
+                        qcom,supply-enable-load = <100000>;
+                        qcom,supply-disable-load = <100>;
+                };
+
+                qcom,panel-supply-entry@1 {
+                        reg = <1>;
+                        qcom,supply-name = "ibb";
+                        qcom,supply-min-voltage = <4600000>;
+                        qcom,supply-max-voltage = <6000000>;
+                        qcom,supply-enable-load = <100000>;
+                        qcom,supply-disable-load = <100>;
+                        qcom,supply-post-on-sleep = <20>;
+                };
+        };
+};
+&dsi_lgd_ft8707_vid {
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+	lge,extra-supply-entries = <&dsi_extra_pwr_supply>;
+};
+&dsi_lgd_td4300_vid {
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+	lge,extra-supply-entries = <&dsi_extra_pwr_supply>;
+};
+&labibb {
+	status = "ok";
+	qpnp,qpnp-labibb-mode = "lcd";
+//	qcom,labibb-ttw-force-lab-on; //w/a block for lcd blackout issue
+};
+
+&lab_regulator {
+	qcom,qpnp-lab-init-lcd-voltage = <5500000>;
+};
+&ibb_regulator {
+	qcom,qpnp-ibb-init-lcd-voltage = <5500000>;
+};
+
+&ibb_regulator {
+	qcom,qpnp-ibb-discharge-resistor = <32>;
+	qcom,qpnp-ibb-lab-pwrup-delay = <1000>;
+	qcom,qpnp-ibb-lab-pwrdn-delay = <1000>;
+};
+&i2c_2 {
+     ext_dsv_dw_sm@3e {
+         status = "disable";
+    };
+};

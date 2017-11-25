@@ -11,8 +11,10 @@ menuconfig INPUT_TOUCHSCREEN
 
 if INPUT_TOUCHSCREEN
 
-source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
-source "drivers/input/touchscreen/synaptics_dsx_2.6/Kconfig"
+#source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
+#source "drivers/input/touchscreen/synaptics_dsx_2.6/Kconfig"
+source "drivers/input/touchscreen/lge/Kconfig"
+source "drivers/input/touchscreen/lge_jp/Kconfig"
 
 config OF_TOUCHSCREEN
 	def_tristate INPUT
@@ -117,6 +119,39 @@ config TOUCHSCREEN_ATMEL_MXT
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called atmel_mxt_ts.
+config TOUCHSCREEN_ATMEL_T1066
+	tristate "Atmel mXT 1066T3 I2C Touchscreen"
+	depends on I2C
+	help
+	  Say Y here if you have Atmel mXT series I2C touchscreen,
+	  such as AT42QT602240/ATMXT224, connected to your system.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called atmel_t1066.
+
+config TOUCHSCREEN_LGE_LPWG
+	  bool "LGE Touch LPWG feature"
+	  depends on I2C
+	  default n
+	  help
+	  Say Y here if you use lge LPWG feature
+	  if unsure, say N
+
+config TOUCHSCREEN_ATMEL_LPWG_DEBUG_REASON
+    tristate "Atmel LPWG Debug Reason enable feature based touchscreens"
+        depends on I2C
+	    default n
+	        help
+		        Say Y here if you have an Atmel Maxtouch based touchscreen and LPWG Debug Reason.
+
+config TOUCHSCREEN_ATMEL_STYLUS_PEN
+    tristate "Atmel STYLUS PEN enable feature based touchscreens"
+        depends on I2C
+	    default n
+	        help
+		        Say Y here if you have an Atmel Maxtouch based touchscreen and STYLUS PEN.
 
 config TOUCHSCREEN_ATMEL_MAXTOUCH_TS
 	tristate "Atmel Maxtouch Touchscreen Family"
@@ -995,16 +1030,15 @@ config TOUCHSCREEN_FT5X06_GESTURE
 
          If unsure, say N.
 
-config TOUCHSCREEN_MSTAR21XX
-	tristate "mstar touchscreens"
-	depends on I2C
+config TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_EXTRA_SYSFS
+	bool "Synaptics DSX firmware update extra sysfs attributes"
+	depends on TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE
 	help
-	 Say Y here if you have a mstar touchscreen.
+	  Say Y here to enable support for extra sysfs attributes
+	  supporting firmware update in a development environment.
+	  This does not affect the core or other subsystem attributes.
 
-	 If unsure, say N.
-
-	 To compile this driver as a module, choose M here: the
-	 module will be called msg21xx_ts.
+	  If unsure, say N.
 
 config SECURE_TOUCH
 	bool "Secure Touch"
@@ -1013,6 +1047,16 @@ config SECURE_TOUCH
 	  TOUCHSCREEN_ATMEL_MAXTOUCH_TS)
 	help
 	  Say Y here to enable Secure Touch in supported drivers.
+
+	  If unsure, say N.
+
+config TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_EXTRA_SYSFS
+	bool "Synaptics DSX firmware update extra sysfs attributes"
+	depends on TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE
+	help
+	  Say Y here to enable support for extra sysfs attributes
+	  supporting firmware update in a development environment.
+	  This does not affect the core or other subsystem attributes.
 
 	  If unsure, say N.
 
@@ -1104,6 +1148,63 @@ config TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE
 	  To compile this driver as a module, choose M here: the
 	  module will be called synaptics_dsx_fw_update.
 
+config SECURE_TOUCH
+	bool "Secure Touch"
+	depends on TOUCHSCREEN_ATMEL_MXT
+	help
+	  Say Y here to enable Secure Touch support in the Atmel MXT
+	  driver.
+
+	  If unsure, say N.
+
+config TOUCHSCREEN_UNIFIED_DRIVER
+	bool "LGE Unified driver"
+	depends on I2C
+	default n
+	help
+	 Say Y here if you use lge unified driver
+	 if unsure, say N
+
+config TOUCHSCREEN_UNIFIED_DRIVER_3
+        bool "LGE Unified driver Ver3.0"
+        depends on I2C
+        default n
+        help
+         Say Y here if you use lge unified driver ver3.0
+         if unsure, say N
+
+config TOUCHSCREEN_MSM8937_PH2
+	bool "LGE PH2 Device"
+	depends on I2C
+	default n
+	help
+	 Say Y here if you use lge unified driver
+	 if unsure, say N
+
+config TOUCHSCREEN_LR388K6
+	bool "Sharp LR388K56"
+	depends on I2C
+	default n
+	help
+	 Say Y here if you have a Sharp LR388K6 I2C touchscreen
+	 connected to your system.
+	 
+config TOUCHSCREEN_UNIFIED_DRIVER4
+        bool "LGE Unified driver Ver4.0"
+        depends on I2C
+        default n
+        help
+         Say Y here if you use lge unified driver ver3.0
+         if unsure, say N
+
+config TOUCHSCREEN_UNIFIED_MELFAS_MIT300_PH2
+	bool "Melfas MIT-300 based on LGE Unified driver Ver4.0"
+	depends on I2C && TOUCHSCREEN_UNIFIED_DRIVER4
+	default n
+	help
+         Say Y here if you have a Mefas MIT-300(PH2) I2C touchscreen
+         connected to your system.
+
 config TOUCHSCREEN_GT9XX
 	bool "Goodix touchpanel GT9xx series"
 	depends on I2C
@@ -1127,5 +1228,14 @@ config TOUCHSCREEN_MAXIM_STI
 	  module will be called maxim_sti.
 
 source "drivers/input/touchscreen/gt9xx/Kconfig"
+config TOUCHSCREEN_MSG_INFO_PRINT
+	tristate "Touchscreen Message Information Print"
+	default n
+	help
+	  This enables support for printing the log message
+	  which has informative level.
 
+	  Say Y here if you want to enable the driver.
+
+	  If unsure, say N.
 endif

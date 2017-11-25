@@ -160,6 +160,36 @@ cam_sensor_rear_vdig_sleep: cam_sensor_rear_vdig_sleep {
 	};
 };
 
+/* LGE_CHANGE_S, Add cam_sensor_front_vdig for LDO, 2016-09-19, jungryoul.choi@lge.com */
+cam_sensor_front_vdig: cam_sensor_front_vdig {
+	/* VDIG */
+	mux {
+		pins = "gpio35";
+		function = "gpio";
+	};
+
+	config {
+		pins = "gpio35";
+		bias-disable; /* No PULL */
+		drive-strength = <2>; /* 2 MA */
+	};
+};
+
+cam_sensor_front_vdig_sleep: cam_sensor_front_vdig_sleep {
+	/* VDIG */
+	mux {
+		pins = "gpio35";
+		function = "gpio";
+	};
+
+	config {
+		pins = "gpio35";
+		bias-disable; /* No PULL */
+		drive-strength = <2>; /* 2 MA */
+	};
+};
+/* LGE_CHANGE_E, Add cam_sensor_front_vdig for LDO, 2016-09-19, jungryoul.choi@lge.com */
+
 cam_sensor_mclk1_default: cam_sensor_mclk1_default {
 	/* MCLK1 */
 	mux {

@@ -1,0 +1,70 @@
+/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&i2c_2 {
+    max98927@3a {
+        status = "ok";
+        compatible = "maxim,max98927L";
+        reg = <0x3a>;
+        maxim,registers-of-amp =
+            <0x0014 0x0078>,
+            <0x0015 0x00FF>,
+            <0x0017 0x0055>,
+            <0x0018 0x0003>,
+            <0x001A 0x0003>,
+            <0x001B 0x0000>,
+            <0x001C 0x00FC>,
+            <0x001D 0x00FF>,
+            <0x001E 0x0010>,
+            <0x001F 0x0000>,
+            <0x0020 0x0041>,
+            <0x0022 0x0022>,
+            <0x0023 0x0008>,
+            <0x0024 0x0088>,
+            <0x0025 0x0080>,
+            <0x0026 0x0001>,
+            <0x0036 0x0038>,
+            <0x0037 0x0003>,
+            <0x0039 0x0001>,
+            <0x003A 0x0000>,
+            <0x003B 0x0000>,
+            <0x003C 0x0005>,
+            <0x003D 0x00A9>,
+            <0x003E 0x0003>,
+            <0x003F 0x0007>,
+            <0x0040 0x001C>,
+            <0x0041 0x0001>,
+            <0x0042 0x003F>,
+            <0x0043 0x0004>,
+            <0x004E 0x0030>,
+            <0x007F 0x000E>,
+            <0x0082 0x0008>,
+            <0x0086 0x0001>,
+            <0x00FF 0x0000>;
+        maxim,platform_info = <1 0x1016 0x10001062 0x0FF1020B 0x00000000 41>;
+        maxim,boost_step = <
+            0x00 0x00 0x00 0x00
+            0x00 0x00 0x00 0x00
+            0x00 0x00 0x00 0x00
+            0x00 0x00 0x0C 0x1C
+            >;
+        maxim,spk-gain = <0x05>;
+        maxim,digital-gain = <0x38>;
+        maxim,sysclk = <12288000>;
+        maxim,mono_stereo = <0>;
+        maxim,adc_threshold = <0>;
+        maxim,vmon-l-slot = <0>;
+        maxim,imon-l-slot = <2>;
+        maxim,vmon-r-slot = <1>;
+        maxim,imon-r-slot = <3>;
+    };
+};

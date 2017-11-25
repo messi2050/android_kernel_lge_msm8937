@@ -26,6 +26,67 @@ fw-shipped- += acenic/tg1.bin
 else
 acenic-objs := acenic/tg1.bin acenic/tg2.bin
 endif
+
+ifdef CONFIG_TOUCHSCREEN_MSM8937_PH2
+sharp_img_file := $(wildcard $(srctree)/firmware/sharp/ph2/*)
+sharp_firmware := $(subst $(srctree)/firmware/,,$(sharp_img_file))
+fw-shipped-$(CONFIG_TOUCHSCREEN_LR388K6) += $(sharp_firmware)
+endif
+
+ifdef CONFIG_MACH_MSM8940_TF8_TMO_US
+	fw-shipped-$(CONFIG_SENSOR_ATMF04) += atmf04/atmf04_V0.66.fw
+endif
+
+ifdef CONFIG_MACH_MSM8940_TF8_TMO_US
+epack_fw_file := $(wildcard $(srctree)/firmware/epack/tf8/*)
+epack_firmware := $(subst $(srctree)/firmware/,,$(epack_fw_file))
+fw-shipped-$(CONFIG_INPUT_EPACK) += $(epack_firmware)
+endif
+
+ifdef CONFIG_TOUCHSCREEN_UNIFIED_MELFAS_MIT300_PH2
+mit300_fw_file := $(wildcard $(srctree)/firmware/melfas/mit300/ph2/*)
+mit300_firmware := $(subst $(srctree)/firmware/,,$(mit300_fw_file))
+fw-shipped-$(CONFIG_TOUCHSCREEN_UNIFIED_MELFAS_MIT300_PH2) += $(mit300_firmware)
+endif
+
+ifdef CONFIG_LGE_TOUCH_LG4894
+lg4894_fw_file := $(wildcard $(srctree)/firmware/sic/lg4894/lv5/*)
+lg4894_firmware := $(subst $(srctree)/firmware/,,$(lg4894_fw_file))
+fw-shipped-$(CONFIG_LGE_TOUCH_LG4894) += $(lg4894_firmware)
+endif
+
+ifdef CONFIG_LGE_TOUCH_FOCALTECH_FT8607
+focaltech_img_file := $(wildcard $(srctree)/firmware/focaltech/lv3/FT8606/*)
+focaltech_firmware := $(subst $(srctree)/firmware/,,$(focaltech_img_file))
+fw-shipped-$(CONFIG_LGE_TOUCH_FOCALTECH_FT8607) += $(focaltech_firmware)
+endif
+
+ifdef CONFIG_LGE_TOUCH_LGSIC_SW49106
+sw49106_fw_file := $(wildcard $(srctree)/firmware/touch/mh/lgsic/*)
+sw49106_firmware := $(subst $(srctree)/firmware/,,$(sw49106_fw_file))
+fw-shipped-$(CONFIG_LGE_TOUCH_LGSIC_SW49106) += $(sw49106_firmware)
+endif
+
+ifdef CONFIG_LGE_TOUCH_FW_PATH
+fwpath := $(subst ",,$(CONFIG_LGE_TOUCH_FW_PATH))
+ifdef CONFIG_LGE_TOUCH_DUAL
+lge_touch_image_files := $(wildcard $(srctree)/firmware/$(fwpath)/*/*)
+else
+lge_touch_image_files := $(wildcard $(srctree)/firmware/$(fwpath)/*)
+endif
+lge_touch_firmware := $(subst $(srctree)/firmware/,,$(lge_touch_image_files))
+fw-shipped-$(CONFIG_LGE_TOUCH_CORE_BASE) += $(lge_touch_firmware)
+endif
+
+ifdef CONFIG_TOUCHSCREEN_ATMEL_T1066
+atmel_fw_file := $(wildcard $(srctree)/firmware/atmel/b6/*.fw)
+$(foreach var, $(atmel_fw_file),  $(shell objcopy -I binary -O ihex $(var) $(var).ihex))
+atmel_ihex_list := $(subst .ihex, , $(notdir $(wildcard $(srctree)/firmware/atmel/b6/*.ihex)))
+atmel_ihex_files := $(foreach var, $(atmel_ihex_list), atmel/b6/$(var))
+
+fw-shipped-$(CONFIG_TOUCHSCREEN_ATMEL_T1066) += $(atmel_ihex_files)
+endif
+
 fw-shipped-$(CONFIG_ACENIC) += $(acenic-objs)
 fw-shipped-$(CONFIG_ADAPTEC_STARFIRE) += adaptec/starfire_rx.bin \
 					 adaptec/starfire_tx.bin
@@ -138,8 +199,17 @@ fw-shipped-$(CONFIG_YAM) += yam/1200.bin yam/9600.bin
 
 fw-shipped-all := $(fw-shipped-y) $(fw-shipped-m) $(fw-shipped-)
 
+# Directories which we _might_ need to create, so we have a rule for them.
+firmware-dirs := $(sort $(addprefix $(objtree)/$(obj)/,$(dir $(fw-external-y) $(fw-shipped-all))))
+
+quiet_cmd_mkdir = MKDIR   $(patsubst $(objtree)/%,%,$@)
+      cmd_mkdir = mkdir -p $@
+
 quiet_cmd_ihex  = IHEX    $@
       cmd_ihex  = $(OBJCOPY) -Iihex -Obinary $< $@
+
+quiet_cmd_copy  = COPY    $@
+      cmd_copy  = cp -u $(srctree)/$@ $@
 
 quiet_cmd_ihex2fw  = IHEX2FW $@
       cmd_ihex2fw  = $(objtree)/$(obj)/ihex2fw $< $@
@@ -178,7 +248,15 @@ wordsize_deps := $(wildcard include/config/64bit.h include/config/32bit.h \
 		include/config/superh32.h include/config/superh64.h \
 		include/config/x86_32.h include/config/x86_64.h)
 
-$(patsubst %,$(obj)/%.gen.S, $(fw-shipped-y)): %: $(wordsize_deps)
+# For the $$(dir %) trick, where we need % to be expanded first.
+.SECONDEXPANSION:
+ifneq ($(objtree),$(srctree))
+$(patsubst %,$(obj)/%, $(fw-shipped-y)): %: %.gen.S
+	$(call cmd,copy)
+endif
+
+$(patsubst %,$(obj)/%.gen.S, $(fw-shipped-y)): %: $(wordsize_deps) \
+		| $(objtree)/$$(dir %)
 	$(call cmd,fwbin,$(patsubst %.gen.S,%,$@))
 $(patsubst %,$(obj)/%.gen.S, $(fw-external-y)): %: $(wordsize_deps) \
 		include/config/extra/firmware/dir.h

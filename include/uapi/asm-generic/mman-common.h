@@ -52,6 +52,10 @@
 					   overrides the coredump filter bits */
 #define MADV_DODUMP	17		/* Clear the MADV_DONTDUMP flag */
 
+#ifdef CONFIG_MARK_MMAP_HOT_PAGE_ENABLE
+#define MADV_HOTPAGE 23		/* Added by dongwook.seo - HOTPAGE */
+#endif
+
 /* compatibility flags */
 #define MAP_FILE	0
 

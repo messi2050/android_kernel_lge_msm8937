@@ -1,0 +1,33 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "msm8937-l5_dcm_jp-pinctrl.dtsi"
+#include "msm8937-l5_dcm_jp-camera.dtsi"
+#include "msm8937-l5_dcm_jp-panel.dtsi"
+#include "msm8937-l5_dcm_jp-sound.dtsi"
+#include "msm8937-l5_dcm_jp-misc.dtsi"
+#include "msm8937-l5_dcm_jp-pm.dtsi"
+#include "msm8937-l5_dcm_jp-isdbt_japan_spi.dtsi"
+#include "msm8937-l5_dcm_jp-touch.dtsi"
+#include "msm8937-l5_dcm_jp-nfc.dtsi"
+#include "msm8937-l5_dcm_jp-usb.dtsi"
+#include "msm8937-l5_dcm_jp-rearLED.dtsi"
+&soc {
+	earjack-debugger {
+		compatible = "serial,earjack-debugger";
+		status = "ok";
+		interrupt-parent = <&tlmm>;
+		interrupts = <58 0x0>;
+		serial,irq-gpio = <&tlmm 58 0x00>;
+	};
+};

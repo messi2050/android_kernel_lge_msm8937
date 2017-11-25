@@ -1,0 +1,49 @@
+/* Copyright (c) 2012, Code Aurora Forum. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&i2c_5 {
+        qcom,disable-dma;
+        qcom,clk-freq-out = <400000>;
+        pn547@28 {
+                status = "ok";
+                compatible = "nxp,pn547";
+                reg = <0x28>;
+
+                nxp,gpio_sda = <&tlmm 18 0x00>;
+                nxp,gpio_scl = <&tlmm 19 0x00>;
+                nxp,gpio_ven = <&tlmm 16 0x00>;
+                nxp,gpio_mode = <&tlmm 130 0x00>;
+                nxp,gpio_irq = <&tlmm 13 0x00>;
+                nxp,i2c-pull-up = <1>;
+
+                interrupt-parent = <&tlmm>;
+                interrupts = <13 0>;
+                interrupt-names = "nfc_irq";
+        };
+
+        pn547_rev0@28 {
+                status = "disable";
+                compatible = "nxp,pn547";
+                reg = <0x28>;
+
+                nxp,gpio_sda = <&tlmm 18 0x00>;
+                nxp,gpio_scl = <&tlmm 19 0x00>;
+                nxp,gpio_ven = <&tlmm 16 0x00>;
+                nxp,gpio_mode = <&tlmm 130 0x00>;
+                nxp,gpio_irq = <&tlmm 17 0x00>;
+                nxp,i2c-pull-up = <1>;
+
+                interrupt-parent = <&tlmm>;
+                interrupts = <17 0>;
+                interrupt-names = "nfc_irq";
+        };
+};

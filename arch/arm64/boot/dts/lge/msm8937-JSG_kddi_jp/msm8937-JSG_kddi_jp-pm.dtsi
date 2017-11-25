@@ -1,0 +1,100 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/{
+	lge_batterydata: qcom,battery-data {
+		#include "../battery_profile/LGE_BLT25_3000mAh.dtsi"
+		#include "../../qcom/batterydata-itech-3000mah-4200mv.dtsi"
+	};
+};
+
+&pmi8950_fg {
+	qcom,fg-cc-soc-limit-pct = <140>;
+};
+
+&pmi8950_charger {
+	/delete-property/ lge,hvdcp-not-supported;
+	qcom,fastchg-current-ma = <1450>;
+
+        /* ref resistance 200K */
+        lge,no-init-cable = <0 0 0>;
+        lge,cable-mhl-1k = <5000 500 500>;
+        lge,cable-u-28p7k = <10000 1600 500>;
+        lge,cable-28p7k = <250000 1600 500>;
+        lge,cable-56k = <600000 1500 1500>;
+        lge,cable-100k = <620000 1600 500>;
+        lge,cable-130k = <780000 1500 1500>;
+        lge,cable-180k = <870000 1600 500>;
+        lge,cable-200k = <910000 1600 500>;
+        lge,cable-220k = <960000 1600 500>;
+        lge,cable-270k = <1050000 1600 500>;
+        lge,cable-330k = <1150000 1600 500>;
+        lge,cable-620k = <1380000 1600 500>;
+        lge,cable-910k = <1630000 1500 1500>;
+        lge,cable-none = <1900000 1600  500>;
+
+	lge,usb-max-current-ma = <1600>;
+	lge,iusb-qc20 = <1200 700>;
+	lge,ibat-qc20 = <2000 1450>;
+};
+
+&pmi_haptic{
+	status = "ok";
+	qcom,vmax-mv = <2204>;
+};
+
+/* PM8937 GPIO configuration */
+&pm8937_gpios {
+ };
+
+&spmi_bus {
+	qcom,pmi8950@3 {
+		qcom,leds@d800 {
+			qcom,fs-curr-ua = <15000>;
+			/delete-property/ qcom,en-ext-pfet-sc-pro;
+		};
+		qcom,leds@d300 {
+		       qcom,torch_0 {
+		              qcom,current = <25>;
+			};
+		       qcom,torch_1 {
+		              qcom,current = <25>;
+			};
+		};
+	};
+};
+
+&soc {
+	lge,battery-id{
+		lge,default-battery = "LGE_BLT25_3000mAh";
+		/delete-property/ lge,restrict-mode-enabled;
+	};
+
+	/* vst = (0.368*xo_therm) + (0.344*quiet_therm) + 10.17 */
+	virtual_temp_sensor: lge,vts {
+		compatible = "lge,vts";
+		qcom,vts-vadc = <&pm8937_vadc>;
+		lge,scaling-factor= <10>;
+		lge,constant = <10170>;
+		composite_sensor_0: lge,sensor0 {
+			label = "xo_therm";
+			channel = <0x32>;
+			weight = <368>;
+		};
+		composite_sensor_1: lge,sensor1 {
+			label = "quiet_therm";
+			channel = <0x13>;
+			weight = <344>;
+		};
+	};
+};

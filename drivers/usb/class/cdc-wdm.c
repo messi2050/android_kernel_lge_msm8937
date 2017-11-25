@@ -973,7 +973,8 @@ static void wdm_disconnect(struct usb_interface *intf)
 	wake_up_all(&desc->wait);
 	mutex_lock(&desc->rlock);
 	mutex_lock(&desc->wlock);
-	kill_urbs(desc);
+	if(desc)
+		kill_urbs(desc);
 	cancel_work_sync(&desc->rxwork);
 	mutex_unlock(&desc->wlock);
 	mutex_unlock(&desc->rlock);
@@ -983,10 +984,12 @@ static void wdm_disconnect(struct usb_interface *intf)
 	list_del(&desc->device_list);
 	spin_unlock(&wdm_device_list_lock);
 
-	if (!desc->count)
-		cleanup(desc);
-	else
-		dev_dbg(&intf->dev, "%s: %d open files - postponing cleanup\n", __func__, desc->count);
+	if(desc){
+		if (!desc->count)
+			cleanup(desc);
+		else
+			dev_dbg(&intf->dev, "%s: %d open files - postponing cleanup\n", __func__, desc->count);
+	}
 	mutex_unlock(&wdm_mutex);
 }
 
@@ -995,8 +998,8 @@ static int wdm_suspend(struct usb_interface *intf, pm_message_t message)
 {
 	struct wdm_device *desc = wdm_find_device(intf);
 	int rv = 0;
-
-	dev_dbg(&desc->intf->dev, "wdm%d_suspend\n", intf->minor);
+	if(desc)
+		dev_dbg(&desc->intf->dev, "wdm%d_suspend\n", intf->minor);
 
 	/* if this is an autosuspend the caller does the locking */
 	if (!PMSG_IS_AUTO(message)) {
@@ -1015,7 +1018,8 @@ static int wdm_suspend(struct usb_interface *intf, pm_message_t message)
 		set_bit(WDM_SUSPENDING, &desc->flags);
 		spin_unlock_irq(&desc->iuspin);
 		/* callback submits work - order is essential */
-		kill_urbs(desc);
+		if(desc)
+			kill_urbs(desc);
 		cancel_work_sync(&desc->rxwork);
 	}
 	if (!PMSG_IS_AUTO(message)) {
@@ -1045,12 +1049,12 @@ static int wdm_resume(struct usb_interface *intf)
 {
 	struct wdm_device *desc = wdm_find_device(intf);
 	int rv;
+	if(desc){
+		dev_dbg(&desc->intf->dev, "wdm%d_resume\n", intf->minor);
 
-	dev_dbg(&desc->intf->dev, "wdm%d_resume\n", intf->minor);
-
-	clear_bit(WDM_SUSPENDING, &desc->flags);
-	rv = recover_from_urb_loss(desc);
-
+		clear_bit(WDM_SUSPENDING, &desc->flags);
+		rv = recover_from_urb_loss(desc);
+	}
 	return rv;
 }
 #endif
@@ -1069,12 +1073,14 @@ static int wdm_pre_reset(struct usb_interface *intf)
 	set_bit(WDM_RESETTING, &desc->flags);	/* inform read/write */
 	set_bit(WDM_READ, &desc->flags);	/* unblock read */
 	clear_bit(WDM_IN_USE, &desc->flags);	/* unblock write */
-	desc->rerr = -EINTR;
+	if(desc)
+		desc->rerr = -EINTR;
 	spin_unlock_irq(&desc->iuspin);
 	wake_up_all(&desc->wait);
 	mutex_lock(&desc->rlock);
 	mutex_lock(&desc->wlock);
-	kill_urbs(desc);
+	if(desc)
+		kill_urbs(desc);
 	cancel_work_sync(&desc->rxwork);
 	return 0;
 }
@@ -1086,7 +1092,8 @@ static int wdm_post_reset(struct usb_interface *intf)
 
 	clear_bit(WDM_OVERFLOW, &desc->flags);
 	clear_bit(WDM_RESETTING, &desc->flags);
-	rv = recover_from_urb_loss(desc);
+	if(desc)
+		rv = recover_from_urb_loss(desc);
 	mutex_unlock(&desc->wlock);
 	mutex_unlock(&desc->rlock);
 	return 0;

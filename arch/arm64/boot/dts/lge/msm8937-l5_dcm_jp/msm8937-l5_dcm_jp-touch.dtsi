@@ -1,0 +1,127 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&i2c_3 { /* BLSP1 QUP3 */
+	status = "ok";
+	synaptics_td4300@20 {
+		compatible = "synaptics,td4300";
+		status = "ok";
+
+		reg = <0x20>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0x2008>; // ONESHOT LOW
+
+		pinctrl-names = "touch_pin_active","touch_pin_sleep";	/*Touch GPIO pin name setting*/
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;		/*Touch GPIO pin active setting*/
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;	/*Touch GPIO pin suspend setting*/
+
+		reset-gpio = <&tlmm 64 0x0>;
+		irq-gpio = <&tlmm 65 0x2008>;
+		//vdd-gpio = <&tlmm 3 0x0>;  /* ???? 3 : ph2 3.3v/l5 mipi 1.2v */
+		//vio-gpio = <&tlmm 63 0x0>; /* ???? 63 : 1.8v io*/
+
+		irqflags = <0x2002>; // ONESHOT FALLING
+
+		hw_reset_delay = <150>;
+		sw_reset_delay = <100>;
+
+		/*Caps*/
+		max_x = <1080>;
+		max_y = <1920>;
+		max_pressure = <0xff>;
+		max_width = <15>;
+		max_orientation = <1>;
+		max_id = <10>;
+
+		/* Role */
+		use_lpwg = <1>;
+		use_lpwg_test = <1>;
+		hide_coordinate = <1>; // In MP, It's needed to set 1
+
+		/* firmware & panel_spec path */
+		fw_image = "lge_jp/PLG610-V1.09_PR2381989-DS5.12.3.3.1008_50052189.img",
+		           "lge_jp/PLG610-V1.09_PR2381989-DS5.12.3.3.1008_50052189.bin";
+
+		//panel_spec = "touch/h1/h1_limit.txt";
+		//panel_spec_mfts = "touch/h1/h1_limit_mfts.txt";
+	};
+
+	focaltech_ft8707@38 {
+		compatible = "focaltech,ft8707";
+		status = "ok";
+
+		reg = <0x38>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0x2002>; // ONESHOT LOW
+
+		pinctrl-names = "touch_pin_active","touch_pin_sleep";	/*Touch GPIO pin name setting*/
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;		/*Touch GPIO pin active setting*/
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;	/*Touch GPIO pin suspend setting*/
+
+		reset-gpio = <&tlmm 64 0x0>;
+		irq-gpio = <&tlmm 65 0x2002>;
+		//vdd-gpio = <&tlmm 3 0x0>;  /* ???? 3 : ph2 3.3v/l5 mipi 1.2v */
+		//vio-gpio = <&tlmm 63 0x0>; /* ???? 63 : 1.8v io*/
+
+		irqflags = <0x2002>;
+
+		hw_reset_delay = <20>;
+
+		/*Caps*/
+		max_x = <1080>;
+		max_y = <1920>;
+		max_pressure = <0xff>;
+		max_width = <15>;
+		max_orientation = <1>;
+		max_id = <10>;
+
+		/* Role */
+		use_lpwg = <1>;
+		use_lpwg_test = <1>;
+		hide_coordinate = <1>;
+
+		/* firmware & panel_spec path */
+		/* 0 : pramboot, 1 : all bin (CUT1.1), 2 : all bin (CUT1.0) */
+		fw_image = "lge_jp/FT8707_Pramboot_V0.2_20151215_Final.bin",
+		           "lge_jp/LGE_K7_FT87070B_0x96_V0x9E_D0x00_20160319_all.bin",
+		           "lge_jp/LGE_K7_FT87070A_0x96_V0x26_D0x00_20160210_all.bin";
+
+		/* ft8707 specific */
+		//vdd-supply = <&pm8916_l17>;
+		//vcc_i2c-supply = <&pm8916_l6>;
+		focaltech,name = "fts";
+		focaltech,family-id = <0x54>;
+		//focaltech,reset-gpio = <&msmgpio 16 0x00>;
+		//focaltech,irq-gpio =<&msm_gpio 13 0x00>;
+		//focaltech,id1-gpio = <&msm_gpio 109 0x00>;
+		//focaltech,id2-gpio = <&msm_gpio 114 0x00>;
+		//focaltech,id3-gpio = <&msm_gpio 121 0x00>;
+		focaltech,display-coords = <0 0 480 854>;
+		focaltech,panel-coords = <0 0 1080 2000>;
+		focaltech,button-map= <70 150 907>;
+		focaltech,no-force-update;
+		focaltech,i2c-pull-up;
+		focaltech,group-id = <1>;
+		focaltech,hard-reset-delay-ms = <20>;
+		focaltech,soft-reset-delay-ms = <150>;
+		focaltech,num-max-touches = <10>;
+		focaltech,fw-name = "FT_Upgrade_App.i";
+		focaltech,fw-delay-aa-ms = <50>;
+		focaltech,fw-delay-55-ms = <30>;
+		focaltech,fw-upgrade-id1 = <0x79>;
+		focaltech,fw-upgrade-id2 = <0x03>;
+		focaltech,fw-delay-readid-ms = <10>;
+		focaltech,fw-delay-era-flsh-ms = <2000>;
+	};
+};
+

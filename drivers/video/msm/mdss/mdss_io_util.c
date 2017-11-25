@@ -282,6 +282,29 @@ vreg_set_opt_mode_fail:
 } /* msm_dss_enable_vreg */
 EXPORT_SYMBOL(msm_dss_enable_vreg);
 
+#if IS_ENABLED(CONFIG_LGE_MIPI_DSI_LGD_K7J_FHD_VIDEO_INCELL_LCD_PANEL)
+int lge_msm_dss_ctrl_ttw_mode(struct dss_vreg *in_vreg, int num_vreg, int enable)
+{
+	int i = 0, rc = 0;
+
+	if (enable) {
+		for (i = 0; i < num_vreg; i++) {
+			rc = lge_ttw_mode_ctrl(in_vreg[i].vreg, enable);
+			if (rc)
+				pr_err("%s: failed to ctrl ttw [%s] \n", __func__, in_vreg[i].vreg_name);
+		}
+	} else {
+		for (i = num_vreg-1; i >= 0; i--) {
+			rc = lge_ttw_mode_ctrl(in_vreg[i].vreg, enable);
+			if (rc)
+				pr_err("%s: failed to ctrl ttw [%s] \n", __func__, in_vreg[i].vreg_name);
+		}
+	}
+	return rc;
+} /* lge_msm_dss_ctrl_ttw_mode */
+EXPORT_SYMBOL(lge_msm_dss_ctrl_ttw_mode);
+#endif
+
 int msm_dss_enable_gpio(struct dss_gpio *in_gpio, int num_gpio, int enable)
 {
 	int i = 0, rc = 0;

@@ -83,6 +83,9 @@ enum sensor_sub_module_t {
 	SUB_MODULE_CSIPHY_3D,
 	SUB_MODULE_OIS,
 	SUB_MODULE_EXT,
+	SUB_MODULE_IR_LED,
+	SUB_MODULE_IR_CUT,
+	SUB_MODULE_OTP,
 	SUB_MODULE_MAX,
 };
 
@@ -286,11 +289,27 @@ struct msm_eeprom_info_t {
 	struct msm_eeprom_memory_map_array *mem_map_array;
 };
 
+struct msm_ir_led_cfg_data_t {
+	enum msm_ir_led_cfg_type_t cfg_type;
+	int32_t pwm_duty_on_ns;
+	int32_t pwm_period_ns;
+};
+
+struct msm_ir_cut_cfg_data_t {
+	enum msm_ir_cut_cfg_type_t cfg_type;
+};
+
+struct msm_otp_info_t {
+        struct msm_sensor_power_setting_array *power_setting_array;
+        enum i2c_freq_mode_t i2c_freq_mode;
+        struct msm_otp_memory_map_array *mem_map_array;
+};
+
 struct msm_eeprom_cfg_data {
 	enum eeprom_cfg_type_t cfgtype;
 	uint8_t is_supported;
 	union {
-		char eeprom_name[MAX_SENSOR_NAME];
+		char eeprom_name[MAX_EEPROM_NAME];
 		struct eeprom_get_t get_data;
 		struct eeprom_read_t read_data;
 		struct eeprom_write_t write_data;
@@ -298,6 +317,50 @@ struct msm_eeprom_cfg_data {
 		struct msm_eeprom_info_t eeprom_info;
 	} cfg;
 };
+
+#if 1 //defined(CONFIG_MSM_OTP)
+enum otp_cfg_type_t {
+        CFG_OTP_GET_INFO,
+        CFG_OTP_GET_CAL_DATA,
+        CFG_OTP_READ_CAL_DATA,
+        CFG_OTP_WRITE_DATA,
+        CFG_OTP_GET_MM_INFO,
+        CFG_OTP_INIT,
+};
+
+struct otp_get_t {
+        uint32_t num_bytes;
+};
+
+struct otp_read_t {
+        uint8_t *dbuffer;
+        uint32_t num_bytes;
+};
+
+struct otp_write_t {
+        uint8_t *dbuffer;
+        uint32_t num_bytes;
+};
+
+struct otp_get_cmm_t {
+        uint32_t cmm_support;
+        uint32_t cmm_compression;
+        uint32_t cmm_size;
+};
+
+struct msm_otp_cfg_data {
+        enum otp_cfg_type_t cfgtype;
+        uint8_t is_supported;
+        union {
+                char otp_name[MAX_SENSOR_NAME];
+                struct otp_get_t get_data;
+                struct otp_read_t read_data;
+                struct otp_write_t write_data;
+                struct otp_get_cmm_t get_cmm_data;
+                struct msm_otp_info_t otp_info;
+        } cfg;
+};
+#endif
 
 enum msm_sensor_cfg_type_t {
 	CFG_SET_SLAVE_INFO,
@@ -585,6 +648,17 @@ struct sensor_init_cfg_data {
 
 #define VIDIOC_MSM_OIS_CFG_DOWNLOAD \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 14, struct msm_ois_cfg_download_data)
+
+#define VIDIOC_MSM_IR_LED_CFG \
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_ir_led_cfg_data_t)
+
+#define VIDIOC_MSM_IR_CUT_CFG \
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_ir_cut_cfg_data_t)
+
+#if 1 //defined(CONFIG_MSM_OTP)
+#define VIDIOC_MSM_OTP_CFG \
+        _IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct  msm_otp_cfg_data)
+#endif
 
 #endif
 

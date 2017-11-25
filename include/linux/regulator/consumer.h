@@ -270,6 +270,10 @@ int regulator_unregister_notifier(struct regulator *regulator,
 void *regulator_get_drvdata(struct regulator *regulator);
 void regulator_set_drvdata(struct regulator *regulator, void *data);
 
+#if IS_ENABLED(CONFIG_LGE_MIPI_DSI_LGD_K7J_FHD_VIDEO_INCELL_LCD_PANEL)
+int lge_ttw_mode_ctrl(struct regulator *regulator, int enable);
+#endif
+
 #else
 
 /*
@@ -377,6 +381,13 @@ static inline void devm_regulator_bulk_unregister_supply_alias(
 	struct device *dev, const char *const *id, int num_id)
 {
 }
+
+#if IS_ENABLED(CONFIG_LGE_MIPI_DSI_LGD_K7J_FHD_VIDEO_INCELL_LCD_PANEL)
+int lge_ttw_mode_ctrl(struct regulator *regulator, int enable)
+{
+	return 0;
+}
+#endif
 
 static inline int regulator_enable(struct regulator *regulator)
 {

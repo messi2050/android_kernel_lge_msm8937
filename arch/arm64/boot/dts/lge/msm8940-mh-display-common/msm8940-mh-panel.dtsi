@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "../dsi-panel-mh-jdi-nt35596-fhd-video.dtsi"
+#include "../dsi-panel-lgd-incell-sw49106-fhd-video.dtsi"
+#include "../ext_dsv_mh_sm5107.dtsi"
+
+&wled {
+	qcom,cons-sync-write-delay-us = <1000>;
+};
+
+&mdss_mdp {
+	qcom,mdss-pref-prim-intf = "dsi";
+};
+
+&mdss_dsi {
+	hw-config = "single_dsi";
+};
+
+&dsi_lv9_jdi_nt35596_vid {
+	lge,panel-id = <1>;
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+};
+
+&dsi_lgd_incell_sw49106_fhd_incell_vid {
+	lge,panel-id = <0>;
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+};
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_lgd_incell_sw49106_fhd_incell_vid>;
+	pinctrl-names = "mdss_default", "mdss_sleep";
+	pinctrl-0 = <&mdss_te_active>;
+	pinctrl-1 = <&mdss_te_suspend>;
+	qcom,regulator-ldo-mode;
+
+	qcom,platform-reset-gpio = <&tlmm 33 0>;
+
+	lge,extra-gpio-names = "vddio", "avdd", "touch_reset";
+	lge,gpio-vddio = <&tlmm 63 0>;
+	lge,gpio-avdd = <&tlmm 3 0>;
+	lge,gpio-touch_reset = <&tlmm 64 0>;
+};
+
+&mdss_fb0 {
+	/delete-property/ qcom,mdss-fb-splash-logo-enabled;
+};
+
+&spmi_bus {
+	qcom,pmi8950@3 {
+		wled: qcom,leds@d800 {
+			qcom,fs-curr-ua = <20000>;
+		};
+	};
+};

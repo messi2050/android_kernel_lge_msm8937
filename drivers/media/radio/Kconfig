@@ -519,6 +519,14 @@ config RADIO_IRIS_TRANSPORT
           To compile this driver as a module, choose M here: the
           module will be called radio-iris-transport.
 
+config LGE_ANT_SWITCH_FMRADIO_TDMB
+		bool "fmradio ant switch"
+		default n
+
+config LGE_FMRADIO_SOFT_MUTE_OFF
+        bool "fmradio softmute off"
+        default n
+
 config RADIO_SILABS
         tristate "SILABS FM"
         depends on I2C && VIDEO_V4L2

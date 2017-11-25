@@ -1,0 +1,40 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+ &rpm_bus {
+	rpm-regulator-ldoa18 {
+		status = "okay";
+		pm8937_l18: regulator-l18 {
+			regulator-min-microvolt = <2500000>;
+			regulator-max-microvolt = <3000000>;
+			qcom,init-voltage = <2700000>;
+			//regulator-always-on;
+			status = "okay";
+		};
+	};
+};
+
+
+ &soc {
+	qcom,iris-fm {
+		compatible = "qcom,iris_fm";
+		qcom,fm-sw-gpio = <&tlmm 47 0>;
+		xm,vdd_fm_sw-supply = <&pm8937_l18>;
+	};
+};
+
+&pm8937_1 {
+    pm8937_cajon_dig: 8952_wcd_codec@f000 {
+        qcom,cdc-boost-voltage = <4650>;
+    };
+};

@@ -1,0 +1,114 @@
+/*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+
+&i2c_3 { /* BLSP1 QUP3 */
+	qcom,clk-freq-out = <400000>;
+
+	synaptics@20 {
+		compatible = "synaptics,TD4100";
+		status = "okay";
+
+		reg = <0x20>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0x2002>;
+		/* IRQF_ONESHOT		0x00002000 */
+		/* IRQF_TRIGGER_FALLING		0x00000002 */
+		/* IRQF_NO_SUSPEND		0x00004000 */
+		irqflags = <0x00000002>;
+
+		reset-gpio = <&tlmm 64 0x00>;
+		irq-gpio = <&tlmm 65 0x2002>;
+
+		pinctrl-names = "touch_pin_active", "touch_pin_sleep";		/* Touch GPIO pin name setting */
+		pinctrl-0 = <&ts_int_active>;		/* Touch GPIO pin active setting */
+		pinctrl-1 = <&ts_int_suspend>;		/* Touch GPIO pin suspend setting */
+
+		/* Caps */
+		max_x = <720>;
+		max_y = <1280>;
+		max_pressure = <0xff>;
+		max_width = <15>;
+		max_orientation = <90>;
+		max_id = <10>;
+		hw_reset_delay = <150>;
+		sw_reset_delay = <150>;
+
+		/* Role */
+		use_lpwg = <1>;
+		use_lpwg_test = <1>;
+		hide_coordinate = <1>;
+
+		/* Firmware */
+		use_fw_upgrade = <1>;
+		use_firmware = <0>;
+		fw_image = "touch/sf3/synaptics/PLG632_V0.42_PR2536179-DS5.12.4.1.1015-5005712A.img",
+				    "touch/sf3/synaptics/PLG632_V0.42_PR2536179-DS5.12.4.1.1015-5005712A.bin";
+		panel_spec = "touch/sf3/synaptics/sf3_limit.txt";
+		panel_spec_mfts_folder = "touch/sf3/synaptics/sf3_limit.txt";
+
+		/* ASC */
+		use_asc = <0>;
+		low_delta_thres = <350>;
+		high_delta_thres = <600>;
+		max_delta_cnt = <2>;
+	};
+
+	lg4894@28 {
+		status = "disable";
+		compatible = "lge,lg4894";
+		reg = <0x28>;
+
+		/* GPIOs */
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0x2002>;
+		/* IRQF_ONESHOT		0x00002000 */
+		/* IRQF_TRIGGER_FALLING		0x00000002 */
+		/* IRQF_NO_SUSPEND		0x00004000 */
+		irqflags = <0x2002>;
+
+		reset-gpio = <&tlmm 64 0x0>;
+		irq-gpio = <&tlmm 65 0x2002>;
+
+		pinctrl-names = "touch_pin_active","touch_pin_sleep";	/*Touch GPIO pin name setting*/
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;		/*Touch GPIO pin active setting*/
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;	/*Touch GPIO pin suspend setting*/
+
+		//vdd-gpio = <&tlmm 3 0x0>;  /* ???? 3 : ph2 3.3v/l5 mipi 1.2v */
+		//vio-gpio = <&tlmm 63 0x0>; /* ???? 63 : 1.8v io*/
+
+		/* Caps */
+		max_x = <720>;
+		max_y = <1280>;
+		max_pressure = <0xff>;
+		max_width = <15>;
+		max_orientation = <1>;
+		max_id = <10>;
+
+		/* role */
+		hw_reset_delay = <210>;
+		sw_reset_delay = <90>;
+		use_lpwg = <1>;
+		use_lpwg_test = <1>;
+
+		/* firmware */
+		use_fw_upgrade = <1>;
+		use_firmware = <0>;
+		fw_image = "sic/lg4894/lv5/L0W53LV5_0_13.img", /* for revision 6   */
+			   "sic/lg4894/lv5/L0W53LV5_0_26.img", /* for revision 7,8 */
+			   "sic/lg4894/lv5/L0W53LV5_0_48.img"; /* for revision 9   */
+		panel_spec = "sic/lg4894/lv5/lv5_limit.txt";
+		panel_spec_mfts_folder = "sic/lg4894/lv5/lv5_limit_mfts.txt";
+	};
+};
+

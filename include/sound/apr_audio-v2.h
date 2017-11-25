@@ -16,6 +16,10 @@
 
 #include <linux/qdsp6v2/apr.h>
 
+#ifdef CONFIG_SND_SOC_MAXIM_DSM
+#include <sound/maxim_dsm.h>
+#endif /* CONFIG_SND_SOC_MAXIM_DSM */
+
 /* size of header needed for passing data out of band */
 #define APR_CMD_OB_HDR_SZ  12
 
@@ -3380,6 +3384,10 @@ struct asm_softvolume_params {
 
 #define ASM_MEDIA_FMT_MULTI_CHANNEL_PCM_V2 0x00010DA5
 
+#if defined(CONFIG_LGE_AUDIO_EFFECT) || defined(CONFIG_LGE_AUDIO_NORMALIZER) || defined(CONFIG_LGE_AUDIO_MABL)
+#define ASM_STREAM_POSTPROC_TOPO_ID_DEFAULT_LGE 0x10009009
+#define ASM_STREAM_POSTPROC_TOPO_ID_OFFLOAD_LGE 0x10009010
+#endif
 #define ASM_MEDIA_FMT_MULTI_CHANNEL_PCM_V3 0x00010DDC
 
 #define ASM_MEDIA_FMT_EVRCB_FS 0x00010BEF
@@ -8676,7 +8684,7 @@ struct afe_clk_set {
 	 * for enable and disable clock.
 	 *	"clk_freq_in_hz", "clk_attri", and "clk_root"
 	 *	are ignored in disable clock case.
-	 *	@values 
+	 *	@values?
 	 *	- 0 -- Disabled
 	 *	- 1 -- Enabled  @tablebulletend
 	 */
@@ -9511,4 +9519,186 @@ struct adm_param_fluence_sourcetracking_t {
 #define AUDPROC_PARAM_ID_AUDIOSPHERE_DESIGN_MULTICHANNEL_INPUT   0x0001091D
 
 #define AUDPROC_PARAM_ID_AUDIOSPHERE_OPERATING_INPUT_MEDIA_INFO  0x0001091E
+
+#ifdef CONFIG_SND_SOC_MAXIM_DSM
+struct afe_dsm_filter_set_params_t {
+    uint32_t dcResistance;
+    uint32_t coilTemp;
+    uint32_t qualityfactor;
+    uint32_t resonanceFreq;
+    uint32_t excursionMeasure;
+    uint32_t rdcroomtemp;
+    uint32_t releasetime;
+    uint32_t coilthermallimit;
+    uint32_t excursionlimit;
+    uint32_t dsmenabled;
+    uint32_t staticgain;
+    uint32_t lfxgain;
+    uint32_t pilotgain;
+    uint32_t flagToWrite;
+    uint32_t featureSetEnable;
+    uint32_t smooFacVoltClip;
+    uint32_t highPassCutOffFactor;
+    uint32_t leadResistance;
+    uint32_t rmsSmooFac;
+    uint32_t clipLimit;
+    uint32_t thermalCoeff;
+    uint32_t qSpk;
+    uint32_t excurLoggingThresh;
+    uint32_t coilTempLoggingThresh;
+    uint32_t resFreq;
+    uint32_t resFreqGuardBand;
+    uint32_t Ambient_Temp;
+    uint32_t STL_attack_time;
+    uint32_t STL_release_time;
+    uint32_t STL_Admittance_a1;
+    uint32_t STL_Admittance_a2;
+    uint32_t STL_Admittance_b0;
+    uint32_t STL_Admittance_b1;
+    uint32_t STL_Admittance_b2;
+    uint32_t Tch1;
+    uint32_t Rth1;
+    uint32_t Tch2;
+    uint32_t Rth2;
+    uint32_t STL_Attenuation_Gain;
+    uint32_t SPT_rampDownFrames;
+    uint32_t SPT_Threshold;
+    uint32_t T_horizon;
+    uint32_t LFX_Admittance_a1;
+    uint32_t LFX_Admittance_a2;
+    uint32_t LFX_Admittance_b0;
+    uint32_t LFX_Admittance_b1;
+    uint32_t LFX_Admittance_b2;
+    uint32_t X_Max;
+    uint32_t SPK_FS;
+    uint32_t Q_GUARD_BAND;
+    uint32_t STImpedModel_a1;
+    uint32_t STImpedModel_a2;
+    uint32_t STImpedModel_b0;
+    uint32_t STImpedModel_b1;
+    uint32_t STImpedModel_b2;
+    uint32_t STImpedModel_Flag;
+    uint32_t Q_Notch;
+    uint32_t Power_Measurement;
+    uint32_t Reserve_1;
+    uint32_t Reserve_2;
+    uint32_t Reserve_3;
+    uint32_t Reserve_4;
+} __packed;
+
+union afe_dsm_spkr_prot_config {
+    struct asm_fbsp_mode_rx_cfg mode_rx_cfg;
+    struct asm_spkr_calib_vi_proc_cfg vi_proc_cfg;
+    struct asm_feedback_path_cfg feedback_path_cfg;
+    struct asm_mode_vi_proc_cfg mode_vi_proc_cfg;
+    struct afe_dsm_filter_set_params_t mode_dsm_proc_cfg;
+} __packed;
+
+struct afe_dsm_spkr_prot_config_command {
+    struct apr_hdr hdr;
+    struct afe_port_cmd_set_param_v2 param;
+    struct afe_port_param_data_v2 pdata;
+    union afe_dsm_spkr_prot_config prot_config;
+} __packed;
+
+struct afe_dsm_filter_get_params_t {
+    uint32_t dcResistance;
+    uint32_t coilTemp;
+    uint32_t qualityfactor;
+    uint32_t resonanceFreq;
+    uint32_t excursionMeasure;
+    uint32_t rdcroomtemp;
+    uint32_t releasetime;
+    uint32_t coilthermallimit;
+    uint32_t excursionlimit;
+    uint32_t dsmenabled;
+    uint32_t staticgain;
+    uint32_t lfxgain;
+    uint32_t pilotgain;
+    uint32_t flagToWrite;
+    uint32_t featureSetEnable;
+    uint32_t smooFacVoltClip;
+    uint32_t highPassCutOffFactor;
+    uint32_t leadResistance;
+    uint32_t rmsSmooFac;
+    uint32_t clipLimit;
+    uint32_t thermalCoeff;
+    uint32_t qSpk;
+    uint32_t excurLoggingThresh;
+    uint32_t coilTempLoggingThresh;
+    uint32_t resFreq;
+    uint32_t resFreqGuardBand;
+    uint32_t Ambient_Temp;
+    uint32_t STL_attack_time;
+    uint32_t STL_release_time;
+    uint32_t STL_Admittance_a1;
+    uint32_t STL_Admittance_a2;
+    uint32_t STL_Admittance_b0;
+    uint32_t STL_Admittance_b1;
+    uint32_t STL_Admittance_b2;
+    uint32_t Tch1;
+    uint32_t Rth1;
+    uint32_t Tch2;
+    uint32_t Rth2;
+    uint32_t STL_Attenuation_Gain;
+    uint32_t SPT_rampDownFrames;
+    uint32_t SPT_Threshold;
+    uint32_t T_horizon;
+    uint32_t LFX_Admittance_a1;
+    uint32_t LFX_Admittance_a2;
+    uint32_t LFX_Admittance_b0;
+    uint32_t LFX_Admittance_b1;
+    uint32_t LFX_Admittance_b2;
+    uint32_t X_Max;
+    uint32_t SPK_FS;
+    uint32_t Q_GUARD_BAND;
+    uint32_t STImpedModel_a1;
+    uint32_t STImpedModel_a2;
+    uint32_t STImpedModel_b0;
+    uint32_t STImpedModel_b1;
+    uint32_t STImpedModel_b2;
+    uint32_t STImpedModel_Flag;
+    uint32_t Q_Notch;
+    uint32_t Power_Measurement;
+    uint32_t Reserve_1;
+    uint32_t Reserve_2;
+    uint32_t Reserve_3;
+    uint32_t Reserve_4;
+} __packed;
+
+struct afe_dsm_spkr_prot_get_vi_calib {
+    struct apr_hdr hdr;
+    struct afe_port_cmd_get_param_v2 get_param;
+    struct afe_port_param_data_v2 pdata;
+    struct afe_dsm_filter_get_params_t res_cfg;
+} __packed;
+
+struct afe_dsm_spkr_prot_calib_get_resp {
+    uint32_t status;
+    struct afe_port_param_data_v2 pdata;
+    struct afe_dsm_filter_get_params_t res_cfg;
+} __packed;
+
+#ifdef USE_DSM_LOG
+struct afe_dsm_filter_get_log_params_t {
+    uint8_t byteLogArray[BEFORE_BUFSIZE];
+    uint32_t intLogArray[BEFORE_BUFSIZE];
+    uint8_t afterProbByteLogArray[AFTER_BUFSIZE];
+    uint32_t afterProbIntLogArray[AFTER_BUFSIZE];
+};
+
+struct afe_dsm_spkr_prot_get_log_data {
+    struct apr_hdr hdr;
+    struct afe_port_cmd_get_param_v2 get_param;
+    struct afe_port_param_data_v2 pdata;
+    struct afe_dsm_filter_get_log_params_t res_log_cfg;
+} __packed;
+
+struct afe_dsm_spkr_prot_response_log_data {
+    uint32_t status;
+    struct afe_port_param_data_v2 pdata;
+    struct afe_dsm_filter_get_log_params_t res_log_cfg;
+} __packed;
+#endif /* USE_DSM_LOG */
+#endif /* CONFIG_SND_SOC_MAXIM_DSM */
 #endif /*_APR_AUDIO_V2_H_ */

@@ -1,0 +1,16 @@
+&i2c_2 {
+	ext_dsv@3e {
+		status = "ok";
+		compatible = "ext_dsv";
+		reg = <0x3e>;
+		lge,ext_dsv_primary = <&dsv_dw8768>;
+		dsv_sm5107: ext_dsv_sm5107 {
+			normal_mode_reg = <0x03 0x43>, <0xFF 0x40>;
+			lpwg_mode_reg = <0x03 0x40>, <0xFF 0x28>;
+		};
+		dsv_dw8768: ext_dsv_dw8768 {
+			normal_mode_reg = <0x05 0x0F>, <0x03 0x83>, <0x07 0x00>;
+			lpwg_mode_reg = <0x05 0x07>, <0x03 0x80>, <0x07 0x08>;
+		};
+	};
+};

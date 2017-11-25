@@ -1,0 +1,74 @@
+/*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "msm8917-b6_jcm_jp-pinctrl.dtsi"
+#include "msm8917-b6_jcm_jp-camera.dtsi"
+#include "msm8917-b6_jcm_jp-panel.dtsi"
+#include "msm8917-b6_jcm_jp-sound.dtsi"
+#include "msm8917-b6_jcm_jp-misc.dtsi"
+#include "msm8917-b6_jcm_jp-pm.dtsi"
+#include "msm8917-b6_jcm_jp-touch.dtsi"
+#include "msm8917-b6_jcm_jp-sensor.dtsi"
+#include "msm8917-b6_jcm_jp-usb.dtsi"
+
+/ {
+	reserved-memory {
+		ramoops_mem: ramoops_region@AFF00000 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0xAFF00000 0x0 0x100000>;
+		};
+
+		crash_fb_mem: crash_fb_mem@AFB00000 {
+			linux,contiguous-region;
+			reg = <0 0xAFB00000 0 0x400000>;
+			label = "crash_fb_mem";
+		};
+
+		secure_mem: secure_region@0 {
+			status = "okay";
+		};
+	};
+};
+
+&soc {
+	ramoops {
+		compatible = "ramoops";
+		mem-size = <0x80000>;
+		mem-address = <0xAFF00000>;
+		record-size = <4096>;
+		console-size = <0x40000>;
+		ftrace-size = <0x40000>;
+		dump-oops = <1>;
+	};
+
+	bootlog {
+		compatible = "bootlog";
+	};
+
+	crash_fb {
+		compatible = "crash_fb";
+		mem-addr = <0xAFB00000>;
+		mem-size = <0x400000>;
+	};
+
+	qcom,wdt@b017000 {
+		qcom,bark-time = <17000>;
+        };
+
+	qcom,ion {
+		qcom,ion-heap@8 {
+			status = "okay";
+		};
+	};
+};

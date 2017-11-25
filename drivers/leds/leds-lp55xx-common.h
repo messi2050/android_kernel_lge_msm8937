@@ -145,6 +145,7 @@ struct lp55xx_engine {
  * @engine_idx : Selected engine number
  * @engines    : Engine structure for the device attribute R/W interface
  * @fw         : Firmware data for running a LED pattern
+ * @irq        : Interrupt number
  */
 struct lp55xx_chip {
 	struct i2c_client *cl;
@@ -156,6 +157,7 @@ struct lp55xx_chip {
 	enum lp55xx_engine_index engine_idx;
 	struct lp55xx_engine engines[LP55XX_ENGINE_MAX];
 	const struct firmware *fw;
+	int irq;
 };
 
 /*
@@ -202,7 +204,6 @@ extern int lp55xx_register_sysfs(struct lp55xx_chip *chip);
 extern void lp55xx_unregister_sysfs(struct lp55xx_chip *chip);
 
 /* common device tree population function */
-extern int lp55xx_of_populate_pdata(struct device *dev,
-				    struct device_node *np);
-
+extern struct lp55xx_platform_data
+*lp55xx_of_populate_pdata(struct device *dev, struct device_node *np);
 #endif /* _LEDS_LP55XX_COMMON_H */

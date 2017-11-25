@@ -1,0 +1,88 @@
+/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/ {
+	aliases {
+		spi6 = &spi_6;
+	};
+
+	soc {
+		spi_6:  spi@7af6000{    /* BLSP-2 QUP2 */
+			compatible = "qcom,spi-qup-v2";
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			reg-names = "spi_physical", "spi_bam_physical";
+			reg = <0x7af6000 0x600>, <0x7ac4000 0x1d000>;
+
+			interrupt-names = "spi_irq", "spi_bam_irq";
+			interrupts = <0 300 0>, <0 239 0>;
+
+			spi-max-frequency = <50000000>;
+			qcom,master-id = <84>;
+
+			clock-names = "iface_clk", "core_clk";
+			clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
+			<&clock_gcc clk_gcc_blsp2_qup2_spi_apps_clk>;
+
+			qcom,infinite-mode = <0>;
+			qcom,use-bam;
+			qcom,ver-reg-exists;
+			qcom,bam-consumer-pipe-index = <6>;
+			qcom,bam-producer-pipe-index = <7>;
+
+			/* Assign runtime functions to pins */
+			qcom,use-pinctrl;
+			pinctrl-names = "spi_default","spi_sleep";
+			pinctrl-0 = <&spi_tdmb_active>;
+			pinctrl-1 = <&spi_tdmb_suspend>;
+
+			qcom,gpio-mosi = <&tlmm 20 0x00>;
+			qcom,gpio-miso = <&tlmm 21 0x00>;
+			qcom,gpio-cs0 = <&tlmm 22 0x00>;
+			qcom,gpio-clk = <&tlmm 23 0x00>;
+		};
+	};
+};
+
+&spi_6 {
+	tdmb@0 {
+		compatible = "lge,tdmb";
+		reg = <0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <9 0x0>;
+		spi-max-frequency = <38400000>;
+
+		/* TDMB CLK */
+		clock-names = "tdmb_xo";
+		clocks = <&clock_gcc clk_bb_clk2>;
+
+		pinctrl-names = "gpio_tdmb_suspend";
+		pinctrl-0 = <&tdmb_int_a &tdmb_ctrl>;
+		tdmb-fc8080,irq-gpio = <&tlmm 9 0x00>;
+		tdmb-fc8080,en-gpio = <&tlmm 129 0x00>;
+
+		/*set hw configure here
+		when use pmic clk buffer, change use-xtal to 0, and set xtal-freq value*/
+		use-xtal = <0>;
+		xtal-freq = <19200>;
+
+		/*when use ant switching, change use-ant-sw to 1, and set ant-gpio*/
+		use-ant-sw = <0>;
+		/*Ex. tdmb-fc8080,ant-gpio = <&tlmm ?? 0x00>; */
+
+		/*when use ldo for LDO_IN, chage ctrl-ldo to 1, and set ldo-supply */
+		ctrl-ldo = <0>;
+		/*Ex. ldo-supply = <&pm8994_l10>; */
+	};
+};

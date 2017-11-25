@@ -16,6 +16,7 @@ obj-$(CONFIG_INPUT_MOUSEDEV)	+= mousedev.o
 obj-$(CONFIG_INPUT_JOYDEV)	+= joydev.o
 obj-$(CONFIG_INPUT_EVDEV)	+= evdev.o
 obj-$(CONFIG_INPUT_EVBUG)	+= evbug.o
+obj-$(CONFIG_INPUT_MAG_PEN)	+= mag_pen.o
 
 obj-$(CONFIG_INPUT_KEYBOARD)	+= keyboard/
 obj-$(CONFIG_INPUT_MOUSE)	+= mouse/
@@ -27,4 +28,6 @@ obj-$(CONFIG_INPUT_MISC)	+= misc/
 obj-$(CONFIG_INPUT_APMPOWER)	+= apm-power.o
 obj-$(CONFIG_INPUT_KEYRESET)	+= keyreset.o
 obj-$(CONFIG_INPUT_KEYCOMBO)	+= keycombo.o
-
+obj-$(CONFIG_INPUT_FINGERPRINT) += fingerprint/
+obj-$(CONFIG_SENSOR_ATMF04)	+= sensor/
+obj-$(CONFIG_INPUT_EPACK) += epack/
