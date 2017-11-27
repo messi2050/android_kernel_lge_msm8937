@@ -858,22 +858,12 @@ int32_t msm_sensor_driver_probe(void *setting,
 		 * and probe already succeeded for that sensor. Ignore this
 		 * probe
 		 */
-<<<<<<< HEAD
-/* LGE_CHANGE_S, check slave address as well when sensor is probed again, 2016-09-12, jungryoul.choi@lge.com */
-		if ((slave_info->sensor_id_info.sensor_id ==
-			s_ctrl->sensordata->cam_slave_info->sensor_id_info.sensor_id) &&
-			(slave_info->slave_addr ==
-			s_ctrl->sensordata->cam_slave_info->slave_addr)) {
-/* LGE_CHANGE_E, check slave address as well when sensor is probed again, 2016-09-12, jungryoul.choi@lge.com */
-			pr_err("slot%d: sensor id%d already probed\n",
-=======
 		if (slave_info->sensor_id_info.sensor_id ==
 			s_ctrl->sensordata->cam_slave_info->
 				sensor_id_info.sensor_id &&
 			!(strcmp(slave_info->sensor_name,
 			s_ctrl->sensordata->cam_slave_info->sensor_name))) {
 			pr_err("slot%d: sensor name: %s sensor id%d already probed\n",
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 				slave_info->camera_id,
 				slave_info->sensor_name,
 				s_ctrl->sensordata->cam_slave_info->

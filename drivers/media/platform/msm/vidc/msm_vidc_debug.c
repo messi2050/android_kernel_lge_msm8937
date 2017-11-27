@@ -420,8 +420,6 @@ struct dentry *msm_vidc_debugfs_init_inst(struct msm_vidc_inst *inst,
 		goto exit;
 	}
 	snprintf(debugfs_name, MAX_DEBUGFS_NAME, "inst_%p", inst);
-<<<<<<< HEAD
-=======
 
 	idata = kzalloc(sizeof(struct core_inst_pair), GFP_KERNEL);
 	if (!idata) {
@@ -432,7 +430,6 @@ struct dentry *msm_vidc_debugfs_init_inst(struct msm_vidc_inst *inst,
 	idata->core = inst->core;
 	idata->inst = inst;
 
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	dir = debugfs_create_dir(debugfs_name, parent);
 	if (!dir) {
 		dprintk(VIDC_ERR, "Failed to create debugfs for msm_vidc\n");

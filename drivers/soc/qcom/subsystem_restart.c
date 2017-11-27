@@ -610,7 +610,7 @@ static void subsystem_shutdown(struct subsys_device *dev, void *data)
 
 	pr_info("[%s:%d]: Shutting down %s\n",
 			current->comm, current->pid, name);
-<<<<<<< HEAD
+
 #if defined(CONFIG_LGE_HANDLE_PANIC)
 	if (dev->desc->shutdown(dev->desc, true) < 0) {
 		lge_set_subsys_crash_reason(name, LGE_ERR_SUB_SD);
@@ -622,11 +622,10 @@ static void subsystem_shutdown(struct subsys_device *dev, void *data)
 		panic("subsys-restart: [%s:%d]: Failed to shutdown %s!",
 			current->comm, current->pid, name);
 #endif
-=======
+
 	if (dev->desc->shutdown(dev->desc, true) < 0)
 		panic("subsys-restart: [%s:%d]: Failed to shutdown %s!",
 			current->comm, current->pid, name);
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	dev->crash_count++;
 	subsys_set_state(dev, SUBSYS_OFFLINE);
 	disable_all_irqs(dev);
@@ -660,12 +659,10 @@ static void subsystem_powerup(struct subsys_device *dev, void *data)
 	if (dev->desc->powerup(dev->desc) < 0) {
 		notify_each_subsys_device(&dev, 1, SUBSYS_POWERUP_FAILURE,
 								NULL);
-<<<<<<< HEAD
+
 #if defined(CONFIG_LGE_HANDLE_PANIC)
 		lge_set_subsys_crash_reason(name, LGE_ERR_SUB_PWR);
 #endif
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 		panic("[%s:%d]: Powerup error: %s!",
 			current->comm, current->pid, name);
 	}
@@ -675,12 +672,10 @@ static void subsystem_powerup(struct subsys_device *dev, void *data)
 	if (ret) {
 		notify_each_subsys_device(&dev, 1, SUBSYS_POWERUP_FAILURE,
 								NULL);
-<<<<<<< HEAD
+
 #if defined(CONFIG_LGE_HANDLE_PANIC)
 		lge_set_subsys_crash_reason(name, LGE_ERR_SUB_TOW);
 #endif
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 		panic("[%s:%d]: Timed out waiting for error ready: %s!",
 			current->comm, current->pid, name);
 	}

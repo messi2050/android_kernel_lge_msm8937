@@ -70,11 +70,7 @@ static ssize_t dev_info_read(struct file *file, char __user *buf,
 
 	INIT_DBG_BUF(dbg_buf);
 	write_str(dbg_buf, "===============================");
-<<<<<<< HEAD
-	write_str(dbg_buf, "DEV: 0x%p", dev_ctxt);
-=======
 	write_str(dbg_buf, "DEV: 0x%pK", dev_ctxt);
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	write_str(dbg_buf, "===============================");
 	write_str(dbg_buf, "state: %d", dev_ctxt->state);
 
@@ -182,17 +178,10 @@ static ssize_t inst_info_read(struct file *file, char __user *buf,
 
 	INIT_DBG_BUF(dbg_buf);
 	write_str(dbg_buf, "===============================");
-<<<<<<< HEAD
-	write_str(dbg_buf, "INSTANCE: %p (%s)", inst,
-								"BA device");
-	write_str(dbg_buf, "===============================");
-	write_str(dbg_buf, "dev: %p", inst->dev_ctxt);
-=======
 	write_str(dbg_buf, "INSTANCE: %pK (%s)", inst,
 								"BA device");
 	write_str(dbg_buf, "===============================");
 	write_str(dbg_buf, "dev: %pK", inst->dev_ctxt);
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	write_str(dbg_buf, "state: %d", inst->state);
 
 	size = simple_read_from_buffer(buf, count, ppos,

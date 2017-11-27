@@ -444,10 +444,7 @@ static int parse_header(void)
 		}
 		img->firmware_data = fwu->data_buffer + FW_IMAGE_OFFSET;
 	}
-<<<<<<< HEAD
-=======
 	/* get config offset*/
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	if (img->config_size) {
 		// FW_IMAGE_OFFSET + image_size was ok as above
 		if (!in_bounds(FW_IMAGE_OFFSET + img->image_size,
@@ -1807,8 +1804,6 @@ static ssize_t fwu_sysfs_store_image(struct file *data_file,
 		struct kobject *kobj, struct bin_attribute *attributes,
 		char *buf, loff_t pos, size_t count)
 {
-<<<<<<< HEAD
-=======
 	ssize_t retval;
 
 	if (!mutex_trylock(&fwu_sysfs_mutex))
@@ -1819,18 +1814,12 @@ static ssize_t fwu_sysfs_store_image(struct file *data_file,
 		retval = -EAGAIN;
 		goto exit;
 	}
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	if (count > fwu->image_size - fwu->data_pos) {
 		dev_err(&fwu->rmi4_data->i2c_client->dev,
 				"%s: Not enough space in buffer\n",
 				__func__);
-<<<<<<< HEAD
-		return -EINVAL;
-=======
-
 		retval = -EINVAL;
 		goto exit;
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	}
 
 	memcpy((void *)(&fwu->ext_data_source[fwu->data_pos]),

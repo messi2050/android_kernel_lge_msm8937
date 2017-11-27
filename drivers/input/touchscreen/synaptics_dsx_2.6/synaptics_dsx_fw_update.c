@@ -2226,16 +2226,8 @@ static int fwu_get_image_firmware_id(unsigned int *fw_id)
 					__func__);
 			return -ENOMEM;
 		}
-<<<<<<< HEAD
-
-		max_index = min((ptrdiff_t)(MAX_FIRMWARE_ID_LEN - 1),
-				&fwu->image_name[MAX_IMAGE_NAME_LEN] - strptr);
-		index = 0;
-		while (index < max_index && isdigit(strptr[index])) {
-=======
 		while ((index < MAX_FIRMWARE_ID_LEN - 1) && strptr[index] >= '0'
 						&& strptr[index] <= '9') {
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 			firmware_id[index] = strptr[index];
 			index++;
 		}
@@ -4410,8 +4402,6 @@ static int synaptics_rmi4_fwu_init(struct synaptics_rmi4_data *rmi4_data)
 	fwu->do_lockdown = DO_LOCKDOWN;
 	fwu->initialized = true;
 
-<<<<<<< HEAD
-
 #ifdef DO_STARTUP_FW_UPDATE
 	fwu->fwu_workqueue = create_singlethread_workqueue("fwu_workqueue");
 	INIT_WORK(&fwu->fwu_work, fwu_startup_fw_update_work);
@@ -4419,9 +4409,7 @@ static int synaptics_rmi4_fwu_init(struct synaptics_rmi4_data *rmi4_data)
 			&fwu->fwu_work);
 #endif
 
-=======
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_EXTRA_SYSFS
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	retval = sysfs_create_bin_file(&rmi4_data->input_dev->dev.kobj,
 			&dev_attr_data);
 	if (retval < 0) {

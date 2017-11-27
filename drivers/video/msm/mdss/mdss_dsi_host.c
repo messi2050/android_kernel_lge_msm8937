@@ -2336,18 +2336,10 @@ void mdss_dsi_wait4video_done(struct mdss_dsi_ctrl_pdata *ctrl)
 
 	/* DSI_INTL_CTRL */
 	data = MIPI_INP((ctrl->ctrl_base) + 0x0110);
-<<<<<<< HEAD
-	/* clear previous VIDEO_DONE interrupt as well */
-	data &= (DSI_INTR_TOTAL_MASK | DSI_INTR_VIDEO_DONE);
-	data |= DSI_INTR_VIDEO_DONE_MASK;
-
-	MIPI_OUTP((ctrl->ctrl_base) + 0x0110, data);
-=======
 	/* clear previous VIDEO_DONE interrupt first */
 	data &= DSI_INTR_TOTAL_MASK;
 	MIPI_OUTP((ctrl->ctrl_base) + 0x0110, (data | DSI_INTR_VIDEO_DONE));
 	wmb(); /* make sure write happened */
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 
 	spin_lock_irqsave(&ctrl->mdp_lock, flag);
 	reinit_completion(&ctrl->video_comp);
@@ -2379,7 +2371,7 @@ static int mdss_dsi_wait4video_eng_busy(struct mdss_dsi_ctrl_pdata *ctrl)
 
 	if (ctrl->ctrl_state & CTRL_STATE_MDP_ACTIVE) {
 		mdss_dsi_wait4video_done(ctrl);
-<<<<<<< HEAD
+
 		/* delay 4 ms to skip BLLP */
 #if IS_ENABLED(CONFIG_LGE_DISPLAY_PRE_ACTIVE_AREA_DELAY)
 		usleep_range(ctrl->panel_data.panel_info.pre_active_area_delay_us, ctrl->panel_data.panel_info.pre_active_area_delay_us);
@@ -2390,7 +2382,7 @@ static int mdss_dsi_wait4video_eng_busy(struct mdss_dsi_ctrl_pdata *ctrl)
 		usleep_range(4000, 4000);
 #endif
 #endif
-=======
+
 		v_total = mdss_panel_get_vtotal(pinfo);
 		v_blank = pinfo->lcdc.v_back_porch + pinfo->lcdc.v_pulse_width;
 		if (pinfo->dynamic_fps && pinfo->current_fps)
@@ -2402,7 +2394,6 @@ static int mdss_dsi_wait4video_eng_busy(struct mdss_dsi_ctrl_pdata *ctrl)
 		/* delay sleep_ms to skip BLLP */
 		if (sleep_ms)
 			usleep_range((sleep_ms * 1000), (sleep_ms * 1000) + 10);
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 		ret = 1;
 	}
 

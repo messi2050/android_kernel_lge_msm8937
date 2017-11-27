@@ -4439,10 +4439,7 @@ static int mdss_fb_handle_buf_sync_ioctl(struct msm_sync_pt_data *sync_pt_data,
 		goto buf_sync_err_3;
 	}
 
-<<<<<<< HEAD
-=======
 	sync_fence_install(rel_fence, rel_fen_fd);
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	sync_fence_install(retire_fence, retire_fen_fd);
 
 skip_retire_fence:

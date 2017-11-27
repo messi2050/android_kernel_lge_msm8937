@@ -85,10 +85,7 @@ enum sensor_sub_module_t {
 	SUB_MODULE_EXT,
 	SUB_MODULE_IR_LED,
 	SUB_MODULE_IR_CUT,
-<<<<<<< HEAD
 	SUB_MODULE_OTP,
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	SUB_MODULE_MAX,
 };
 
@@ -302,15 +299,12 @@ struct msm_ir_cut_cfg_data_t {
 	enum msm_ir_cut_cfg_type_t cfg_type;
 };
 
-<<<<<<< HEAD
 struct msm_otp_info_t {
         struct msm_sensor_power_setting_array *power_setting_array;
         enum i2c_freq_mode_t i2c_freq_mode;
         struct msm_otp_memory_map_array *mem_map_array;
 };
 
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 struct msm_eeprom_cfg_data {
 	enum eeprom_cfg_type_t cfgtype;
 	uint8_t is_supported;
@@ -661,13 +655,10 @@ struct sensor_init_cfg_data {
 #define VIDIOC_MSM_IR_CUT_CFG \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_ir_cut_cfg_data_t)
 
-<<<<<<< HEAD
 #if 1 //defined(CONFIG_MSM_OTP)
 #define VIDIOC_MSM_OTP_CFG \
         _IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct  msm_otp_cfg_data)
 #endif
 
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 #endif
 

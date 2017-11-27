@@ -92,12 +92,9 @@ struct f_midi {
 	unsigned int buflen, qlen;
 };
 
-<<<<<<< HEAD
 #ifdef CONFIG_LGE_USB_G_ANDROID
 static struct f_midi _midi;
 #endif
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 static struct f_midi *the_midi;
 
 static inline struct f_midi *func_to_midi(struct usb_function *f)
@@ -426,15 +423,14 @@ static void f_midi_unbind(struct usb_configuration *c, struct usb_function *f)
 	card = midi->card;
 	midi->card = NULL;
 	if (card)
-<<<<<<< HEAD
+
 #ifdef CONFIG_LGE_USB_G_ANDROID
 		snd_card_free_when_closed(card);
 #else
 		snd_card_free(card);
 #endif
-=======
+
 		snd_card_free_when_closed(card);
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 
 	kfree(midi->id);
 	midi->id = NULL;
@@ -452,10 +448,7 @@ static void f_midi_unbind(struct usb_configuration *c, struct usb_function *f)
 	usb_free_all_descriptors(f);
 #ifndef CONFIG_LGE_USB_G_ANDROID
 	kfree(midi);
-<<<<<<< HEAD
 #endif
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	the_midi = NULL;
 }
 

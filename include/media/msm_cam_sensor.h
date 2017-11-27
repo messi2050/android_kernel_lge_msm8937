@@ -276,12 +276,9 @@ struct msm_flash_cfg_data_t32 {
 
 #define VIDIOC_MSM_IR_CUT_CFG32 \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_ir_cut_cfg_data_t32)
-<<<<<<< HEAD
 
 #define VIDIOC_MSM_OTP_CFG32 \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_otp_cfg_data32)
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 #endif
 
 #endif

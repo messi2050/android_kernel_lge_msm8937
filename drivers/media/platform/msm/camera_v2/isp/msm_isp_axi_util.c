@@ -16,12 +16,9 @@
 #include "msm_isp_axi_util.h"
 
 #define HANDLE_TO_IDX(handle) (handle & 0xFF)
-<<<<<<< HEAD
+
 #define ISP_SOF_DEBUG_COUNT 5//0=>5
 
-=======
-#define ISP_SOF_DEBUG_COUNT 0
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 static int msm_isp_update_dual_HW_ms_info_at_start(
 	struct vfe_device *vfe_dev,
 	enum msm_vfe_input_src stream_src,
@@ -3708,14 +3705,11 @@ int msm_isp_update_axi_stream(struct vfe_device *vfe_dev, void *arg)
 	case UPDATE_STREAM_REQUEST_FRAMES_VER2: {
 		struct msm_vfe_axi_stream_cfg_update_info_req_frm *req_frm =
 			&update_cmd->req_frm_ver2;
-<<<<<<< HEAD
-=======
 		if (HANDLE_TO_IDX(req_frm->stream_handle) >= VFE_AXI_SRC_MAX) {
 			pr_err("%s: Invalid stream handle\n", __func__);
 			rc = -EINVAL;
 			break;
 		}
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 		stream_info = &axi_data->stream_info[HANDLE_TO_IDX(
 				req_frm->stream_handle)];
 		rc = msm_isp_request_frame(vfe_dev, stream_info,

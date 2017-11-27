@@ -677,15 +677,12 @@ static int android_enable(struct android_dev *dev)
 		if (ktime_to_ms(diff) < MIN_DISCONNECT_DELAY_MS)
 			msleep(MIN_DISCONNECT_DELAY_MS - ktime_to_ms(diff));
 
-<<<<<<< HEAD
 #ifdef CONFIG_LGE_USB_G_ANDROID
 		if (dev->acc_wait_check) {
 			dev->acc_wait_check = false;
 			acc_wait_event();
 		}
 #endif
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 		/* Userspace UVC driver will trigger connect for video */
 		if (!video_enabled)
 			usb_gadget_connect(cdev->gadget);
@@ -701,7 +698,6 @@ static void android_disable(struct android_dev *dev)
 	struct usb_composite_dev *cdev = dev->cdev;
 	struct android_configuration *conf;
 	bool do_put = false;
-<<<<<<< HEAD
 
 #ifdef CONFIG_LGE_USB_FACTORY
 	if (dev->check_pif) {
@@ -709,8 +705,6 @@ static void android_disable(struct android_dev *dev)
 		return;
 	}
 #endif
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 
 #ifdef CONFIG_LGE_USB_G_ANDROID
 	pr_info("%s: checked disable_depth(%d)\n", __func__, dev->disable_depth);
@@ -1851,183 +1845,6 @@ struct uac2_function_config {
 	struct usb_function *func;
 	struct usb_function_instance *fi;
 };
-<<<<<<< HEAD
-=======
-
-static int uac2_function_init(struct android_usb_function *f,
-			       struct usb_composite_dev *cdev)
-{
-	struct uac2_function_config *config;
-
-	f->config = kzalloc(sizeof(*config), GFP_KERNEL);
-	if (!f->config)
-		return -ENOMEM;
-
-	config = f->config;
-
-	config->fi = usb_get_function_instance("uac2");
-	if (IS_ERR(config->fi))
-		return PTR_ERR(config->fi);
-
-	config->func = usb_get_function(config->fi);
-	if (IS_ERR(config->func)) {
-		usb_put_function_instance(config->fi);
-		return PTR_ERR(config->func);
-	}
-
-	return 0;
-}
-
-static void uac2_function_cleanup(struct android_usb_function *f)
-{
-	struct uac2_function_config *config = f->config;
-
-	if (config) {
-		usb_put_function(config->func);
-		usb_put_function_instance(config->fi);
-	}
-
-	kfree(f->config);
-	f->config = NULL;
-}
-
-static int uac2_function_bind_config(struct android_usb_function *f,
-					  struct usb_configuration *c)
-{
-	struct uac2_function_config *config = f->config;
-
-	return usb_add_function(c, config->func);
-}
-
-static struct android_usb_function uac2_function = {
-	.name		= "uac2_func",
-	.init		= uac2_function_init,
-	.cleanup	= uac2_function_cleanup,
-	.bind_config	= uac2_function_bind_config,
-};
-
-#ifdef CONFIG_MEDIA_SUPPORT
-/* PERIPHERAL VIDEO */
-struct video_function_config {
-	struct usb_function *func;
-	struct usb_function_instance *fi;
-};
-
-static int video_function_init(struct android_usb_function *f,
-			       struct usb_composite_dev *cdev)
-{
-	struct f_uvc_opts *uvc_opts;
-	struct video_function_config *config;
-
-	f->config = kzalloc(sizeof(*config), GFP_KERNEL);
-	if (!f->config)
-		return -ENOMEM;
-
-	config = f->config;
-
-	config->fi = usb_get_function_instance("uvc");
-	if (IS_ERR(config->fi))
-		return PTR_ERR(config->fi);
-
-	uvc_opts = container_of(config->fi, struct f_uvc_opts, func_inst);
-
-	uvc_opts->streaming_interval = streaming_interval;
-	uvc_opts->streaming_maxpacket = streaming_maxpacket;
-	uvc_opts->streaming_maxburst = streaming_maxburst;
-	uvc_set_trace_param(trace);
-
-	uvc_opts->fs_control = uvc_fs_control_cls;
-	uvc_opts->ss_control = uvc_ss_control_cls;
-	uvc_opts->fs_streaming = uvc_fs_streaming_cls;
-	uvc_opts->hs_streaming = uvc_hs_streaming_cls;
-	uvc_opts->ss_streaming = uvc_ss_streaming_cls;
-
-	config->func = usb_get_function(config->fi);
-	if (IS_ERR(config->func)) {
-		usb_put_function_instance(config->fi);
-		return PTR_ERR(config->func);
-	}
-
-	return 0;
-}
-
-static void video_function_cleanup(struct android_usb_function *f)
-{
-	struct video_function_config *config = f->config;
-
-	if (config) {
-		usb_put_function(config->func);
-		usb_put_function_instance(config->fi);
-	}
-
-	kfree(f->config);
-	f->config = NULL;
-}
-
-static int video_function_bind_config(struct android_usb_function *f,
-					  struct usb_configuration *c)
-{
-	struct video_function_config *config = f->config;
-
-	return usb_add_function(c, config->func);
-}
-
-static void video_function_enable(struct android_usb_function *f)
-{
-	video_enabled = true;
-}
-
-static void video_function_disable(struct android_usb_function *f)
-{
-	video_enabled = false;
-}
-
-static struct android_usb_function video_function = {
-	.name		= "video",
-	.init		= video_function_init,
-	.cleanup	= video_function_cleanup,
-	.bind_config	= video_function_bind_config,
-	.enable		= video_function_enable,
-	.disable	= video_function_disable,
-};
-
-int video_ready_callback(struct usb_function *function)
-{
-	struct android_dev *dev = video_function.android_dev;
-	struct usb_composite_dev *cdev;
-
-	if (!dev) {
-		pr_err("%s: dev is NULL\n", __func__);
-		return -ENODEV;
-	}
-
-	cdev = dev->cdev;
-
-	pr_debug("%s: connect\n", __func__);
-	usb_gadget_connect(cdev->gadget);
-
-	return 0;
-}
-
-int video_closed_callback(struct usb_function *function)
-{
-	struct android_dev *dev = video_function.android_dev;
-	struct usb_composite_dev *cdev;
-
-	if (!dev) {
-		pr_err("%s: dev is NULL\n", __func__);
-		return -ENODEV;
-	}
-
-	cdev = dev->cdev;
-
-	pr_debug("%s: disconnect\n", __func__);
-	usb_gadget_disconnect(cdev->gadget);
-
-	return 0;
-}
-#endif
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 
 static int uac2_function_init(struct android_usb_function *f,
 			       struct usb_composite_dev *cdev)

@@ -32,12 +32,9 @@
 #include "cam_hw_ops.h"
 #include <media/msmb_generic_buf_mgr.h>
 
-<<<<<<< HEAD
 /*LGE_CHANGE, CST, added variable for debugfs*/
 static uint8_t msm_debug;
 
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 static struct v4l2_device *msm_v4l2_dev;
 static struct list_head    ordered_sd_list;
 

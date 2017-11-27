@@ -6315,16 +6315,13 @@ static void handle_usb_removal(struct smbchg_chip *chip)
 		chip->typec_current_ma = 0;
 	/* cancel/wait for hvdcp pending work if any */
 	cancel_delayed_work_sync(&chip->hvdcp_det_work);
-<<<<<<< HEAD
 #ifdef CONFIG_LGE_PM
 	smbchg_relax(chip, PM_DETECT_HVDCP);
 #endif
 #ifdef CONFIG_LGE_PM_PARALLEL_BATTERY_PROTECT
 	cancel_delayed_work_sync(&chip->battchg_protect_work);
 #endif
-=======
 	smbchg_relax(chip, PM_DETECT_HVDCP);
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	smbchg_change_usb_supply_type(chip, POWER_SUPPLY_TYPE_UNKNOWN);
 	if (!chip->skip_usb_notification) {
 		pr_smb(PR_MISC, "setting usb psy present = %d\n",
@@ -8139,7 +8136,6 @@ static irqreturn_t fastchg_handler(int irq, void *_chip)
 	struct smbchg_chip *chip = _chip;
 
 	pr_smb(PR_INTERRUPT, "p2f triggered\n");
-<<<<<<< HEAD
 #if defined(CONFIG_LGE_PM_TAPER_CHG_AICL_DISABLE)
 #if defined(CONFIG_LGE_PM_ONBINARY_ORANGE)
 	if(!lge_get_board_orange()){
@@ -8153,9 +8149,6 @@ static irqreturn_t fastchg_handler(int irq, void *_chip)
 	chip->prev_taper_status = false;
 #endif
 #endif
-=======
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
-
 	if (is_usb_present(chip) || is_dc_present(chip)) {
 		smbchg_detect_parallel_charger(chip);
 		smbchg_parallel_usb_check_ok(chip);
@@ -11803,7 +11796,6 @@ static int smbchg_probe(struct spmi_device *spmi)
 	}
 #else
 	rerun_hvdcp_det_if_necessary(chip);
-<<<<<<< HEAD
 #endif
 #ifdef CONFIG_LGE_PM_EMBEDDED_BATTERY
 	if (lge_is_factory_cable() && is_usb_present(chip) &&
@@ -11813,9 +11805,6 @@ static int smbchg_probe(struct spmi_device *spmi)
 		pr_info("won_test AICL disable for no battery scene %d\n", is_battery_present());
 	}
 #endif
-=======
-
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 	update_usb_status(chip, is_usb_present(chip), false);
 	dump_regs(chip);
 	create_debugfs_entries(chip);

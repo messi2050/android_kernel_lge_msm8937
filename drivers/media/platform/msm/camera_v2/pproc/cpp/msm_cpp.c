@@ -2326,11 +2326,6 @@ static int msm_cpp_cfg_frame(struct cpp_device *cpp_dev,
 		return -EINVAL;
 	}
 
-<<<<<<< HEAD
-	if (stripe_base == UINT_MAX || new_frame->num_strips >
-		(UINT_MAX - 1 - stripe_base) / stripe_size) {
-		pr_err("Invalid frame message,num_strips %d is large\n",
-=======
 	/* Stripe index starts at zero */
 	if ((!new_frame->num_strips) ||
 		(new_frame->first_stripe_index >= new_frame->num_strips) ||
@@ -2354,7 +2349,6 @@ static int msm_cpp_cfg_frame(struct cpp_device *cpp_dev,
 		(new_frame->num_strips >
 			(UINT_MAX - 1 - stripe_base) / stripe_size)) {
 		pr_err("Invalid frame message, num_strips %d is large\n",
->>>>>>> LA.UM.5.6.c1-02300-8x37.0
 			new_frame->num_strips);
 		return -EINVAL;
 	}

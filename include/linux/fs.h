@@ -1443,9 +1443,6 @@ extern int vfs_rmdir(struct inode *, struct dentry *);
 extern int vfs_unlink(struct inode *, struct dentry *, struct inode **);
 extern int vfs_rename(struct inode *, struct dentry *, struct inode *, struct dentry *, struct inode **, unsigned int);
 extern int vfs_whiteout(struct inode *, struct dentry *);
-#ifdef CONFIG_SDCARD_FS
-extern long do_unlinkat(int, const char __user *, bool);
-#endif
 
 /*
  * VFS dentry helper functions.
