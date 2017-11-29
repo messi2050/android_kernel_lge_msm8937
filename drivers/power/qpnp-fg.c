@@ -7107,7 +7107,6 @@ static void get_default_rslow_comp_settings(struct fg_chip *chip)
 	memcpy(&chip->rslow_comp.rslow_comp, chip->batt_profile + offset, 4);
 }
 
->>>>>>> LA.UM.5.6.r1-06300-89xx.0
 static int populate_system_data(struct fg_chip *chip)
 {
 	u8 buffer[24];
