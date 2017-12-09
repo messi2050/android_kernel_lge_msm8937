@@ -53,10 +53,11 @@ config MSMB_CAMERA_DEBUG
 
 if MSMB_CAMERA
 if LGE_DIR_CAMERA
-source "drivers/media/platform/msm/camera_v2_LGE/Kconfig"
+source "drivers/media/platform/msm/camera_v2_lge/Kconfig"
 endif
 if !LGE_DIR_CAMERA
 source "drivers/media/platform/msm/camera_v2/Kconfig"
+endif
 endif # MSMB_CAMERA
 source "drivers/media/platform/msm/dvb/Kconfig"
 source "drivers/media/platform/msm/broadcast/Kconfig"
