@@ -659,6 +659,7 @@ static int32_t msm_cci_data_queue(struct cci_device *cci_dev,
 
 	max_queue_size = cci_dev->cci_i2c_queue_info[master][queue].
 			max_queue_size;
+
 	if (c_ctrl->cmd == MSM_CCI_I2C_WRITE_SEQ)
 		queue_size = max_queue_size;
 	else
@@ -1427,10 +1428,8 @@ static int32_t msm_cci_init(struct v4l2_subdev *sd,
 			MSM_CCI_WRITE_DATA_PAYLOAD_SIZE_10;
 	cci_dev->support_seq_write = 0;
 	if (cci_dev->hw_version >= 0x10020000) {
-		//LGE_UPDATE yt.jeon@lge.com
-		//cci_dev->payload_size =
-		//	MSM_CCI_WRITE_DATA_PAYLOAD_SIZE_11;
-
+		cci_dev->payload_size =
+			MSM_CCI_WRITE_DATA_PAYLOAD_SIZE_11;
 		cci_dev->support_seq_write = 1;
 	}
 	for (i = 0; i < NUM_MASTERS; i++) {
@@ -1849,7 +1848,6 @@ static void msm_cci_init_cci_params(struct cci_device *new_cci_dev)
 			cci_master_info[i].reset_complete);
 
 		for (j = 0; j < NUM_QUEUES; j++) {
-			spin_lock_init(&new_cci_dev->cci_master_info[i].report_lock[j]); /*LGE_CHANGE, fix I2C write timeout, 2016-04-08, Camera-Stability@lge.com*/
 			mutex_init(&new_cci_dev->cci_master_info[i].mutex_q[j]);
 			init_completion(&new_cci_dev->
 				cci_master_info[i].report_q[j]);

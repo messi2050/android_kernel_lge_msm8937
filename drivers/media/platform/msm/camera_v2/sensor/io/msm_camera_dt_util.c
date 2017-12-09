@@ -254,24 +254,6 @@ int msm_sensor_get_sub_module_index(struct device_node *of_node,
 		src_node = NULL;
 	}
 
-#if defined(CONFIG_MSM_OTP)
-	src_node = of_parse_phandle(of_node, "qcom,otp-src", 0);
-	if (!src_node) {
-		CDBG("%s:%d otp src_node NULL\n", __func__, __LINE__);
-	} else {
-		rc = of_property_read_u32(src_node, "cell-index", &val);
-		CDBG("%s qcom,otp cell index %d, rc %d\n", __func__,
-			val, rc);
-		if (rc < 0) {
-			pr_err("%s failed %d\n", __func__, __LINE__);
-			goto ERROR;
-		}
-		sensor_info->subdev_id[SUB_MODULE_OTP] = val;
-		of_node_put(src_node);
-		src_node = NULL;
-	}
-#endif
-
 	rc = of_property_read_u32(of_node, "qcom,eeprom-sd-index", &val);
 	if (rc != -EINVAL) {
 		CDBG("%s qcom,eeprom-sd-index %d, rc %d\n", __func__, val, rc);

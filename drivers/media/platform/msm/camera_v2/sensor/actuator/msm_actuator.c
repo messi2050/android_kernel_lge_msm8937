@@ -26,11 +26,9 @@ DEFINE_MSM_MUTEX(msm_actuator_mutex);
 #define CDBG(fmt, args...) pr_debug(fmt, ##args)
 #endif
 
-//LGE_CHANGE_S, Fix Tick-noise
-#define PARK_LENS_LONG_STEP 1
-#define PARK_LENS_MID_STEP 1
-#define PARK_LENS_SMALL_STEP 1
-//LGE_CHANGE_E, Fix Tick-noise
+#define PARK_LENS_LONG_STEP 7
+#define PARK_LENS_MID_STEP 5
+#define PARK_LENS_SMALL_STEP 3
 #define MAX_QVALUE 4096
 
 static struct v4l2_file_operations msm_actuator_v4l2_subdev_fops;
@@ -117,7 +115,6 @@ static void msm_actuator_parse_i2c_params(struct msm_actuator_ctrl_t *a_ctrl,
 			if (write_arr[i].reg_addr != 0xFFFF) {
 				i2c_byte1 = write_arr[i].reg_addr;
 				i2c_byte2 = value;
-#if 0
 				if (size != (i+1)) {
 					i2c_byte2 = value & 0xFF;
 					CDBG("byte1:0x%x, byte2:0x%x\n",
@@ -138,19 +135,6 @@ static void msm_actuator_parse_i2c_params(struct msm_actuator_ctrl_t *a_ctrl,
 					i2c_byte1 = write_arr[i].reg_addr;
 					i2c_byte2 = (value & 0xFF00) >> 8;
 				}
-#else
-						if (size != (i+1)) {
-							i2c_byte2 = (value & 0xFF00) >> 8;
-							CDBG("byte1:0x%x, byte2:0x%x\n", i2c_byte1, i2c_byte2);
-							i2c_tbl[a_ctrl->i2c_tbl_index].reg_addr = i2c_byte1;
-							i2c_tbl[a_ctrl->i2c_tbl_index].reg_data = i2c_byte2;
-							i2c_tbl[a_ctrl->i2c_tbl_index].delay = 0;
-							a_ctrl->i2c_tbl_index++;
-							i++;
-							i2c_byte1 = write_arr[i].reg_addr;
-							i2c_byte2 = (value & 0x00FF);
-						}
-#endif
 			} else {
 				i2c_byte1 = (value & 0xFF00) >> 8;
 				i2c_byte2 = value & 0xFF;
@@ -833,11 +817,7 @@ static int32_t msm_actuator_park_lens(struct msm_actuator_ctrl_t *a_ctrl)
 	next_lens_pos = a_ctrl->step_position_table[a_ctrl->curr_step_pos];
 	while (next_lens_pos) {
 		/* conditions which help to reduce park lens time */
-		//LGE_CHANGE_S, Fix Tick-noise
-		if (next_lens_pos > (a_ctrl->step_position_table[a_ctrl->total_steps] / 2)) {
-			next_lens_pos = (uint16_t)(a_ctrl->step_position_table[a_ctrl->total_steps] * 1 / 2);
-		} else if (next_lens_pos > (a_ctrl->park_lens.max_step *
-		//LGE_CHANGE_E, Fix Tick-noise
+		if (next_lens_pos > (a_ctrl->park_lens.max_step *
 			PARK_LENS_LONG_STEP)) {
 			next_lens_pos = next_lens_pos -
 				(a_ctrl->park_lens.max_step *
@@ -1974,10 +1954,9 @@ static int32_t msm_actuator_platform_probe(struct platform_device *pdev)
 		rc = msm_camera_pinctrl_init(
 			&(msm_actuator_t->pinctrl_info), &(pdev->dev));
 		if (rc < 0) {
-			CDBG("ERR:%s: Error in reading actuator pinctrl\n",
-				__func__); //LGE_UPDATE
+			pr_err("ERR:%s: Error in reading actuator pinctrl\n",
+				__func__);
 			msm_actuator_t->cam_pinctrl_status = 0;
-			rc = 0; //LGE_UPDATE
 		}
 	}
 

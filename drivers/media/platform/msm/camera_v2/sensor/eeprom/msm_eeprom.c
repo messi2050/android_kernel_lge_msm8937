@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2017, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -17,10 +17,6 @@
 #include "msm_sd.h"
 #include "msm_cci.h"
 #include "msm_eeprom.h"
-#include <linux/device.h>
-#if 1 //def CONFIG_MACH_LGE
-#include "msm_eeprom_util.h"
-#endif
 
 #undef CDBG
 #define CDBG(fmt, args...) pr_debug(fmt, ##args)
@@ -28,29 +24,6 @@
 DEFINE_MSM_MUTEX(msm_eeprom_mutex);
 #ifdef CONFIG_COMPAT
 static struct v4l2_file_operations msm_eeprom_v4l2_subdev_fops;
-#endif
-
-#if defined(CONFIG_MSM_OTP)
-static LIST_HEAD(eeprom_list);
-int32_t msm_eeprom_find(const char *name, enum camb_position_t position)
-{
-	int32_t rc = 0;
-	struct msm_eeprom_ctrl_t *e_ctrl = NULL;
-
-	if (!list_empty(&eeprom_list)) {
-		list_for_each_entry(e_ctrl, &eeprom_list, link) {
-			CDBG("name = %s, position = %d\n", e_ctrl->eboard_info->eeprom_name, e_ctrl->position);
-			if ((!strcmp(e_ctrl->eboard_info->eeprom_name, name))
-				&& (e_ctrl->position == position)) {
-				rc = 1;
-				break;
-			}
-		}
-	}
-
-	return rc;
-}
-EXPORT_SYMBOL(msm_eeprom_find);
 #endif
 
 /**
@@ -589,7 +562,6 @@ static int eeprom_init_config(struct msm_eeprom_ctrl_t *e_ctrl,
 	rc = eeprom_parse_memory_map(e_ctrl, memory_map_arr);
 	if (rc < 0) {
 		pr_err("%s::%d memory map parse failed\n", __func__, __LINE__);
-		goto free_mem; //LGE_CHANGE for preventing crash
 	}
 
 	rc = msm_camera_power_down(power_info, e_ctrl->eeprom_device_type,
@@ -598,9 +570,6 @@ static int eeprom_init_config(struct msm_eeprom_ctrl_t *e_ctrl,
 		pr_err("%s:%d Power down failed rc %d\n",
 			__func__, __LINE__, rc);
 	}
-#if 1 //def CONFIG_MACH_LGE
-	msm_eeprom_set_maker_id(e_ctrl->cal_data.mapdata[EEPROM_OFFSET_MODULE_MAKER]);
-#endif
 
 free_mem:
 	kfree(power_setting_array);
@@ -1708,7 +1677,7 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 	rc = msm_eeprom_get_dt_data(e_ctrl);
 	if (rc < 0)
 		goto board_free;
-        e_ctrl->userspace_probe = 1;
+
 	if (e_ctrl->userspace_probe == 0) {
 		rc = of_property_read_u32(of_node, "qcom,slave-addr",
 			&temp);
@@ -1717,15 +1686,6 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 			goto board_free;
 		}
 
-#if defined(CONFIG_MSM_OTP)
-	rc = of_property_read_u32(of_node, "qcom,eeprom-position",
-				  &e_ctrl->position);
-	CDBG("qcom,eeprom-position %d, rc %d\n", e_ctrl->position, rc);
-	if (rc < 0) {
-		e_ctrl->position = BACK_CAMERA_B;
-		pr_info("Default EEPROM position.\n");
-	}
-#endif
 		rc = of_property_read_u32(of_node, "qcom,i2c-freq-mode",
 			&e_ctrl->i2c_freq_mode);
 		CDBG("qcom,i2c_freq_mode %d, rc %d\n",
@@ -1797,11 +1757,6 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 #endif
 
 	e_ctrl->is_supported = (e_ctrl->is_supported << 1) | 1;
-
-#if 1 //def CONFIG_MACH_LGE
-	msm_eeprom_create_sysfs();
-#endif
-
 	CDBG("%s X\n", __func__);
 	return rc;
 
@@ -1910,9 +1865,6 @@ static int __init msm_eeprom_init_module(void)
 static void __exit msm_eeprom_exit_module(void)
 {
 	platform_driver_unregister(&msm_eeprom_platform_driver);
-#if 1 //def CONFIG_MACH_LGE
-	msm_eeprom_destroy_sysfs();
-#endif
 	spi_unregister_driver(&msm_eeprom_spi_driver);
 	i2c_del_driver(&msm_eeprom_i2c_driver);
 }

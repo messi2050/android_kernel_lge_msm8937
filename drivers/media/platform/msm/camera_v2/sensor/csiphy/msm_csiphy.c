@@ -451,11 +451,6 @@ static int msm_csiphy_2phase_lane_config(
 			mipi_csiphy_3ph_cmn_ctrl0.addr);
 	}
 	msm_csiphy_cphy_irq_config(csiphy_dev, csiphy_params);
-    /* LGE_CHANGE_S, CASE#02354719, MSM CSIPHY Lane configuration, 2016-03-30, jh.bae@lge.com */
-        msm_camera_io_w(0x50, csiphybase+0x10);
-        msm_camera_io_w(0x50, csiphybase+0x210);
-        msm_camera_io_w(0x50, csiphybase+0x710);
-    /* LGE_CHANGE_E, CASE#02354719, MSM CSIPHY Lane configuration, 2016-03-30, jh.bae@lge.com */
 	return 0;
 }
 

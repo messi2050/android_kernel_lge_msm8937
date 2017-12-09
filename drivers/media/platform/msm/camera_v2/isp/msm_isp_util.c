@@ -556,6 +556,8 @@ static int msm_isp_set_dual_HW_master_slave_mode(
 	vfe_dev->common_data->ms_resource.dual_hw_type = DUAL_HW_MASTER_SLAVE;
 	vfe_dev->vfe_ub_policy = MSM_WM_UB_EQUAL_SLICING;
 	if (dual_hw_ms_cmd->primary_intf < VFE_SRC_MAX) {
+		ISP_DBG("%s: vfe %d primary_intf %d\n", __func__,
+			vfe_dev->pdev->id, dual_hw_ms_cmd->primary_intf);
 		src_info = &vfe_dev->axi_data.
 			src_info[dual_hw_ms_cmd->primary_intf];
 		src_info->dual_hw_ms_info.dual_hw_ms_type =
@@ -574,7 +576,7 @@ static int msm_isp_set_dual_HW_master_slave_mode(
 	if (src_info != NULL &&
 		dual_hw_ms_cmd->dual_hw_ms_type == MS_TYPE_MASTER) {
 		src_info->dual_hw_type = DUAL_HW_MASTER_SLAVE;
-		ISP_DBG("%s: Master\n", __func__);
+		ISP_DBG("%s: vfe %d Master\n", __func__, vfe_dev->pdev->id);
 
 		src_info->dual_hw_ms_info.sof_info =
 			&vfe_dev->common_data->ms_resource.master_sof_info;
@@ -585,7 +587,7 @@ static int msm_isp_set_dual_HW_master_slave_mode(
 			&vfe_dev->common_data->common_dev_data_lock,
 			flags);
 		src_info->dual_hw_type = DUAL_HW_MASTER_SLAVE;
-		ISP_DBG("%s: Slave\n", __func__);
+		ISP_DBG("%s: vfe %d Slave\n", __func__, vfe_dev->pdev->id);
 
 		for (j = 0; j < MS_NUM_SLAVE_MAX; j++) {
 			if (vfe_dev->common_data->ms_resource.
@@ -628,7 +630,9 @@ static int msm_isp_set_dual_HW_master_slave_mode(
 				dual_hw_ms_cmd->input_src[i]);
 			return -EINVAL;
 		}
-		ISP_DBG("%s: src %d\n", __func__, dual_hw_ms_cmd->input_src[i]);
+		ISP_DBG("%s: vfe %d src %d type %d\n", __func__,
+			vfe_dev->pdev->id, dual_hw_ms_cmd->input_src[i],
+			dual_hw_ms_cmd->dual_hw_ms_type);
 		src_info = &vfe_dev->axi_data.
 			src_info[dual_hw_ms_cmd->input_src[i]];
 		src_info->dual_hw_type = DUAL_HW_MASTER_SLAVE;
@@ -1821,10 +1825,8 @@ void msm_isp_process_overflow_irq(
 			return;
 		}
 
-        pr_err("%s: VFE%d Bus overflow detected: start recovery!\n",
+		ISP_DBG("%s: VFE%d Bus overflow detected: start recovery!\n",
 			__func__, vfe_dev->pdev->id);
-
-        pr_err("%s: vfe_id %d status0: 0x%x status1: 0x%x\n", __func__, vfe_dev->pdev->id, *irq_status0, *irq_status1);
 
 		/* maks off irq for current vfe */
 		atomic_cmpxchg(&vfe_dev->error_info.overflow_state,
@@ -1956,22 +1958,6 @@ irqreturn_t msm_isp_process_irq(int irq_num, void *data)
 		ISP_DBG("%s: error_mask0/1 & error_count are set!\n", __func__);
 		return IRQ_HANDLED;
 	}
-
-	/*LGE_CHANGE_S, ignore duplicate irq to fix ping pong bit error, 2016-08-08, hyeonsoo.jeon@lge.com */
-	if ((vfe_dev->irq_status0 == irq_status0) &&
-		(vfe_dev->irq_status1 == irq_status1) &&
-		(vfe_dev->irq_status0 > 0) &&
-		(vfe_dev->irq_status0 !=  0x80000000 ) &&
-		(vfe_dev->ping_pong_status == ping_pong_status)) {
-			pr_err("%s:VFE%d status0 0x%x status1 0x%x pingpong %d already handled\n",
-			__func__, vfe_dev->pdev->id, irq_status0, irq_status1, ping_pong_status);
-			return IRQ_HANDLED;
-	}
-
-	vfe_dev->irq_status0 = irq_status0;
-	vfe_dev->irq_status1 = irq_status1;
-	vfe_dev->ping_pong_status = ping_pong_status;
-	/*LGE_CHANGE_E, ignore duplicate irq to fix ping pong bit error, 2016-08-08, hyeonsoo.jeon@lge.com */
 
 	msm_isp_enqueue_tasklet_cmd(vfe_dev, irq_status0, irq_status1,
 					ping_pong_status);

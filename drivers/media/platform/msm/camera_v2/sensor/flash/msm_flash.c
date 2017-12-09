@@ -398,7 +398,6 @@ static int32_t msm_flash_off(struct msm_flash_ctrl_t *flash_ctrl,
 		led_trigger_event(flash_ctrl->switch_trigger, 0);
 
 	CDBG("Exit\n");
-	pr_info("msm_flash_off done\n"); //LGE_UPDATE
 	return 0;
 }
 
@@ -592,7 +591,7 @@ static int32_t msm_flash_low(
 				pr_debug("LED current clamped to %d\n",
 					curr);
 			}
-			pr_info("low_flash_current[%d] = %d\n", i, curr); //LGE_UPDATE
+			CDBG("low_flash_current[%d] = %d", i, curr);
 			led_trigger_event(flash_ctrl->torch_trigger[i],
 				curr);
 		}
@@ -629,7 +628,7 @@ static int32_t msm_flash_high(
 				pr_debug("LED flash_current[%d] clamped %d\n",
 					i, curr);
 			}
-			pr_info("high_flash_current[%d] = %d\n", i, curr); //LGE_UPDATE
+			CDBG("high_flash_current[%d] = %d", i, curr);
 			led_trigger_event(flash_ctrl->flash_trigger[i],
 				curr);
 		}

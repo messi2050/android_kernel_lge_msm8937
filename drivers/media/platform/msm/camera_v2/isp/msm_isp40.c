@@ -597,16 +597,6 @@ static void msm_vfe40_read_irq_status(struct vfe_device *vfe_dev,
 		msm_camera_io_w_mb(1, vfe_dev->vfe_base + 0x24);
 	}
 
-/* LGE_CHANGE_S, Remove QCT patch about duplicated irq, 2017-01-20, dongsu.bag@lge.com */
-#if 0
-	if (*irq_status0 &&
-		(*irq_status0 == msm_camera_io_r(vfe_dev->vfe_base + 0x38))) {
-		msm_camera_io_w(*irq_status0, vfe_dev->vfe_base + 0x30);
-		msm_camera_io_w_mb(1, vfe_dev->vfe_base + 0x24);
-	}
-#endif
-/* LGE_CHANGE_E, Remove QCT patch about duplicated irq, 2017-01-20, dongsu.bag@lge.com */
-
 	if (*irq_status1 & (1 << 0)) {
 		vfe_dev->error_info.camif_status =
 		msm_camera_io_r(vfe_dev->vfe_base + 0x31C);

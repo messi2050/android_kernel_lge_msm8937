@@ -1692,8 +1692,6 @@ void msm_vfe47_cfg_axi_ub_equal_default(
 	uint32_t wm_ub_size;
 	uint64_t delta;
 	uint32_t rdi_ub_offset;
-	int plane;
-	struct msm_vfe_axi_stream *stream_info;
 
 	if (frame_src == VFE_PIX_0) {
 		for (i = 0; i < axi_data->hw_info->num_wm; i++) {
@@ -1737,17 +1735,9 @@ void msm_vfe47_cfg_axi_ub_equal_default(
 			ub_offset += wm_ub_size;
 		} else {
 
-			stream_info =  &axi_data->stream_info[
-				HANDLE_TO_IDX(axi_data->free_wm[i])];
-			for (plane = 0; plane < stream_info->num_planes;
-					plane++)
-				if (stream_info->wm[plane] ==
-					axi_data->free_wm[i])
-					break;
-
-			rdi_ub_offset = ((SRC_TO_INTF(
+			rdi_ub_offset = (SRC_TO_INTF(
 					HANDLE_TO_IDX(axi_data->free_wm[i])) -
-					VFE_RAW_0 * 2) + plane) *
+					VFE_RAW_0) * 2 *
 					axi_data->hw_info->min_wm_ub;
 			wm_ub_size = axi_data->hw_info->min_wm_ub * 2;
 			msm_camera_io_w((rdi_ub_offset << 16 |
