@@ -958,7 +958,7 @@ static int usb_bam_disconnect_ipa_cons(
 	struct usb_bam_ctx_type *ctx = &msm_usb_bam[cur_bam];
 	struct usb_bam_pipe_connect *pipe_connect;
 	struct sps_pipe *pipe;
-	u32 timeout = 10, pipe_empty;
+	u32 timeout = 50, pipe_empty;
 	struct usb_bam_sps_type usb_bam_sps = ctx->usb_bam_sps;
 	struct sps_connect *sps_connection;
 	bool inject_zlt = true;
@@ -3016,8 +3016,13 @@ static void msm_usb_bam_update_props(struct sps_bam_props *props,
 	struct msm_usb_bam_platform_data *pdata = pdev->dev.platform_data;
 	enum usb_ctrl bam_type = pdata->bam_type;
 	struct usb_bam_ctx_type *ctx = &msm_usb_bam[bam_type];
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	props->phys_addr = ctx->io_res->start;
 	props->virt_addr = NULL;
 	props->virt_size = resource_size(ctx->io_res);

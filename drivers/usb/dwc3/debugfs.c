@@ -907,6 +907,7 @@ static ssize_t dwc3_store_int_events(struct file *file,
 		pr_err("[%s] EINVAL\n", __func__);
 		ret = -EINVAL;
 		return ret;
+<<<<<<< HEAD
 	}
 
 	ret = kstrtou8_from_user(ubuf, count, 0, &clear_stats);
@@ -915,6 +916,16 @@ static ssize_t dwc3_store_int_events(struct file *file,
 		return ret;
 	}
 
+=======
+	}
+
+	ret = kstrtou8_from_user(ubuf, count, 0, &clear_stats);
+	if (ret < 0) {
+		pr_err("can't get enter value.\n");
+		return ret;
+	}
+
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	if (clear_stats != 0) {
 		pr_err("Wrong value. To clear stats, enter value as 0.\n");
 		ret = -EINVAL;
@@ -1049,8 +1060,11 @@ static int dwc3_gadget_int_events_show(struct seq_file *s, void *unused)
 		seq_printf(s, "%d\t", dwc->bh_completion_time[i]);
 	seq_putc(s, '\n');
 
-	seq_printf(s, "t_pwr evt irq : %lld\t",
+	seq_printf(s, "t_pwr evt irq : %lld\n",
 			ktime_to_us(dwc->t_pwr_evt_irq));
+
+	seq_printf(s, "l1_remote_wakeup_cnt : %lu\n",
+		dwc->l1_remote_wakeup_cnt);
 
 	spin_unlock_irqrestore(&dwc->lock, flags);
 	return 0;

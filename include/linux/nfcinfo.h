@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*Copyright (c) 2017, The Linux Foundation. All rights reserved.
  *
  *This program is free software; you can redistribute it and/or modify
@@ -10,6 +11,8 @@
  *GNU General Public License for more details.
  */
 
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 #ifndef _NFCINFO_H
 #define _NFCINFO_H
 

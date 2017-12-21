@@ -4,7 +4,7 @@
  * Copyright (C) 2003 Al Borchers (alborchers@steinerpoint.com)
  * Copyright (C) 2008 by David Brownell
  * Copyright (C) 2008 by Nokia Corporation
- * Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  *
  * This software is distributed under the terms of the GNU General
  * Public License ("GPL") as published by the Free Software Foundation,
@@ -1114,7 +1114,11 @@ static struct usb_function *gser_alloc(struct usb_function_instance *fi)
 	opts = container_of(fi, struct f_serial_opts, func_inst);
 	if (nr_ports) {
 		opts->port_num = gser_next_free_port++;
+<<<<<<< HEAD
 		if(opts->port_num >= GSERIAL_NO_PORTS) {
+=======
+		if (opts->port_num >= GSERIAL_NO_PORTS) {
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			pr_err("%s: No serial allowed for port %d\n",
 					__func__, opts->port_num);
 			return ERR_PTR(-EINVAL);

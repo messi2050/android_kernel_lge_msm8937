@@ -287,10 +287,15 @@ xfs_set_acl(struct inode *inode, struct posix_acl *acl, int type)
 
 	if (type == ACL_TYPE_ACCESS) {
 		umode_t mode;
+<<<<<<< HEAD
 		struct posix_acl *old_acl = acl;
 		error = posix_acl_update_mode(inode, &mode, &acl);
 		if (!acl)
 			posix_acl_release(old_acl);
+=======
+
+		error = posix_acl_update_mode(inode, &mode, &acl);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		if (error)
 			return error;
 		error = xfs_set_mode(inode, mode);

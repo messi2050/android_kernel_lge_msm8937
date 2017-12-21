@@ -15,6 +15,10 @@
 
 #include <linux/module.h>
 #include <linux/pwm.h>
+<<<<<<< HEAD
+=======
+#include <linux/delay.h>
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 #include "msm_ir_led.h"
 #include "msm_camera_dt_util.h"
 
@@ -41,7 +45,10 @@ static int32_t msm_ir_led_get_subdev_id(
 {
 	uint32_t *subdev_id = (uint32_t *)arg;
 
+<<<<<<< HEAD
 	CDBG("Enter\n");
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	if (!subdev_id) {
 		pr_err("subdevice ID is not valid\n");
 		return -EINVAL;
@@ -54,7 +61,10 @@ static int32_t msm_ir_led_get_subdev_id(
 	*subdev_id = ir_led_ctrl->pdev->id;
 
 	CDBG("subdev_id %d\n", *subdev_id);
+<<<<<<< HEAD
 	CDBG("Exit\n");
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return 0;
 }
 
@@ -64,37 +74,62 @@ static int32_t msm_ir_led_init(
 {
 	int32_t rc = 0;
 
+<<<<<<< HEAD
 	CDBG("Enter\n");
 
 	rc = ir_led_ctrl->func_tbl->camera_ir_led_off(ir_led_ctrl, ir_led_data);
 
 	CDBG("Exit\n");
+=======
+	rc = ir_led_ctrl->func_tbl->camera_ir_led_off(ir_led_ctrl, ir_led_data);
+
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return rc;
 }
 
 static int32_t msm_ir_led_release(
+<<<<<<< HEAD
 	struct msm_ir_led_ctrl_t *ir_led_ctrl)
 {
 	int32_t rc = 0;
+=======
+	struct msm_ir_led_ctrl_t *ir_led_ctrl,
+		struct msm_ir_led_cfg_data_t *ir_led_data)
+{
+	int32_t rc = -EFAULT;
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	if (ir_led_ctrl->ir_led_state == MSM_CAMERA_IR_LED_RELEASE) {
 		pr_err("Invalid ir_led state = %d\n",
 			ir_led_ctrl->ir_led_state);
+<<<<<<< HEAD
 		return 0;
 	}
 
 	rc = ir_led_ctrl->func_tbl->camera_ir_led_off(ir_led_ctrl, NULL);
+=======
+		return rc;
+	}
+
+	rc = ir_led_ctrl->func_tbl->camera_ir_led_off(ir_led_ctrl, ir_led_data);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	if (rc < 0) {
 		pr_err("camera_ir_led_off failed (%d)\n", rc);
 		return rc;
 	}
 	ir_led_ctrl->ir_led_state = MSM_CAMERA_IR_LED_RELEASE;
+<<<<<<< HEAD
 	return 0;
+=======
+
+	return rc;
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 }
 
 static int32_t msm_ir_led_off(struct msm_ir_led_ctrl_t *ir_led_ctrl,
 	struct msm_ir_led_cfg_data_t *ir_led_data)
 {
+<<<<<<< HEAD
 	CDBG("Enter\n");
 
 	if (ir_led_ctrl->pwm_dev)
@@ -103,6 +138,36 @@ static int32_t msm_ir_led_off(struct msm_ir_led_ctrl_t *ir_led_ctrl,
 		pr_err("pwm device is null\n");
 
 	CDBG("Exit\n");
+=======
+	int32_t rc = 0;
+
+	CDBG("pwm duty on(ns) %d, pwm period(ns) %d\n",
+		ir_led_data->pwm_duty_on_ns, ir_led_data->pwm_period_ns);
+
+	if (ir_led_data->pwm_period_ns <= 0)
+		ir_led_data->pwm_period_ns = DEFAULT_PWM_TIME_PERIOD_NS;
+
+	if (ir_led_data->pwm_duty_on_ns != 0)
+		ir_led_data->pwm_duty_on_ns = DEFAULT_PWM_DUTY_CYCLE_NS;
+
+	if (ir_led_ctrl->pwm_dev) {
+		rc = pwm_config(ir_led_ctrl->pwm_dev,
+			ir_led_data->pwm_duty_on_ns,
+			ir_led_data->pwm_period_ns);
+
+		if (rc) {
+			pr_err("PWM config failed (%d)\n", rc);
+			return rc;
+		}
+		/*workaround to disable pwm_module*/
+		udelay(50);
+
+		pwm_disable(ir_led_ctrl->pwm_dev);
+	} else {
+		CDBG("pwm device is null\n");
+	}
+
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return 0;
 }
 
@@ -110,7 +175,11 @@ static int32_t msm_ir_led_on(
 	struct msm_ir_led_ctrl_t *ir_led_ctrl,
 	struct msm_ir_led_cfg_data_t *ir_led_data)
 {
+<<<<<<< HEAD
 	int rc;
+=======
+	int32_t rc = 0;
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	CDBG("pwm duty on(ns) %d, pwm period(ns) %d\n",
 		ir_led_data->pwm_duty_on_ns, ir_led_data->pwm_period_ns);
@@ -129,9 +198,15 @@ static int32_t msm_ir_led_on(
 			pr_err("PWM enable failed(%d)\n", rc);
 			return rc;
 		}
+<<<<<<< HEAD
 	} else
 		pr_err("pwm device is null\n");
 
+=======
+	} else {
+		CDBG("pwm device is null\n");
+	}
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return 0;
 }
 
@@ -144,12 +219,19 @@ static int32_t msm_ir_led_handle_init(
 	enum msm_ir_led_driver_type ir_led_driver_type =
 		ir_led_ctrl->ir_led_driver_type;
 
+<<<<<<< HEAD
 	CDBG("Enter\n");
 
 	if (ir_led_ctrl->ir_led_state == MSM_CAMERA_IR_LED_INIT) {
 		pr_err("Invalid ir_led state = %d\n",
 				ir_led_ctrl->ir_led_state);
 		return 0;
+=======
+	if (ir_led_ctrl->ir_led_state == MSM_CAMERA_IR_LED_INIT) {
+		pr_err("Invalid ir_led state = %d\n",
+				ir_led_ctrl->ir_led_state);
+		return rc;
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	}
 
 	for (i = 0; i < ARRAY_SIZE(ir_led_table); i++) {
@@ -175,8 +257,13 @@ static int32_t msm_ir_led_handle_init(
 
 	ir_led_ctrl->ir_led_state = MSM_CAMERA_IR_LED_INIT;
 
+<<<<<<< HEAD
 	CDBG("Exit\n");
 	return 0;
+=======
+	CDBG("IR LED STATE intialised Successfully\n");
+	return rc;
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 }
 
 static int32_t msm_ir_led_config(struct msm_ir_led_ctrl_t *ir_led_ctrl,
@@ -186,10 +273,17 @@ static int32_t msm_ir_led_config(struct msm_ir_led_ctrl_t *ir_led_ctrl,
 	struct msm_ir_led_cfg_data_t *ir_led_data =
 		(struct msm_ir_led_cfg_data_t *) argp;
 
+<<<<<<< HEAD
 	mutex_lock(ir_led_ctrl->ir_led_mutex);
 
 	CDBG("type %d\n", ir_led_data->cfg_type);
 
+=======
+	CDBG("type %d\n", ir_led_data->cfg_type);
+
+	mutex_lock(ir_led_ctrl->ir_led_mutex);
+
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	switch (ir_led_data->cfg_type) {
 	case CFG_IR_LED_INIT:
 		rc = msm_ir_led_handle_init(ir_led_ctrl, ir_led_data);
@@ -197,7 +291,11 @@ static int32_t msm_ir_led_config(struct msm_ir_led_ctrl_t *ir_led_ctrl,
 	case CFG_IR_LED_RELEASE:
 		if (ir_led_ctrl->ir_led_state == MSM_CAMERA_IR_LED_INIT)
 			rc = ir_led_ctrl->func_tbl->camera_ir_led_release(
+<<<<<<< HEAD
 				ir_led_ctrl);
+=======
+				ir_led_ctrl, ir_led_data);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		break;
 	case CFG_IR_LED_OFF:
 		if (ir_led_ctrl->ir_led_state == MSM_CAMERA_IR_LED_INIT)
@@ -216,7 +314,11 @@ static int32_t msm_ir_led_config(struct msm_ir_led_ctrl_t *ir_led_ctrl,
 
 	mutex_unlock(ir_led_ctrl->ir_led_mutex);
 
+<<<<<<< HEAD
 	CDBG("Exit: type %d\n", ir_led_data->cfg_type);
+=======
+	CDBG("Exit (%d): type %d\n", rc, ir_led_data->cfg_type);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	return rc;
 }
@@ -226,8 +328,12 @@ static long msm_ir_led_subdev_ioctl(struct v4l2_subdev *sd,
 {
 	struct msm_ir_led_ctrl_t *fctrl = NULL;
 	void __user *argp = (void __user *)arg;
+<<<<<<< HEAD
 
 	CDBG("Enter\n");
+=======
+	struct msm_ir_led_cfg_data_t ir_led_data = {0};
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	if (!sd) {
 		pr_err(" v4l2 ir led subdevice is NULL\n");
@@ -250,13 +356,21 @@ static long msm_ir_led_subdev_ioctl(struct v4l2_subdev *sd,
 			pr_err("No call back funcions\n");
 			return -EINVAL;
 		} else {
+<<<<<<< HEAD
 			return fctrl->func_tbl->camera_ir_led_release(fctrl);
+=======
+			return fctrl->func_tbl->camera_ir_led_release(fctrl,
+							&ir_led_data);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		}
 	default:
 		pr_err_ratelimited("invalid cmd %d\n", cmd);
 		return -ENOIOCTLCMD;
 	}
+<<<<<<< HEAD
 	CDBG("Exit\n");
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 }
 
 static struct v4l2_subdev_core_ops msm_ir_led_subdev_core_ops = {
@@ -267,6 +381,7 @@ static struct v4l2_subdev_ops msm_ir_led_subdev_ops = {
 	.core = &msm_ir_led_subdev_core_ops,
 };
 
+<<<<<<< HEAD
 static int msm_ir_led_close(struct v4l2_subdev *sd,
 			struct v4l2_subdev_fh *fh) {
 
@@ -292,14 +407,20 @@ static int msm_ir_led_close(struct v4l2_subdev *sd,
 static const struct v4l2_subdev_internal_ops msm_ir_led_internal_ops = {
 	.close = msm_ir_led_close,
 };
+=======
+static const struct v4l2_subdev_internal_ops msm_ir_led_internal_ops;
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 static int32_t msm_ir_led_get_dt_data(struct device_node *of_node,
 	struct msm_ir_led_ctrl_t *fctrl)
 {
 	int32_t rc = 0;
 
+<<<<<<< HEAD
 	CDBG("called\n");
 
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	/* Read the sub device */
 	rc = of_property_read_u32(of_node, "cell-index", &fctrl->pdev->id);
 	if (rc < 0) {
@@ -323,7 +444,10 @@ static long msm_ir_led_subdev_do_ioctl(
 		(struct msm_ir_led_cfg_data_t32 *)arg;
 	struct msm_ir_led_cfg_data_t ir_led_data;
 
+<<<<<<< HEAD
 	CDBG("Enter\n");
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	ir_led_data.cfg_type = u32->cfg_type;
 	ir_led_data.pwm_duty_on_ns = u32->pwm_duty_on_ns;
 	ir_led_data.pwm_period_ns = u32->pwm_period_ns;
@@ -338,7 +462,10 @@ static long msm_ir_led_subdev_do_ioctl(
 
 	rc = msm_ir_led_subdev_ioctl(sd, cmd, &ir_led_data);
 
+<<<<<<< HEAD
 	CDBG("Exit\n");
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return rc;
 }
 
@@ -354,7 +481,10 @@ static int32_t msm_ir_led_platform_probe(struct platform_device *pdev)
 	int32_t rc = 0;
 	struct msm_ir_led_ctrl_t *ir_led_ctrl = NULL;
 
+<<<<<<< HEAD
 	CDBG("Enter\n");
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	if (!pdev->dev.of_node) {
 		pr_err("IR LED device node is not present in device tree\n");
 		return -EINVAL;
@@ -370,16 +500,30 @@ static int32_t msm_ir_led_platform_probe(struct platform_device *pdev)
 	/* Reading PWM device node */
 	ir_led_ctrl->pwm_dev = of_pwm_get(pdev->dev.of_node, NULL);
 
+<<<<<<< HEAD
 	if (IS_ERR(ir_led_ctrl->pwm_dev)) {
 		rc = PTR_ERR(ir_led_ctrl->pwm_dev);
 		pr_err("Cannot get PWM device (%d)\n", rc);
+=======
+	if (PTR_ERR(ir_led_ctrl->pwm_dev) == -EPROBE_DEFER) {
+		pr_info("Deferring probe...Cannot get PWM device\n");
+		return -EPROBE_DEFER;
+	}
+
+	if (IS_ERR(ir_led_ctrl->pwm_dev)) {
+		rc = PTR_ERR(ir_led_ctrl->pwm_dev);
+		CDBG("Cannot get PWM device (%d)\n", rc);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		ir_led_ctrl->pwm_dev = NULL;
 	}
 
 	rc = msm_ir_led_get_dt_data(pdev->dev.of_node, ir_led_ctrl);
 	if (rc < 0) {
 		pr_err("msm_ir_led_get_dt_data failed\n");
+<<<<<<< HEAD
 		devm_kfree(&pdev->dev, ir_led_ctrl);
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		return -EINVAL;
 	}
 
@@ -401,7 +545,16 @@ static int32_t msm_ir_led_platform_probe(struct platform_device *pdev)
 	ir_led_ctrl->msm_sd.sd.entity.type = MEDIA_ENT_T_V4L2_SUBDEV;
 	ir_led_ctrl->msm_sd.sd.entity.group_id = MSM_CAMERA_SUBDEV_IR_LED;
 	ir_led_ctrl->msm_sd.close_seq = MSM_SD_CLOSE_2ND_CATEGORY | 0x1;
+<<<<<<< HEAD
 	msm_sd_register(&ir_led_ctrl->msm_sd);
+=======
+
+	rc = msm_sd_register(&ir_led_ctrl->msm_sd);
+	if (rc < 0) {
+		pr_err("sub dev register failed for ir_led device\n");
+		return rc;
+	}
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	CDBG("ir_led sd name = %s\n",
 		ir_led_ctrl->msm_sd.sd.entity.name);
@@ -431,7 +584,10 @@ static int __init msm_ir_led_init_module(void)
 {
 	int32_t rc = 0;
 
+<<<<<<< HEAD
 	CDBG("Enter\n");
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	rc = platform_driver_register(&msm_ir_led_platform_driver);
 	if (!rc)
 		return rc;

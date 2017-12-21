@@ -42,6 +42,7 @@ struct msm_camera_sensor_slave_info32 {
 	uint8_t  is_init_params_valid;
 	struct msm_sensor_init_params sensor_init_params;
 	enum msm_sensor_output_format_t output_format;
+	uint8_t bypass_video_node_creation;
 };
 
 struct msm_camera_csid_lut_params32 {
@@ -276,9 +277,12 @@ struct msm_flash_cfg_data_t32 {
 
 #define VIDIOC_MSM_IR_CUT_CFG32 \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_ir_cut_cfg_data_t32)
+<<<<<<< HEAD
 
 #define VIDIOC_MSM_OTP_CFG32 \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_otp_cfg_data32)
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 #endif
 
 #endif

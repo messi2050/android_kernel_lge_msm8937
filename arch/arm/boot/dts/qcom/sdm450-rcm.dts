@@ -14,6 +14,7 @@
 /dts-v1/;
 
 #include "sdm450.dtsi"
+<<<<<<< HEAD
 #include "msm-pmi8950.dtsi"
 #include "msm8953-cdp.dtsi"
 #include "msm8953-pmi8950.dtsi"
@@ -29,3 +30,12 @@
 	qcom,external-typec;
 	qcom,typec-psy-name = "typec";
 };
+=======
+#include "msm8953-cdp.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. SDM450 RCM";
+	compatible = "qcom,sdm450-cdp", "qcom,sdm450", "qcom,cdp";
+	qcom,board-id= <21 0>;
+};
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0

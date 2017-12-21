@@ -254,10 +254,24 @@ static struct vb2_buffer *msm_vb2_get_buf(int session_id,
 	struct msm_session *session;
 	struct msm_vb2_buffer *msm_vb2 = NULL;
 	unsigned long flags, rl_flags;
+<<<<<<< HEAD
 
 	session = msm_get_session(session_id);
 	if (IS_ERR_OR_NULL(session))
 		return NULL;
+
+	read_lock_irqsave(&session->stream_rwlock, rl_flags);
+
+	stream = msm_get_stream(session, stream_id);
+	if (IS_ERR_OR_NULL(stream)) {
+		read_unlock_irqrestore(&session->stream_rwlock, rl_flags);
+=======
+
+	session = msm_get_session(session_id);
+	if (IS_ERR_OR_NULL(session))
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
+		return NULL;
+	}
 
 	read_lock_irqsave(&session->stream_rwlock, rl_flags);
 
@@ -290,7 +304,10 @@ static struct vb2_buffer *msm_vb2_get_buf(int session_id,
 end:
 	spin_unlock_irqrestore(&stream->stream_lock, flags);
 	read_unlock_irqrestore(&session->stream_rwlock, rl_flags);
+<<<<<<< HEAD
 
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return vb2_buf;
 }
 
@@ -302,10 +319,25 @@ static struct vb2_buffer *msm_vb2_get_buf_by_idx(int session_id,
 	struct msm_session *session;
 	struct msm_vb2_buffer *msm_vb2 = NULL;
 	unsigned long flags, rl_flags;
+<<<<<<< HEAD
+
+	session = msm_get_session(session_id);
+	if (IS_ERR_OR_NULL(session))
+=======
 
 	session = msm_get_session(session_id);
 	if (IS_ERR_OR_NULL(session))
 		return NULL;
+
+	read_lock_irqsave(&session->stream_rwlock, rl_flags);
+
+	stream = msm_get_stream(session, stream_id);
+
+	if (IS_ERR_OR_NULL(stream)) {
+		read_unlock_irqrestore(&session->stream_rwlock, rl_flags);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
+		return NULL;
+	}
 
 	read_lock_irqsave(&session->stream_rwlock, rl_flags);
 
@@ -337,7 +369,10 @@ static struct vb2_buffer *msm_vb2_get_buf_by_idx(int session_id,
 end:
 	spin_unlock_irqrestore(&stream->stream_lock, flags);
 	read_unlock_irqrestore(&session->stream_rwlock, rl_flags);
+<<<<<<< HEAD
 
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return vb2_buf;
 }
 
@@ -354,7 +389,18 @@ static int msm_vb2_put_buf(struct vb2_buffer *vb, int session_id,
 
 	session = msm_get_session(session_id);
 	if (IS_ERR_OR_NULL(session))
+<<<<<<< HEAD
+=======
 		return -EINVAL;
+
+	read_lock_irqsave(&session->stream_rwlock, rl_flags);
+
+	stream = msm_get_stream(session, stream_id);
+	if (IS_ERR_OR_NULL(stream)) {
+		read_unlock_irqrestore(&session->stream_rwlock, rl_flags);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
+		return -EINVAL;
+	}
 
 	read_lock_irqsave(&session->stream_rwlock, rl_flags);
 

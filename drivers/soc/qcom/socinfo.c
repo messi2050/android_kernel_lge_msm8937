@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2009-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -573,13 +573,18 @@ static struct msm_soc_info cpu_of_id[] = {
 	[297] = {MSM_CPU_9607, "MDM9207"},
 	[298] = {MSM_CPU_9607, "MDM9307"},
 	[299] = {MSM_CPU_9607, "MDM9628"},
+	[322] = {MSM_CPU_9607, "MDM9206"},
 
-	/* Californium IDs */
-	[279] = {MSM_CPU_CALIFORNIUM, "MDMCALIFORNIUM"},
-	[283] = {MSM_CPU_CALIFORNIUM, "MDMCALIFORNIUM"},
-	[284] = {MSM_CPU_CALIFORNIUM, "MDMCALIFORNIUM"},
-	[285] = {MSM_CPU_CALIFORNIUM, "MDMCALIFORNIUM"},
-	[286] = {MSM_CPU_CALIFORNIUM, "MDMCALIFORNIUM"},
+	/* 9650 IDs */
+	[279] = {MSM_CPU_9650, "MDM9650"},
+	[283] = {MSM_CPU_9650, "MDM9650"},
+	[284] = {MSM_CPU_9650, "MDM9650"},
+	[285] = {MSM_CPU_9650, "MDM9650"},
+	[286] = {MSM_CPU_9650, "MDM9650"},
+
+	/* SDX20 IDs */
+	[314] = {SDX_CPU_20, "SDX20"},
+	[333] = {SDX_CPU_20, "SDX20"},
 
 	/*MSM8937 ID  */
 	[294] = {MSM_CPU_8937, "MSM8937"},
@@ -1282,9 +1287,13 @@ static void * __init setup_dummy_socinfo(void)
 		dummy_socinfo.id = 238;
 		strlcpy(dummy_socinfo.build_id, "mdm9640 - ",
 			sizeof(dummy_socinfo.build_id));
-	} else if (early_machine_is_mdmcalifornium()) {
+	} else if (early_machine_is_mdm9650()) {
 		dummy_socinfo.id = 286;
-		strlcpy(dummy_socinfo.build_id, "mdmcalifornium - ",
+		strlcpy(dummy_socinfo.build_id, "mdm9650 - ",
+			sizeof(dummy_socinfo.build_id));
+	} else if (early_machine_is_sdx20()) {
+		dummy_socinfo.id = 314;
+		strlcpy(dummy_socinfo.build_id, "sdx20 - ",
 			sizeof(dummy_socinfo.build_id));
 	} else if (early_machine_is_msm8994()) {
 		dummy_socinfo.id = 207;

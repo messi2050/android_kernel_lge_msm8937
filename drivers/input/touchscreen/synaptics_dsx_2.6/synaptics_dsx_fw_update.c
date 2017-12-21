@@ -4402,6 +4402,7 @@ static int synaptics_rmi4_fwu_init(struct synaptics_rmi4_data *rmi4_data)
 	fwu->do_lockdown = DO_LOCKDOWN;
 	fwu->initialized = true;
 
+<<<<<<< HEAD
 #ifdef DO_STARTUP_FW_UPDATE
 	fwu->fwu_workqueue = create_singlethread_workqueue("fwu_workqueue");
 	INIT_WORK(&fwu->fwu_work, fwu_startup_fw_update_work);
@@ -4409,6 +4410,8 @@ static int synaptics_rmi4_fwu_init(struct synaptics_rmi4_data *rmi4_data)
 			&fwu->fwu_work);
 #endif
 
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_EXTRA_SYSFS
 	retval = sysfs_create_bin_file(&rmi4_data->input_dev->dev.kobj,
 			&dev_attr_data);
@@ -4444,6 +4447,7 @@ exit_remove_attrs:
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_EXTRA_SYSFS
 	sysfs_remove_bin_file(&rmi4_data->input_dev->dev.kobj, &dev_attr_data);
 #endif
+<<<<<<< HEAD
 
 exit_destroy_work:
 #ifdef DO_STARTUP_FW_UPDATE
@@ -4451,6 +4455,8 @@ exit_destroy_work:
 	flush_workqueue(fwu->fwu_workqueue);
 	destroy_workqueue(fwu->fwu_workqueue);
 #endif
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 exit_free_mem:
 	kfree(fwu->image_name);

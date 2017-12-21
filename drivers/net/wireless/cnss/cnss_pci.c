@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -29,7 +29,6 @@
 #include <linux/pm_qos.h>
 #include <linux/pm_runtime.h>
 #include <linux/esoc_client.h>
-#include <linux/pinctrl/consumer.h>
 #include <linux/firmware.h>
 #include <linux/dma-mapping.h>
 #include <linux/msm-bus.h>
@@ -118,11 +117,15 @@
 #define WLAN_VREG_IO_DELAY_MIN	100
 #define WLAN_VREG_IO_DELAY_MAX	1000
 #define WLAN_ENABLE_DELAY	10
+#define PCIE_SWITCH_DELAY       20
 #define WLAN_RECOVERY_DELAY	1
 #define PCIE_ENABLE_DELAY	100
 #define WLAN_BOOTSTRAP_DELAY	10
 #define EVICT_BIN_MAX_SIZE      (512*1024)
+<<<<<<< HEAD
 #define CNSS_PINCTRL_STATE_ACTIVE "default"
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 static DEFINE_SPINLOCK(pci_link_down_lock);
 
@@ -152,8 +155,11 @@ struct cnss_wlan_gpio_info {
 	bool state;
 	bool init;
 	bool prop;
+<<<<<<< HEAD
 	struct pinctrl *pinctrl;
 	struct pinctrl_state *gpio_state_default;
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 };
 
 struct cnss_wlan_vreg_info {
@@ -289,6 +295,7 @@ static struct cnss_data {
 	atomic_t auto_suspended;
 	bool monitor_wake_intr;
 	struct cnss_dual_wifi dual_wifi_info;
+	struct cnss_dev_platform_ops platform_ops;
 } *penv;
 
 static unsigned int pcie_link_down_panic;
@@ -571,6 +578,7 @@ static void cnss_wlan_gpio_set(struct cnss_wlan_gpio_info *info, bool state)
 {
 	if (!info->prop)
 		return;
+<<<<<<< HEAD
 
 	if (info->state == state) {
 		pr_debug("Already %s gpio is %s\n",
@@ -630,6 +638,38 @@ static int cnss_pinctrl_init(struct cnss_wlan_gpio_info *gpio_info,
 	ret = pinctrl_select_state(gpio_info->pinctrl,
 				   gpio_info->gpio_state_default);
 
+=======
+
+	if (info->state == state) {
+		pr_debug("Already %s gpio is %s\n",
+			 info->name, state ? "high" : "low");
+		return;
+	}
+
+	gpio_set_value(info->num, state);
+	info->state = state;
+
+	pr_debug("%s: %s gpio is now %s\n", __func__,
+		 info->name, info->state ? "enabled" : "disabled");
+}
+
+static int cnss_configure_wlan_en_gpio(bool state)
+{
+	int ret = 0;
+	struct cnss_wlan_gpio_info *gpio_info = &penv->gpio_info;
+	struct cnss_wlan_vreg_info *vreg_info = &penv->vreg_info;
+
+	if (penv->wlan_en_vreg_support) {
+		if (state)
+			ret = regulator_enable(vreg_info->wlan_en_reg);
+		else
+			ret = regulator_disable(vreg_info->wlan_en_reg);
+	} else {
+		cnss_wlan_gpio_set(gpio_info, state);
+	}
+
+	msleep(WLAN_ENABLE_DELAY);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return ret;
 }
 
@@ -740,10 +780,13 @@ static int cnss_get_wlan_enable_gpio(
 			"can't get gpio %s ret %d", gpio_info->name, ret);
 	}
 
+<<<<<<< HEAD
 	ret = cnss_pinctrl_init(gpio_info, pdev);
 	if (ret)
 		pr_debug("%s: pinctrl init failed!\n", __func__);
 
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	ret = cnss_wlan_gpio_init(gpio_info);
 	if (ret)
 		pr_err("gpio init failed\n");
@@ -752,6 +795,7 @@ static int cnss_get_wlan_enable_gpio(
 }
 
 static int cnss_get_wlan_bootstrap_gpio(struct platform_device *pdev)
+<<<<<<< HEAD
 {
 	int ret = 0;
 	struct device_node *node = (&pdev->dev)->of_node;
@@ -776,6 +820,32 @@ static int cnss_get_wlan_bootstrap_gpio(struct platform_device *pdev)
 static int cnss_wlan_get_resources(struct platform_device *pdev)
 {
 	int ret = 0;
+=======
+{
+	int ret = 0;
+	struct device_node *node = (&pdev->dev)->of_node;
+
+	if (!of_find_property(node, WLAN_BOOTSTRAP_GPIO_NAME, NULL))
+		return ret;
+
+	penv->wlan_bootstrap_gpio =
+		of_get_named_gpio(node, WLAN_BOOTSTRAP_GPIO_NAME, 0);
+	if (penv->wlan_bootstrap_gpio > 0) {
+		ret = cnss_wlan_bootstrap_gpio_init();
+	} else {
+		ret = penv->wlan_bootstrap_gpio;
+		pr_err(
+		"%s: Can't get GPIO %s, ret = %d",
+		__func__, WLAN_BOOTSTRAP_GPIO_NAME, ret);
+	}
+
+	return ret;
+}
+
+static int cnss_wlan_get_resources(struct platform_device *pdev)
+{
+	int ret = 0;
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	struct cnss_wlan_gpio_info *gpio_info = &penv->gpio_info;
 	struct cnss_wlan_vreg_info *vreg_info = &penv->vreg_info;
 	struct device_node *node = pdev->dev.of_node;
@@ -1616,6 +1686,31 @@ int cnss_msm_pcie_enumerate(u32 rc_idx)
 }
 #endif
 
+static void cnss_pcie_set_platform_ops(struct device *dev)
+{
+	struct cnss_dev_platform_ops *pf_ops = &penv->platform_ops;
+
+	pf_ops->request_bus_bandwidth = cnss_pci_request_bus_bandwidth;
+	pf_ops->get_virt_ramdump_mem = cnss_pci_get_virt_ramdump_mem;
+	pf_ops->device_self_recovery = cnss_pci_device_self_recovery;
+	pf_ops->schedule_recovery_work = cnss_pci_schedule_recovery_work;
+	pf_ops->device_crashed = cnss_pci_device_crashed;
+	pf_ops->get_wlan_mac_address = cnss_pci_get_wlan_mac_address;
+	pf_ops->set_wlan_mac_address = cnss_pcie_set_wlan_mac_address;
+	pf_ops->power_up = cnss_pcie_power_up;
+	pf_ops->power_down = cnss_pcie_power_down;
+
+	dev->platform_data = pf_ops;
+}
+
+static void cnss_pcie_reset_platform_ops(struct device *dev)
+{
+	struct cnss_dev_platform_ops *pf_ops = &penv->platform_ops;
+
+	memset(pf_ops, 0, sizeof(struct cnss_dev_platform_ops));
+	dev->platform_data = NULL;
+}
+
 static int cnss_wlan_pci_probe(struct pci_dev *pdev,
 			       const struct pci_device_id *id)
 {
@@ -1626,6 +1721,7 @@ static int cnss_wlan_pci_probe(struct pci_dev *pdev,
 	struct codeswap_codeseg_info *cnss_seg_info = NULL;
 	struct device *dev = &pdev->dev;
 
+	cnss_pcie_set_platform_ops(dev);
 	penv->pdev = pdev;
 	penv->id = id;
 	atomic_set(&penv->fw_available, 0);
@@ -1736,6 +1832,7 @@ end_dma_alloc:
 err_unknown:
 err_pcie_suspend:
 smmu_init_fail:
+	cnss_pcie_reset_platform_ops(dev);
 	return ret;
 }
 
@@ -1747,6 +1844,7 @@ static void cnss_wlan_pci_remove(struct pci_dev *pdev)
 		return;
 
 	dev = &penv->pldev->dev;
+	cnss_pcie_reset_platform_ops(dev);
 	device_remove_file(dev, &dev_attr_wlan_setup);
 
 	if (penv->smmu_mapping)
@@ -1762,6 +1860,9 @@ static int cnss_wlan_pci_suspend(struct device *dev)
 	pm_message_t state = { .event = PM_EVENT_SUSPEND };
 
 	if (!penv)
+		goto out;
+
+	if (!penv->pcie_link_state)
 		goto out;
 
 	wdriver = penv->driver;
@@ -1789,6 +1890,9 @@ static int cnss_wlan_pci_resume(struct device *dev)
 	struct pci_dev *pdev = to_pci_dev(dev);
 
 	if (!penv)
+		goto out;
+
+	if (!penv->pcie_link_state)
 		goto out;
 
 	wdriver = penv->driver;
@@ -2094,6 +2198,7 @@ static void cnss_wlan_memory_expansion(void)
 	u_int32_t total_length = 0;
 	struct pci_dev *pdev;
 
+	mutex_lock(&penv->fw_setup_stat_lock);
 	filename = cnss_wlan_get_evicted_data_file();
 	mutex_lock(&penv->fw_setup_stat_lock);
 	pdev = penv->pdev;
@@ -2663,6 +2768,16 @@ static int cnss_powerup(const struct subsys_desc *subsys)
 
 	msleep(POWER_ON_DELAY);
 	cnss_configure_wlan_en_gpio(WLAN_EN_HIGH);
+<<<<<<< HEAD
+=======
+	/**
+	 *  Some platforms have wifi and other PCIE card attached with PCIE
+	 *  switch on the same RC like P5459 board(ROME 3.2 PCIE card + Ethernet
+	 *  PCI), it will need extra time to stable the signals when do SSR,
+	 *  otherwise fail to create the PCIE link, so add PCIE_SWITCH_DELAY.
+	 */
+	msleep(PCIE_SWITCH_DELAY);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	if (!pdev) {
 		pr_err("%d: invalid pdev\n", __LINE__);
@@ -3162,6 +3277,9 @@ static struct platform_driver cnss_driver = {
 		.name = "cnss",
 		.owner = THIS_MODULE,
 		.of_match_table = cnss_dt_match,
+#ifdef CONFIG_CNSS_ASYNC
+		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+#endif
 	},
 };
 
@@ -3483,6 +3601,9 @@ int cnss_pm_runtime_request(struct device *dev,
 		break;
 	case CNSS_PM_REQUEST_RESUME:
 		ret = pm_request_resume(dev);
+		break;
+	case CNSS_PM_GET_NORESUME:
+		pm_runtime_get_noresume(dev);
 		break;
 	default:
 		ret = -EINVAL;

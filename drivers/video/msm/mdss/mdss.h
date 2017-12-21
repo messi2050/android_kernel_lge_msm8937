@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -515,6 +515,9 @@ struct mdss_data_type {
 	bool skip_first;
 #endif
 	struct mdss_scaler_block *scaler_off;
+
+	u32 splash_intf_sel;
+	u32 splash_split_disp;
 };
 
 extern struct mdss_data_type *mdss_res;

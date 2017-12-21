@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -87,7 +87,7 @@ int __ipa_generate_rt_hw_rule_v2(enum ipa_ip_type ip,
 		return -EPERM;
 	}
 
-	IPADBG("en_rule 0x%x\n", en_rule);
+	IPADBG_LOW("en_rule 0x%x\n", en_rule);
 
 	rule_hdr->u.hdr.en_rule = en_rule;
 	ipa_write_32(rule_hdr->u.word, (u8 *)rule_hdr);
@@ -490,7 +490,9 @@ static void __ipa_reap_sys_rt_tbls(enum ipa_ip_type ip)
 	set = &ipa_ctx->rt_tbl_set[ip];
 	list_for_each_entry(tbl, &set->head_rt_tbl_list, link) {
 		if (tbl->prev_mem.phys_base) {
-			IPADBG("reaping rt tbl name=%s ip=%d\n", tbl->name, ip);
+			IPADBG_LOW("reaping rt");
+			IPADBG_LOW("tbl name=%s ip=%d\n",
+				tbl->name, ip);
 			dma_free_coherent(ipa_ctx->pdev, tbl->prev_mem.size,
 					tbl->prev_mem.base,
 					tbl->prev_mem.phys_base);
@@ -503,8 +505,9 @@ static void __ipa_reap_sys_rt_tbls(enum ipa_ip_type ip)
 		list_del(&tbl->link);
 		WARN_ON(tbl->prev_mem.phys_base != 0);
 		if (tbl->curr_mem.phys_base) {
-			IPADBG("reaping sys rt tbl name=%s ip=%d\n", tbl->name,
-					ip);
+			IPADBG_LOW("reaping sys");
+			IPADBG_LOW("rt tbl name=%s ip=%d\n",
+				tbl->name, ip);
 			dma_free_coherent(ipa_ctx->pdev, tbl->curr_mem.size,
 					tbl->curr_mem.base,
 					tbl->curr_mem.phys_base);
@@ -522,6 +525,7 @@ int __ipa_commit_rt_v1_1(enum ipa_ip_type ip)
 	struct ipa_ip_v6_routing_init *v6;
 	u16 avail;
 	u16 size;
+	gfp_t flag = GFP_KERNEL | (ipa_ctx->use_dma_zone ? GFP_DMA : 0);
 
 	mem = kmalloc(sizeof(struct ipa_mem_buffer), GFP_KERNEL);
 	if (!mem) {
@@ -538,7 +542,7 @@ int __ipa_commit_rt_v1_1(enum ipa_ip_type ip)
 			IPA_MEM_PART(v6_rt_size_ddr);
 		size = sizeof(struct ipa_ip_v6_routing_init);
 	}
-	cmd = kmalloc(size, GFP_KERNEL);
+	cmd = kmalloc(size, flag);
 	if (!cmd) {
 		IPAERR("failed to alloc immediate command object\n");
 		goto fail_alloc_cmd;
@@ -695,6 +699,7 @@ int __ipa_commit_rt_v2(enum ipa_ip_type ip)
 	struct ipa_mem_buffer head;
 	struct ipa_hw_imm_cmd_dma_shared_mem *cmd1 = NULL;
 	struct ipa_hw_imm_cmd_dma_shared_mem *cmd2 = NULL;
+	gfp_t flag = GFP_KERNEL | (ipa_ctx->use_dma_zone ? GFP_DMA : 0);
 	u16 avail;
 	u32 num_modem_rt_index;
 	int rc = 0;
@@ -745,7 +750,7 @@ int __ipa_commit_rt_v2(enum ipa_ip_type ip)
 	}
 
 	cmd1 = kzalloc(sizeof(struct ipa_hw_imm_cmd_dma_shared_mem),
-		GFP_KERNEL);
+		flag);
 	if (cmd1 == NULL) {
 		IPAERR("Failed to alloc immediate command object\n");
 		rc = -ENOMEM;
@@ -762,7 +767,7 @@ int __ipa_commit_rt_v2(enum ipa_ip_type ip)
 
 	if (lcl) {
 		cmd2 = kzalloc(sizeof(struct ipa_hw_imm_cmd_dma_shared_mem),
-			GFP_KERNEL);
+			flag);
 		if (cmd2 == NULL) {
 			IPAERR("Failed to alloc immediate command object\n");
 			rc = -ENOMEM;
@@ -963,7 +968,7 @@ static int __ipa_del_rt_tbl(struct ipa_rt_tbl *entry)
 		list_del(&entry->link);
 		clear_bit(entry->idx, &ipa_ctx->rt_idx_bitmap[ip]);
 		entry->set->tbl_cnt--;
-		IPADBG("del rt tbl_idx=%d tbl_cnt=%d\n", entry->idx,
+		IPADBG_LOW("del rt tbl_idx=%d tbl_cnt=%d\n", entry->idx,
 				entry->set->tbl_cnt);
 		kmem_cache_free(ipa_ctx->rt_tbl_cache, entry);
 	} else {
@@ -971,7 +976,7 @@ static int __ipa_del_rt_tbl(struct ipa_rt_tbl *entry)
 				&ipa_ctx->reap_rt_tbl_set[ip].head_rt_tbl_list);
 		clear_bit(entry->idx, &ipa_ctx->rt_idx_bitmap[ip]);
 		entry->set->tbl_cnt--;
-		IPADBG("del sys rt tbl_idx=%d tbl_cnt=%d\n", entry->idx,
+		IPADBG_LOW("del sys rt tbl_idx=%d tbl_cnt=%d\n", entry->idx,
 				entry->set->tbl_cnt);
 	}
 
@@ -1052,7 +1057,8 @@ static int __ipa_add_rt_rule(enum ipa_ip_type ip, const char *name,
 		WARN_ON(1);
 		goto ipa_insert_failed;
 	}
-	IPADBG("add rt rule tbl_idx=%d rule_cnt=%d\n", tbl->idx, tbl->rule_cnt);
+	IPADBG_LOW("add rt rule tbl_idx=%d", tbl->idx);
+	IPADBG_LOW("rule_cnt=%d\n", tbl->rule_cnt);
 	*rule_hdl = id;
 	entry->id = id;
 
@@ -1136,7 +1142,7 @@ int __ipa_del_rt_rule(u32 rule_hdl)
 		__ipa_release_hdr_proc_ctx(entry->proc_ctx->id);
 	list_del(&entry->link);
 	entry->tbl->rule_cnt--;
-	IPADBG("del rt rule tbl_idx=%d rule_cnt=%d\n", entry->tbl->idx,
+	IPADBG_LOW("del rt rule tbl_idx=%d rule_cnt=%d\n", entry->tbl->idx,
 			entry->tbl->rule_cnt);
 	if (entry->tbl->rule_cnt == 0 && entry->tbl->ref_cnt == 0) {
 		if (__ipa_del_rt_tbl(entry->tbl))
@@ -1393,7 +1399,7 @@ int ipa2_put_rt_tbl(u32 rt_tbl_hdl)
 {
 	struct ipa_rt_tbl *entry;
 	enum ipa_ip_type ip = IPA_IP_MAX;
-	int result;
+	int result = 0;
 
 	mutex_lock(&ipa_ctx->lock);
 	entry = ipa_id_find(rt_tbl_hdl);

@@ -28,6 +28,12 @@
 #define DM_VERITY_FEC_BUF_MAX \
 	(1 << (PAGE_SHIFT - DM_VERITY_FEC_BUF_RS_BITS))
 
+<<<<<<< HEAD
+=======
+/* maximum recursion level for verity_fec_decode */
+#define DM_VERITY_FEC_MAX_RECURSION	4
+
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 #define DM_VERITY_OPT_FEC_DEV		"use_fec_from_device"
 #define DM_VERITY_OPT_FEC_BLOCKS	"fec_blocks"
 #define DM_VERITY_OPT_FEC_START		"fec_start"
@@ -61,6 +67,10 @@ struct dm_verity_fec_io {
 	unsigned nbufs;		/* number of buffers allocated */
 	u8 *output;		/* buffer for corrected output */
 	size_t output_pos;
+<<<<<<< HEAD
+=======
+	unsigned level;		/* recursion level */
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 };
 
 #ifdef CONFIG_DM_VERITY_FEC

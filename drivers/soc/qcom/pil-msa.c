@@ -571,6 +571,7 @@ int pil_mss_reset_load_mba(struct pil_desc *pil)
 		}
 		drv->dp_size = dp_fw->size;
 		drv->mba_dp_size += drv->dp_size;
+		drv->mba_dp_size = ALIGN(drv->mba_dp_size, SZ_4K);
 	}
 
 	mba_dp_virt = dma_alloc_attrs(dma_dev, drv->mba_dp_size, &mba_dp_phys,
@@ -594,9 +595,16 @@ int pil_mss_reset_load_mba(struct pil_desc *pil)
 			&mba_dp_phys, &mba_dp_phys_end, drv->mba_dp_size);
 
 	/* Load the MBA image into memory */
+<<<<<<< HEAD
 	if (fw->size <= SZ_1M) {
 		/* Ensures memcpy is done for max 1MB fw size */
 		memcpy(mba_dp_virt, data, fw->size);
+=======
+	count = fw->size;
+	if (count <= SZ_1M) {
+		/* Ensures memcpy is done for max 1MB fw size */
+		memcpy(mba_dp_virt, data, count);
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	} else {
 		dev_err(pil->dev, "%s fw image loading into memory is failed due to fw size overflow\n",
 			__func__);
@@ -650,7 +658,7 @@ err_invalid_fw:
 }
 
 static int pil_msa_auth_modem_mdt(struct pil_desc *pil, const u8 *metadata,
-					size_t size)
+		size_t size, phys_addr_t phy_addr, size_t phy_sz)
 {
 	struct modem_data *drv = dev_get_drvdata(pil->dev);
 	void *mdata_virt;
@@ -679,6 +687,19 @@ static int pil_msa_auth_modem_mdt(struct pil_desc *pil, const u8 *metadata,
 	wmb();
 
 	if (pil->subsys_vmid > 0) {
+		/**
+		  * In case of modem ssr, we need to assign memory back to linux.
+		  * This is not true after cold boot since linux already owns
+		  * it. Also for secure boot devices, modem memory has to be
+		  * released after MBA is booted
+		  */
+		if (pil->modem_ssr) {
+			ret = pil_assign_mem_to_linux(pil, phy_addr, phy_sz);
+			if (ret)
+				dev_err(pil->dev,
+					"Failed to assign to linux, ret- %d\n",
+					ret);
+		}
 		ret = pil_assign_mem_to_subsys(pil, mdata_phys,
 							ALIGN(size, SZ_4K));
 		if (ret) {
@@ -731,7 +752,8 @@ fail:
 }
 
 static int pil_msa_mss_reset_mba_load_auth_mdt(struct pil_desc *pil,
-				  const u8 *metadata, size_t size)
+		const u8 *metadata, size_t size,
+		phys_addr_t modem_reg, size_t sz_modem_reg)
 {
 	int ret;
 
@@ -739,7 +761,8 @@ static int pil_msa_mss_reset_mba_load_auth_mdt(struct pil_desc *pil,
 	if (ret)
 		return ret;
 
-	return pil_msa_auth_modem_mdt(pil, metadata, size);
+	return pil_msa_auth_modem_mdt(pil, metadata, size,
+			modem_reg, sz_modem_reg);
 }
 
 static int pil_msa_mba_verify_blob(struct pil_desc *pil, phys_addr_t phy_addr,

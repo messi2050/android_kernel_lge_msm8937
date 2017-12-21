@@ -316,6 +316,7 @@ static bool in_bounds(unsigned long offset,
 	}
 	return 1;
 }
+<<<<<<< HEAD
 
 /* Check offset + size <= bound.  1 if in bounds, 0 otherwise. */
 static bool in_bounds(unsigned long offset,
@@ -350,6 +351,8 @@ static bool in_bounds(unsigned long offset,
 	}
 	return 1;
 }
+=======
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 static unsigned int extract_uint(const unsigned char *ptr)
 {
@@ -1818,6 +1821,10 @@ static ssize_t fwu_sysfs_store_image(struct file *data_file,
 		dev_err(&fwu->rmi4_data->i2c_client->dev,
 				"%s: Not enough space in buffer\n",
 				__func__);
+<<<<<<< HEAD
+=======
+
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		retval = -EINVAL;
 		goto exit;
 	}

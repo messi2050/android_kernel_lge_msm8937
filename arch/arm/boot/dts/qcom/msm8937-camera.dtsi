@@ -401,9 +401,16 @@
 			<&clock_gcc clk_gcc_camss_cpp_clk>,
 			<&clock_gcc clk_gcc_camss_micro_ahb_clk>,
 			<&clock_gcc clk_gcc_camss_ahb_clk>;
+<<<<<<< HEAD
 		clock-names = "ispif_ahb_clk","cpp_core_clk", "camss_top_ahb_clk",
 			"camss_vfe_cpp_ahb_clk", "camss_vfe_cpp_axi_clk",
 			"camss_vfe_cpp_clk","micro_iface_clk", "camss_ahb_clk";
+=======
+		clock-names = "ispif_ahb_clk", "cpp_core_clk",
+			"camss_top_ahb_clk", "camss_vfe_cpp_ahb_clk",
+			"camss_vfe_cpp_axi_clk", "camss_vfe_cpp_clk",
+			"micro_iface_clk", "camss_ahb_clk";
+>>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		qcom,clock-rates = <61540000 180000000 0 0 0 180000000 0 0>;
 		qcom,min-clock-rate = <133000000>;
 		qcom,bus-master = <1>;
