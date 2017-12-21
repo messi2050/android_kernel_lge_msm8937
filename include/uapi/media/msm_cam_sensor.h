@@ -308,6 +308,10 @@ struct msm_otp_info_t {
 struct msm_eeprom_cfg_data {
 	enum eeprom_cfg_type_t cfgtype;
 	uint8_t is_supported;
+/*LGE_CHANGE_S, Make EEPROM CheckSum Property for AAT Mode, 2016-02-23, seungmin.hong@lge.com*/
+        enum camb_position_t position;
+        uint8_t AAT_Checksum;
+/*LGE_CHANGE_E, Make EEPROM CheckSum Property for AAT Mode, 2016-02-23, seungmin.hong@lge.com*/
 	union {
 		char eeprom_name[MAX_EEPROM_NAME];
 		struct eeprom_get_t get_data;

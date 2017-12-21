@@ -160,8 +160,6 @@ struct msm_vfe_irq_ops {
 	void (*config_irq)(struct vfe_device *vfe_dev,
 		uint32_t irq_status0, uint32_t irq_status1,
 		enum msm_isp_irq_operation);
-	void (*process_eof_irq)(struct vfe_device *vfe_dev,
-		uint32_t irq_status0);
 };
 
 struct msm_vfe_axi_ops {
@@ -197,12 +195,15 @@ struct msm_vfe_axi_ops {
 		uint8_t plane_idx);
 	void (*clear_wm_xbar_reg)(struct vfe_device *vfe_dev,
 		struct msm_vfe_axi_stream *stream_info, uint8_t plane_idx);
-	void (*cfg_ub)(struct vfe_device *vfe_dev,
-		enum msm_vfe_input_src frame_src);
+
+	void (*cfg_ub)(struct vfe_device *vfe_dev);
+
 	void (*read_wm_ping_pong_addr)(struct vfe_device *vfe_dev);
+
 	void (*update_ping_pong_addr)(void __iomem *vfe_base,
 		uint8_t wm_idx, uint32_t pingpong_bit, dma_addr_t paddr,
 		int32_t buf_size);
+
 	uint32_t (*get_wm_mask)(uint32_t irq_status0, uint32_t irq_status1);
 	uint32_t (*get_comp_mask)(uint32_t irq_status0, uint32_t irq_status1);
 	uint32_t (*get_pingpong_status)(struct vfe_device *vfe_dev);
@@ -211,8 +212,6 @@ struct msm_vfe_axi_ops {
 		uint32_t enable_camif);
 	void (*update_cgc_override)(struct vfe_device *vfe_dev,
 		uint8_t wm_idx, uint8_t cgc_override);
-	uint32_t (*ub_reg_offset)(struct vfe_device *vfe_dev, int idx);
-	uint32_t (*get_ub_size)(struct vfe_device *vfe_dev);
 };
 
 struct msm_vfe_core_ops {
@@ -466,7 +465,6 @@ struct msm_vfe_src_info {
 	uint32_t frame_id;
 	uint32_t reg_update_frame_id;
 	uint8_t active;
-	uint8_t flag;
 	uint8_t pix_stream_count;
 	uint8_t raw_stream_count;
 	enum msm_vfe_inputmux input_mux;
@@ -478,7 +476,6 @@ struct msm_vfe_src_info {
 	struct timeval time_stamp;
 	enum msm_vfe_dual_hw_type dual_hw_type;
 	struct msm_vfe_dual_hw_ms_info dual_hw_ms_info;
-	uint32_t eof_id;
 };
 
 struct msm_vfe_fetch_engine_info {
@@ -519,6 +516,7 @@ struct msm_vfe_axi_shared_data {
 	uint32_t event_mask;
 	uint8_t enable_frameid_recovery;
 	enum msm_vfe_camif_state camif_state;
+	uint8_t need_wm_reconfig;
 	uint32_t recovery_count;
 };
 
@@ -679,7 +677,6 @@ struct master_slave_resource_info {
 
 struct msm_vfe_common_dev_data {
 	spinlock_t common_dev_data_lock;
-	spinlock_t common_dev_axi_lock;
 	struct dual_vfe_resource *dual_vfe_res;
 	struct master_slave_resource_info ms_resource;
 };
@@ -760,7 +757,6 @@ struct vfe_device {
 	uint32_t is_split;
 	uint32_t dual_vfe_enable;
 	unsigned long page_fault_addr;
-	uint32_t vfe_hw_limit;
 
 	/* Debug variables */
 	int dump_reg;
@@ -788,7 +784,6 @@ struct vfe_device {
 	/* before halt irq info */
 	uint32_t recovery_irq0_mask;
 	uint32_t recovery_irq1_mask;
-	uint32_t ms_frame_id;
 };
 
 struct vfe_parent_device {

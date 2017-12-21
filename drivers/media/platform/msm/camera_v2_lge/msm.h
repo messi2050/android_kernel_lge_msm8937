@@ -120,6 +120,7 @@ struct msm_session {
 	struct mutex lock;
 	struct mutex lock_q;
 	struct mutex close_lock;
+	rwlock_t stream_rwlock;
 };
 
 static inline bool msm_is_daemon_present(void)

@@ -149,7 +149,7 @@ typedef int (*msm_queue_find_func)(void *d1, void *d2);
 #define msm_queue_find(queue, type, member, func, data) ({\
 	unsigned long flags;					\
 	struct msm_queue_head *__q = (queue);			\
-	type *node = 0; \
+	type *node = NULL; \
 	typeof(node) __ret = NULL; \
 	msm_queue_find_func __f = (func); \
 	spin_lock_irqsave(&__q->lock, flags);			\
@@ -292,22 +292,47 @@ void msm_delete_stream(unsigned int session_id, unsigned int stream_id)
 	struct msm_session *session = NULL;
 	struct msm_stream  *stream = NULL;
 	unsigned long flags;
+	int try_count = 0;
 
 	session = msm_queue_find(msm_session_q, struct msm_session,
 		list, __msm_queue_find_session, &session_id);
+
 	if (!session)
 		return;
 
-	stream = msm_queue_find(&session->stream_q, struct msm_stream,
-		list, __msm_queue_find_stream, &stream_id);
-	if (!stream)
-		return;
-	spin_lock_irqsave(&(session->stream_q.lock), flags);
-	list_del_init(&stream->list);
-	session->stream_q.len--;
-	kfree(stream);
-	stream = NULL;
-	spin_unlock_irqrestore(&(session->stream_q.lock), flags);
+	while (1) {
+
+		if (try_count > 5) {
+			pr_err("%s : not able to delete stream %d\n",
+				__func__, __LINE__);
+			break;
+		}
+
+		write_lock(&session->stream_rwlock);
+		try_count++;
+		stream = msm_queue_find(&session->stream_q, struct msm_stream,
+			list, __msm_queue_find_stream, &stream_id);
+
+		if (!stream) {
+			write_unlock(&session->stream_rwlock);
+			return;
+		}
+
+		if (msm_vb2_get_stream_state(stream) != 1) {
+			write_unlock(&session->stream_rwlock);
+			continue;
+		}
+
+		spin_lock_irqsave(&(session->stream_q.lock), flags);
+		list_del_init(&stream->list);
+		session->stream_q.len--;
+		kfree(stream);
+		stream = NULL;
+		spin_unlock_irqrestore(&(session->stream_q.lock), flags);
+		write_unlock(&session->stream_rwlock);
+		break;
+	}
+
 }
 EXPORT_SYMBOL(msm_delete_stream);
 
@@ -457,6 +482,7 @@ int msm_create_session(unsigned int session_id, struct video_device *vdev)
 	mutex_init(&session->lock);
 	mutex_init(&session->lock_q);
 	mutex_init(&session->close_lock);
+	rwlock_init(&session->stream_rwlock);
 	return 0;
 }
 EXPORT_SYMBOL(msm_create_session);
@@ -1200,21 +1226,17 @@ long msm_copy_camera_private_ioctl_args(unsigned long arg,
 	struct msm_camera_private_ioctl_arg *k_ioctl,
 	void __user **tmp_compat_ioctl_ptr)
 {
-	struct msm_camera_private_ioctl_arg up_ioctl;
+	struct msm_camera_private_ioctl_arg *up_ioctl_ptr =
+		(struct msm_camera_private_ioctl_arg *)arg;
 
 	if (WARN_ON(!arg || !k_ioctl || !tmp_compat_ioctl_ptr))
 		return -EIO;
 
-	if (copy_from_user(&up_ioctl,
-		(struct msm_camera_private_ioctl_arg *)arg,
-		sizeof(struct msm_camera_private_ioctl_arg)))
-		return -EFAULT;
-
-	k_ioctl->id = up_ioctl.id;
-	k_ioctl->size = up_ioctl.size;
-	k_ioctl->result = up_ioctl.result;
-	k_ioctl->reserved = up_ioctl.reserved;
-	*tmp_compat_ioctl_ptr = compat_ptr(up_ioctl.ioctl_ptr);
+	k_ioctl->id = up_ioctl_ptr->id;
+	k_ioctl->size = up_ioctl_ptr->size;
+	k_ioctl->result = up_ioctl_ptr->result;
+	k_ioctl->reserved = up_ioctl_ptr->reserved;
+	*tmp_compat_ioctl_ptr = compat_ptr(up_ioctl_ptr->ioctl_ptr);
 
 	return 0;
 }
