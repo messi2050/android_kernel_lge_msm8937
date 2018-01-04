@@ -2058,10 +2058,7 @@ static inline struct page *follow_page(struct vm_area_struct *vma,
 #define FOLL_MIGRATION	0x400	/* wait for page to replace migration entry */
 #define FOLL_TRIED	0x800	/* a retry, previous pass started an IO */
 #define FOLL_COW	0x4000	/* internal GUP flag */
-<<<<<<< HEAD
 #define FOLL_CMA    0x80000 /* migrate if the page is from cma pageblock */
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 typedef int (*pte_fn_t)(pte_t *pte, pgtable_t token, unsigned long addr,
 			void *data);

@@ -1296,14 +1296,11 @@ static inline void gsi_get_inst_ram_offset_and_size(unsigned long *base_offset,
 		unsigned long *size)
 {
 }
-<<<<<<< HEAD
-=======
 
 static inline int gsi_halt_channel_ee(unsigned int chan_idx, unsigned int ee,
 	 int *code)
 {
 	return -GSI_STATUS_UNSUPPORTED_OP;
 }
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 #endif
 #endif

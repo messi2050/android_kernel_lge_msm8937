@@ -82,19 +82,17 @@
 #define BLANK_FLAG_ULP	FB_BLANK_NORMAL
 #endif
 
-<<<<<<< HEAD
 #ifdef CONFIG_LGE_DISPLAY_BL_DIMMING
 bool fb_blank_called;
 extern bool lge_battery_check(void);
 #endif
-=======
+
 /*
  * Time period for fps calulation in micro seconds.
  * Default value is set to 1 sec.
  */
 #define MDP_TIME_PERIOD_CALC_FPS_US	1000000
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 static struct fb_info *fbi_list[MAX_FBI_LIST];
 static int fbi_list_index;
 #if IS_ENABLED(CONFIG_LGE_DISPLAY_LV7_ESD_FLAG)
@@ -705,7 +703,6 @@ static void __mdss_fb_idle_notify_work(struct work_struct *work)
 	mfd->idle_state = MDSS_FB_IDLE;
 }
 
-
 static ssize_t mdss_fb_get_fps_info(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -1011,8 +1008,6 @@ static ssize_t mdss_fb_get_dfps_mode(struct device *dev,
 	return ret;
 }
 
-
-
 static DEVICE_ATTR(msm_fb_type, S_IRUGO, mdss_fb_get_type, NULL);
 static DEVICE_ATTR(msm_fb_split, S_IRUGO | S_IWUSR, mdss_fb_show_split,
 					mdss_fb_store_split);
@@ -1029,12 +1024,8 @@ static DEVICE_ATTR(msm_fb_panel_status, S_IRUGO | S_IWUSR,
 	mdss_fb_get_panel_status, mdss_fb_force_panel_dead);
 static DEVICE_ATTR(msm_fb_dfps_mode, S_IRUGO | S_IWUSR,
 	mdss_fb_get_dfps_mode, mdss_fb_change_dfps_mode);
-<<<<<<< HEAD
-
-=======
 static DEVICE_ATTR(measured_fps, S_IRUGO | S_IWUSR | S_IWGRP,
 	mdss_fb_get_fps_info, NULL);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 static struct attribute *mdss_fb_attrs[] = {
 	&dev_attr_msm_fb_type.attr,
 	&dev_attr_msm_fb_split.attr,
@@ -2128,7 +2119,7 @@ static int mdss_fb_blank_sub(int blank_mode, struct fb_info *info,
 	if (mfd->dcm_state == DCM_ENTER)
 		return -EPERM;
 
-	pr_info("%pS mode:%d\n", __builtin_return_address(0),
+	pr_debug("%pS mode:%d\n", __builtin_return_address(0),
 		blank_mode);
 
 	snprintf(trace_buffer, sizeof(trace_buffer), "fb%d blank %d",
@@ -4497,10 +4488,6 @@ static int mdss_fb_handle_buf_sync_ioctl(struct msm_sync_pt_data *sync_pt_data,
 		goto buf_sync_err_3;
 	}
 
-<<<<<<< HEAD
-	sync_fence_install(rel_fence, rel_fen_fd);
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	sync_fence_install(retire_fence, retire_fen_fd);
 
 skip_retire_fence:
@@ -4655,27 +4642,13 @@ static int mdss_fb_atomic_commit_ioctl(struct fb_info *info,
 	struct mdp_input_layer __user *input_layer_list;
 	struct mdp_output_layer *output_layer = NULL;
 	struct mdp_output_layer __user *output_layer_user;
-<<<<<<< HEAD
-	struct msm_fb_data_type *mfd;
-=======
 	struct mdp_frc_info *frc_info = NULL;
 	struct mdp_frc_info __user *frc_info_user;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	ret = copy_from_user(&commit, argp, sizeof(struct mdp_layer_commit));
 	if (ret) {
 		pr_err("%s:copy_from_user failed\n", __func__);
 		return ret;
-	}
-
-	mfd = (struct msm_fb_data_type *)info->par;
-	if (!mfd)
-		return -EINVAL;
-
-	if (mfd->panel_info->panel_dead) {
-		pr_debug("early commit return\n");
-		MDSS_XLOG(mfd->panel_info->panel_dead);
-		return 0;
 	}
 
 	output_layer_user = commit.commit_v1.output_layer;
@@ -4929,15 +4902,12 @@ static int __ioctl_wait_idle(struct msm_fb_data_type *mfd, u32 cmd)
 	return ret;
 }
 
-<<<<<<< HEAD
-=======
 #ifdef TARGET_HW_MDSS_MDP3
 static bool check_not_supported_ioctl(u32 cmd)
 {
 	return false;
 }
 #else
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 static bool check_not_supported_ioctl(u32 cmd)
 {
 	return((cmd == MSMFB_OVERLAY_SET) || (cmd == MSMFB_OVERLAY_UNSET) ||
@@ -4946,10 +4916,7 @@ static bool check_not_supported_ioctl(u32 cmd)
 		(cmd == MSMFB_BUFFER_SYNC) || (cmd == MSMFB_OVERLAY_QUEUE) ||
 		(cmd == MSMFB_NOTIFY_UPDATE));
 }
-<<<<<<< HEAD
-=======
 #endif
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 /*
  * mdss_fb_do_ioctl() - MDSS Framebuffer ioctl function

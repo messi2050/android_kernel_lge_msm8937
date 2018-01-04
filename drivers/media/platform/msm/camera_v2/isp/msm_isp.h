@@ -448,7 +448,7 @@ struct msm_vfe_axi_stream {
 
 	uint32_t runtime_num_burst_capture;
 	uint32_t runtime_output_format;
-	enum msm_stream_rdi_input_type  rdi_input_type;
+	enum msm_stream_memory_input_t  memory_input;
 	struct msm_isp_sw_framskip sw_skip;
 	uint8_t sw_ping_pong_bit;
 	uint8_t sw_sof_ping_pong_bit;
@@ -785,11 +785,8 @@ struct vfe_device {
 	/* before halt irq info */
 	uint32_t recovery_irq0_mask;
 	uint32_t recovery_irq1_mask;
-<<<<<<< HEAD
-=======
 	/* Store the buf_idx for pd stats RDI stream */
 	uint8_t pd_buf_idx;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	uint32_t ms_frame_id;
 };
 

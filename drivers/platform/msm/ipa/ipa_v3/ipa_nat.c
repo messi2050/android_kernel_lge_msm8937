@@ -34,10 +34,6 @@ enum nat_table_type {
 #define NAT_TABLE_ENTRY_SIZE_BYTE 32
 #define NAT_INTEX_TABLE_ENTRY_SIZE_BYTE 4
 
-<<<<<<< HEAD
-
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 static int ipa3_nat_vma_fault_remap(
 	 struct vm_area_struct *vma, struct vm_fault *vmf)
 {
@@ -256,16 +252,10 @@ int ipa3_allocate_nat_device(struct ipa_ioc_nat_alloc_mem *mem)
 	IPADBG("passed memory size %zu\n", mem->size);
 
 	mutex_lock(&nat_ctx->lock);
-<<<<<<< HEAD
-	if (strcmp(mem->dev_name, NAT_DEV_NAME)) {
-		IPAERR_RL("Nat device name mismatch\n");
-		IPAERR_RL("Expect: %s Recv: %s\n", NAT_DEV_NAME, mem->dev_name);
-=======
 	if (strcmp(IPA_NAT_DEV_NAME, mem->dev_name)) {
 		IPAERR_RL("Nat device name mismatch\n");
 		IPAERR_RL("Expect: %s Recv: %s\n",
 			IPA_NAT_DEV_NAME, mem->dev_name);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		result = -EPERM;
 		goto bail;
 	}

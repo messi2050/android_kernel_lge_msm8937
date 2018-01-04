@@ -194,7 +194,6 @@ config INPUT_KEYCOMBO
 	---help---
 	  Say Y here if you want to take action when some keys are pressed;
 
-<<<<<<< HEAD
 	  To compile this driver as a module, choose M here: the
 	  module will be called keycombo.
 
@@ -207,8 +206,6 @@ config INPUT_EPACK
 	  To compile this driver as a module, choose M here: the
 	  module will be called keycombo.
 
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 comment "Input Device Drivers"
 
 source "drivers/input/keyboard/Kconfig"

@@ -117,7 +117,6 @@ void mdss_check_dsi_ctrl_status(struct work_struct *work, uint32_t interval)
 			goto status_dead;
 	}
 
-<<<<<<< HEAD
 #if IS_ENABLED(CONFIG_LGE_TOUCH_LG4894)
 	if (lg4894_check_finger()) {
 		schedule_delayed_work(&pstatus_data->check_status,
@@ -126,8 +125,6 @@ void mdss_check_dsi_ctrl_status(struct work_struct *work, uint32_t interval)
 	}
 #endif
 
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	/*
 	 * TODO: Because mdss_dsi_cmd_mdp_busy has made sure DMA to
 	 * be idle in mdss_dsi_cmdlist_commit, it is not necessary

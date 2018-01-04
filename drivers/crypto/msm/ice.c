@@ -1530,22 +1530,12 @@ struct platform_device *qcom_ice_get_pdevice(struct device_node *node)
 		if (ice_dev->pdev->of_node == node) {
 			pr_info("%s: found ice device %pK\n", __func__,
 			ice_dev);
-<<<<<<< HEAD
-			ice_pdev = to_platform_device(ice_dev->pdev);
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			break;
 		}
 	}
 
-<<<<<<< HEAD
-	if(ice_pdev)
-		pr_info("%s: matching platform device %pK\n", __func__, ice_pdev);
-
-=======
 	ice_pdev = to_platform_device(ice_dev->pdev);
 	pr_info("%s: matching platform device %pK\n", __func__, ice_pdev);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 out:
 	return ice_pdev;
 }

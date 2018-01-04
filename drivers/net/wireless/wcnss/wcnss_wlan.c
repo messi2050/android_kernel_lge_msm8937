@@ -573,8 +573,6 @@ void wcnss_pronto_is_a2xb_bus_stall(void *tst_addr, u32 fifo_mask, char *type)
 	}
 }
 
-<<<<<<< HEAD
-=======
 int wcnss_get_dual_band_capability_info(struct platform_device *pdev)
 {
 	u32 reg = 0;
@@ -599,7 +597,6 @@ int wcnss_get_dual_band_capability_info(struct platform_device *pdev)
 	return 0;
 }
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 /* Log pronto debug registers during SSR Timeout CB */
 void wcnss_pronto_log_debug_regs(void)
 {

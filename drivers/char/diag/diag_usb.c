@@ -29,6 +29,9 @@
 #include "diag_usb.h"
 #include "diag_mux.h"
 #include "diagmem.h"
+#ifdef CONFIG_LGE_DIAG_BYPASS
+int diag_bypass_enable = 1;
+#endif
 #include "diag_ipc_logging.h"
 
 #define DIAG_USB_STRING_SZ	10
@@ -219,12 +222,8 @@ static void usb_disconnect(struct diag_usb_info *ch)
 	if (!ch)
 		return;
 
-<<<<<<< HEAD
-	if (!atomic_read(&ch->connected) && driver->usb_connected)
-=======
 	if (!atomic_read(&ch->connected) &&
 		driver->usb_connected && diag_mask_param())
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		diag_clear_masks(NULL);
 
 	if (ch && ch->ops && ch->ops->close)
@@ -289,9 +288,16 @@ static void usb_read_done_work_fn(struct work_struct *work)
 	 * USB is disconnected/Disabled before the previous read completed.
 	 * Discard the packet and don't do any further processing.
 	 */
+/* [LGE_S][BSP_Modem] LGSSL to support testmode cmd */
+	if (diag_mux->mode != DIAG_MEMORY_DEVICE_MODE)
+	{
+/* [LGE_E][BSP_Modem] LGSSL to support testmode cmd */
 	if (!atomic_read(&ch->connected) || !ch->enabled ||
 	    !atomic_read(&ch->diag_state))
 		return;
+/* [LGE_S][BSP_Modem] LGSSL to support testmode cmd */
+	}
+/* [LGE_E][BSP_Modem] LGSSL to support testmode cmd */
 
 	req = ch->read_ptr;
 	ch->read_cnt++;
@@ -361,12 +367,18 @@ static void diag_usb_notifier(void *priv, unsigned event,
 	case USB_DIAG_CONNECT:
 		usb_info->max_size = usb_diag_request_size(usb_info->hdl);
 		atomic_set(&usb_info->connected, 1);
+#ifdef CONFIG_LGE_DIAG_BYPASS
+        diag_bypass_enable = 0;
+#endif
 		pr_info("diag: USB channel %s connected\n", usb_info->name);
 		queue_work(usb_info->usb_wq,
 			   &usb_info->connect_work);
 		break;
 	case USB_DIAG_DISCONNECT:
 		atomic_set(&usb_info->connected, 0);
+#ifdef CONFIG_LGE_DIAG_BYPASS
+        diag_bypass_enable = 1;
+#endif
 		pr_info("diag: USB channel %s disconnected\n", usb_info->name);
 		queue_work(usb_info->usb_wq,
 			   &usb_info->disconnect_work);

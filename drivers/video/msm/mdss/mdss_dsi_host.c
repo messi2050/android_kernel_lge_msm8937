@@ -2381,8 +2381,6 @@ static int mdss_dsi_wait4video_eng_busy(struct mdss_dsi_ctrl_pdata *ctrl)
 
 	if (ctrl->ctrl_state & CTRL_STATE_MDP_ACTIVE) {
 		mdss_dsi_wait4video_done(ctrl);
-<<<<<<< HEAD
-
 		/* delay 4 ms to skip BLLP */
 #if IS_ENABLED(CONFIG_LGE_DISPLAY_PRE_ACTIVE_AREA_DELAY)
 		usleep_range(ctrl->panel_data.panel_info.pre_active_area_delay_us, ctrl->panel_data.panel_info.pre_active_area_delay_us);
@@ -2393,9 +2391,6 @@ static int mdss_dsi_wait4video_eng_busy(struct mdss_dsi_ctrl_pdata *ctrl)
 		usleep_range(4000, 4000);
 #endif
 #endif
-
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		v_total = mdss_panel_get_vtotal(pinfo);
 		v_blank = pinfo->lcdc.v_back_porch + pinfo->lcdc.v_pulse_width;
 		if (pinfo->dynamic_fps && pinfo->current_fps)

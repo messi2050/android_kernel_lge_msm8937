@@ -188,13 +188,8 @@ int fb_copy_cmap(const struct fb_cmap *from, struct fb_cmap *to)
 
 int fb_cmap_to_user(const struct fb_cmap *from, struct fb_cmap_user *to)
 {
-<<<<<<< HEAD
-	u32 tooff = 0, fromoff = 0;
-	u32 size;
-=======
 	unsigned int tooff = 0, fromoff = 0;
 	size_t size;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	if (to->start > from->start)
 		fromoff = to->start - from->start;
@@ -203,15 +198,9 @@ int fb_cmap_to_user(const struct fb_cmap *from, struct fb_cmap_user *to)
 	if (fromoff >= from->len || tooff >= to->len)
 		return -EINVAL;
 
-<<<<<<< HEAD
-	size = to->len - tooff;
-	if (size > (from->len - fromoff))
-		size = from->len - fromoff;
-=======
 	size = min_t(size_t, to->len - tooff, from->len - fromoff);
 	if (size == 0)
 		return -EINVAL;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	size *= sizeof(u16);
 	if (size == 0)
 		return -EINVAL;

@@ -49,6 +49,10 @@
 #include <linux/compat.h>
 #endif
 
+#ifdef CONFIG_LGE_DIAG_BYPASS
+#include "lg_diag_bypass.h"
+#endif
+
 MODULE_DESCRIPTION("Diag Char Driver");
 MODULE_LICENSE("GPL v2");
 MODULE_VERSION("1.0");
@@ -421,27 +425,6 @@ void diag_clear_masks(struct diag_md_session_t *info)
 	"diag:%s: masks cleared successfully\n", __func__);
 }
 
-void diag_clear_masks(struct diag_md_session_t *info)
-{
-	int ret;
-	char cmd_disable_log_mask[] = { 0x73, 0, 0, 0, 0, 0, 0, 0};
-	char cmd_disable_msg_mask[] = { 0x7D, 0x05, 0, 0, 0, 0, 0, 0};
-	char cmd_disable_event_mask[] = { 0x60, 0};
-
-	DIAG_LOG(DIAG_DEBUG_PERIPHERALS,
-	"diag: %s: masks clear request upon %s\n", __func__,
-	((info) ? "ODL exit" : "USB Disconnection"));
-
-	ret = diag_process_apps_masks(cmd_disable_log_mask,
-			sizeof(cmd_disable_log_mask), info);
-	ret = diag_process_apps_masks(cmd_disable_msg_mask,
-			sizeof(cmd_disable_msg_mask), info);
-	ret = diag_process_apps_masks(cmd_disable_event_mask,
-			sizeof(cmd_disable_event_mask), info);
-	DIAG_LOG(DIAG_DEBUG_PERIPHERALS,
-	"diag:%s: masks cleared successfully\n", __func__);
-}
-
 static void diag_close_logging_process(const int pid)
 {
 	int i;
@@ -453,24 +436,15 @@ static void diag_close_logging_process(const int pid)
 	if (!session_info)
 		return;
 
-<<<<<<< HEAD
-	diag_clear_masks(session_info);
-=======
 	if (diag_mask_clear_param)
 		diag_clear_masks(session_info);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	mutex_lock(&driver->diag_maskclear_mutex);
 	driver->mask_clear = 1;
 	mutex_unlock(&driver->diag_maskclear_mutex);
 
-<<<<<<< HEAD
-	mutex_lock(&driver->diagchar_mutex);
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	session_peripheral_mask = session_info->peripheral_mask;
 	diag_md_session_close(session_info);
-	mutex_unlock(&driver->diagchar_mutex);
 	for (i = 0; i < NUM_MD_SESSIONS; i++)
 		if (MD_PERIPHERAL_MASK(i) & session_peripheral_mask)
 			diag_mux_close_peripheral(DIAG_LOCAL_PROC, i);
@@ -784,6 +758,11 @@ struct diag_cmd_reg_entry_t *diag_cmd_search(
 						continue;
 					}
 				}
+#ifdef CONFIG_LGE_DIAG_CMD_FORWARD_MODEM
+				if ((entry->cmd_code == 0x5D) && (item->proc != PERIPHERAL_MODEM)) {
+					continue;
+				}
+#endif
 				return &item->entry;
 			}
 		}
@@ -1777,18 +1756,14 @@ static int diag_ioctl_lsm_deinit(void)
 {
 	int i;
 
-	mutex_lock(&driver->diagchar_mutex);
 	for (i = 0; i < driver->num_clients; i++)
 		if (driver->client_map[i].pid == current->tgid)
 			break;
 
-	if (i == driver->num_clients) {
-		mutex_unlock(&driver->diagchar_mutex);
+	if (i == driver->num_clients)
 		return -EINVAL;
-	}
 
 	driver->data_ready[i] |= DEINIT_TYPE;
-	mutex_unlock(&driver->diagchar_mutex);
 	wake_up_interruptible(&driver->wait_q);
 
 	return 1;
@@ -2858,16 +2833,6 @@ static int diag_user_process_apps_data(const char __user *buf, int len,
 	return 0;
 }
 
-static int check_data_ready(int index)
-{
-	int data_type = 0;
-
-	mutex_lock(&driver->diagchar_mutex);
-	data_type = driver->data_ready[index];
-	mutex_unlock(&driver->diagchar_mutex);
-	return data_type;
-}
-
 static ssize_t diagchar_read(struct file *file, char __user *buf, size_t count,
 			  loff_t *ppos)
 {
@@ -2880,11 +2845,9 @@ static ssize_t diagchar_read(struct file *file, char __user *buf, size_t count,
 	int write_len = 0;
 	struct diag_md_session_t *session_info = NULL;
 
-	mutex_lock(&driver->diagchar_mutex);
 	for (i = 0; i < driver->num_clients; i++)
 		if (driver->client_map[i].pid == current->tgid)
 			index = i;
-	mutex_unlock(&driver->diagchar_mutex);
 
 	if (index == -1) {
 		pr_err("diag: Client PID not found in table");
@@ -2894,7 +2857,7 @@ static ssize_t diagchar_read(struct file *file, char __user *buf, size_t count,
 		pr_err("diag: bad address from user side\n");
 		return -EFAULT;
 	}
-	wait_event_interruptible(driver->wait_q, (check_data_ready(index)) > 0);
+	wait_event_interruptible(driver->wait_q, driver->data_ready[index]);
 
 	mutex_lock(&driver->diagchar_mutex);
 
@@ -3031,11 +2994,11 @@ static ssize_t diagchar_read(struct file *file, char __user *buf, size_t count,
 	}
 
 exit:
+	mutex_unlock(&driver->diagchar_mutex);
 	if (driver->data_ready[index] & DCI_DATA_TYPE) {
-		data_type = driver->data_ready[index] & DCI_DATA_TYPE;
-		mutex_unlock(&driver->diagchar_mutex);
-		/* Copy the type of data being passed */
 		mutex_lock(&driver->dci_mutex);
+		/* Copy the type of data being passed */
+		data_type = driver->data_ready[index] & DCI_DATA_TYPE;
 		list_for_each_safe(start, temp, &driver->dci_client_list) {
 			entry = list_entry(start, struct diag_dci_client_tbl,
 									track);
@@ -3067,7 +3030,6 @@ exit:
 		mutex_unlock(&driver->dci_mutex);
 		goto end;
 	}
-	mutex_unlock(&driver->diagchar_mutex);
 end:
 	/*
 	 * Flush any read that is currently pending on DCI data and
@@ -3106,7 +3068,12 @@ static ssize_t diagchar_write(struct file *file, const char __user *buf,
 		return -EIO;
 	}
 
+
+#ifdef CONFIG_LGE_DIAG_BYPASS
+	if (driver->logging_mode == DIAG_USB_MODE && !driver->usb_connected && !lge_bypass_status()) {
+#else
 	if (driver->logging_mode == DIAG_USB_MODE && !driver->usb_connected) {
+#endif
 		if (!((pkt_type == DCI_DATA_TYPE) ||
 		    (pkt_type == DCI_PKT_TYPE) ||
 		    (pkt_type & DATA_TYPE_DCI_LOG) ||
@@ -3527,10 +3494,7 @@ static int __init diagchar_init(void)
 	mutex_init(&driver->hdlc_disable_mutex);
 	mutex_init(&driver->diagchar_mutex);
 	mutex_init(&driver->diag_maskclear_mutex);
-<<<<<<< HEAD
-=======
 	mutex_init(&driver->diag_notifier_mutex);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	mutex_init(&driver->diag_file_mutex);
 	mutex_init(&driver->delayed_rsp_mutex);
 	mutex_init(&apps_data_mutex);

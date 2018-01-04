@@ -2425,11 +2425,7 @@ begin:
 			if (skb->len == IPA_PKT_STATUS_SIZE &&
 					!status->exception) {
 				WARN_ON(sys->prev_skb != NULL);
-<<<<<<< HEAD
-				IPADBG("Ins header in next buffer\n");
-=======
 				IPADBG_LOW("Ins header in next buffer\n");
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 				sys->prev_skb = skb_copy(skb, GFP_KERNEL);
 				sys->len_partial =	 skb->len;
 				return rc;

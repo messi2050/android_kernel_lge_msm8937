@@ -465,10 +465,7 @@ struct diagchar_dev {
 	int ref_count;
 	int mask_clear;
 	struct mutex diag_maskclear_mutex;
-<<<<<<< HEAD
-=======
 	struct mutex diag_notifier_mutex;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	struct mutex diagchar_mutex;
 	struct mutex diag_file_mutex;
 	wait_queue_head_t wait_q;
@@ -632,10 +629,7 @@ void diag_cmd_remove_reg(struct diag_cmd_reg_entry_t *entry, uint8_t proc);
 void diag_cmd_remove_reg_by_pid(int pid);
 void diag_cmd_remove_reg_by_proc(int proc);
 int diag_cmd_chk_polling(struct diag_cmd_reg_entry_t *entry);
-<<<<<<< HEAD
-=======
 int diag_mask_param(void);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 void diag_clear_masks(struct diag_md_session_t *info);
 
 void diag_record_stats(int type, int flag);

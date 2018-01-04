@@ -377,12 +377,9 @@ struct qpnp_hap {
 	u8 reg_play;
 	u8 sc_duration;
 	u8 ext_pwm_dtest_line;
-<<<<<<< HEAD
-=======
 	u8 pmic_subtype;
 	u8 auto_res_mode;
 	bool lra_hw_auto_resonance;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	bool vcc_pon_enabled;
 	bool state;
 	bool use_play_irq;

@@ -934,11 +934,6 @@ skip_cqterri:
 			mrq->cmdq_req->resp_err = true;
 			pr_err("%s: Response error (0x%08x) from card !!!",
 				mmc_hostname(mmc), cmdq_readl(cq_host, CQCRA));
-<<<<<<< HEAD
-		} else {
-			mrq->cmdq_req->resp_idx = cmdq_readl(cq_host, CQCRI);
-			mrq->cmdq_req->resp_arg = cmdq_readl(cq_host, CQCRA);
-=======
 
 			/*
 			 * If RED error is detected for WP violation, there is
@@ -955,7 +950,6 @@ skip_cqterri:
 					err_mrq->cmdq_req->resp_err = true;
 				}
 			}
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		}
 		/*
 		 * The following register info are needed for error recovery
@@ -999,12 +993,9 @@ skip_cqterri:
 				MMC_TRACE(mmc, "%s: completing tag -> %lu\n",
 					__func__, tag);
 				cmdq_finish_data(mmc, tag);
-<<<<<<< HEAD
-=======
 			} else {
 				pr_err("%s: tag:%lu finish_data already done\n",
 						mmc_hostname(mmc), tag);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			}
 		}
 	}
@@ -1107,13 +1098,6 @@ static int cmdq_halt(struct mmc_host *mmc, bool halt)
 			} else {
 				MMC_TRACE(mmc, "%s: halt done , retries: %d\n",
 					__func__, retries);
-<<<<<<< HEAD
-				/* halt done: re-enable legacy interrupts */
-				if (cq_host->ops->clear_set_irqs)
-					cq_host->ops->clear_set_irqs(mmc,
-								false);
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 				break;
 			}
 		}

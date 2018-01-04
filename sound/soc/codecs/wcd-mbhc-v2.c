@@ -898,15 +898,11 @@ static int wcd_check_cross_conn(struct wcd_mbhc *mbhc)
 		if (mbhc->mbhc_cb->hph_pa_on_status(mbhc->codec))
 			return false;
 
-<<<<<<< HEAD
-=======
-
 	if (mbhc->mbhc_cb->hph_pull_down_ctrl) {
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 0);
 		mbhc->mbhc_cb->hph_pull_down_ctrl(mbhc->codec, false);
 	}
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	WCD_MBHC_REG_READ(WCD_MBHC_ELECT_SCHMT_ISRC, reg1);
 	/*
 	 * Check if there is any cross connection,

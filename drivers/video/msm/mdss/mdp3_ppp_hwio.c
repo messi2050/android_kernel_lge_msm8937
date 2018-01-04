@@ -1332,13 +1332,8 @@ int config_ppp_op_mode(struct ppp_blit_op *blit_op)
 	pr_debug("ROI(x %d,y %d, w %d, h %d) ",
 		blit_op->dst.roi.x, blit_op->dst.roi.y,
 		blit_op->dst.roi.width, blit_op->dst.roi.height);
-<<<<<<< HEAD
-	pr_debug("Addr %pK, Stride S0 %d Addr_P1 %pK, Stride S1 %d\n",
-		blit_op->dst.p0, blit_op->src.stride0,
-=======
 	pr_debug("Addr %p, Stride S0 %d Addr_P1 %p, Stride S1 %d\n",
 		blit_op->dst.p0, blit_op->dst.stride0,
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		blit_op->dst.p1, blit_op->dst.stride1);
 
 	PPP_WRITEL(ppp_operation_reg, MDP3_PPP_OP_MODE);

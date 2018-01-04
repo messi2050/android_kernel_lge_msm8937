@@ -4421,10 +4421,6 @@ static int iris_vidioc_s_ctrl(struct file *file, void *priv,
 		break;
 	case V4L2_CID_PRIVATE_IRIS_RDSGROUP_PROC:
 		saved_val = radio->g_rds_grp_proc_ps;
-<<<<<<< HEAD
-		rds_grps_proc = radio->g_rds_grp_proc_ps | ctrl->value;
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		radio->g_rds_grp_proc_ps |= ctrl->value;
 		retval = hci_fm_rds_grps_process(
 				&radio->g_rds_grp_proc_ps,

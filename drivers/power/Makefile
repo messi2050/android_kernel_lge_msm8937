@@ -85,3 +85,6 @@ obj-$(CONFIG_MSM_BCL_PERIPHERAL_CTL) += bcl_peripheral.o
 obj-$(CONFIG_POWER_RESET)	+= reset/
 obj-$(CONFIG_LGE_PM_SMPL_COUNTER) += lge_smpl_count.o
 obj-$(CONFIG_ARCH_MSM)		+= qcom/
+
+# flags to fix building with aarch64
+ccflags-y += -Wno-implicit-function-declaration

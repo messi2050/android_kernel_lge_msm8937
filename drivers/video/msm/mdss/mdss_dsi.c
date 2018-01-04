@@ -47,7 +47,6 @@ extern int esd_detected;
 #endif
 
 #define XO_CLK_RATE	19200000
-
 #define CMDLINE_DSI_CTL_NUM_STRING_LEN 2
 
 /* Master structure to hold all the information about the DSI/panel */
@@ -334,7 +333,6 @@ static int mdss_dsi_panel_power_off(struct mdss_panel_data *pdata)
 	ret = msm_dss_enable_vreg(
 		ctrl_pdata->panel_power_data.vreg_config,
 		ctrl_pdata->panel_power_data.num_vreg, 0);
-
 	if (ret)
 		pr_err("%s: failed to disable vregs for %s\n",
 			__func__, __mdss_dsi_pm_name(DSI_PANEL_PM));

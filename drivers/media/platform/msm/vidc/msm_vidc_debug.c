@@ -294,15 +294,6 @@ static int publish_unreleased_reference(struct msm_vidc_inst *inst,
 	*dbuf = cur;
 	return 0;
 }
-void put_inst_helper(struct kref *kref)
-{
-        struct msm_vidc_inst *inst = container_of(kref,
-                        struct msm_vidc_inst, kref);
-
-<<<<<<< HEAD
-        msm_vidc_destroy(inst);
-}
-=======
 static void put_inst_helper(struct kref *kref)
 {
 	struct msm_vidc_inst *inst = container_of(kref,
@@ -311,7 +302,6 @@ static void put_inst_helper(struct kref *kref)
 	msm_vidc_destroy(inst);
 }
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 static ssize_t inst_info_read(struct file *file, char __user *buf,
 		size_t count, loff_t *ppos)
 {
@@ -348,11 +338,7 @@ static ssize_t inst_info_read(struct file *file, char __user *buf,
 	if (!dbuf) {
 		dprintk(VIDC_ERR, "%s: Allocation failed!\n", __func__);
 		len = -ENOMEM;
-<<<<<<< HEAD
-                goto failed_alloc;
-=======
 		goto failed_alloc;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	}
 	cur = dbuf;
 	end = cur + MAX_DBG_BUF_SIZE;
@@ -375,15 +361,6 @@ static ssize_t inst_info_read(struct file *file, char __user *buf,
 		cur += write_str(cur, end - cur, "capability: %s\n",
 			i == OUTPUT_PORT ? "Output" : "Capture");
 		cur += write_str(cur, end - cur, "name : %s\n",
-<<<<<<< HEAD
-			inst->fmts[i]->name);
-		cur += write_str(cur, end - cur, "planes : %d\n",
-			inst->fmts[i]->num_planes);
-		cur += write_str(cur, end - cur,
-			"type: %s\n", i == OUTPUT_PORT ?
-			"Output" : "Capture");
-		for (j = 0; j < inst->fmts[i]->num_planes; j++)
-=======
 			inst->fmts[i].name);
 		cur += write_str(cur, end - cur, "planes : %d\n",
 			inst->fmts[i].num_planes);
@@ -413,7 +390,6 @@ static ssize_t inst_info_read(struct file *file, char __user *buf,
 				inst->bufq[i].vb2_bufq.num_buffers);
 
 		for (j = 0; j < inst->fmts[i].num_planes; j++)
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			cur += write_str(cur, end - cur,
 			"size for plane %d: %u\n", j,
 			inst->bufq[i].vb2_bufq.plane_sizes[j]);
@@ -439,11 +415,7 @@ static ssize_t inst_info_read(struct file *file, char __user *buf,
 
 	kfree(dbuf);
 failed_alloc:
-<<<<<<< HEAD
-        kref_put(&inst->kref, put_inst_helper);
-=======
 	kref_put(&inst->kref, put_inst_helper);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return len;
 }
 
@@ -471,11 +443,7 @@ struct dentry *msm_vidc_debugfs_init_inst(struct msm_vidc_inst *inst,
 		dprintk(VIDC_ERR, "Invalid params, inst: %pK\n", inst);
 		goto exit;
 	}
-<<<<<<< HEAD
-	snprintf(debugfs_name, MAX_DEBUGFS_NAME, "inst_%p", inst);
-=======
 	snprintf(debugfs_name, MAX_DEBUGFS_NAME, "inst_%pK", inst);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	idata = kzalloc(sizeof(struct core_inst_pair), GFP_KERNEL);
 	if (!idata) {

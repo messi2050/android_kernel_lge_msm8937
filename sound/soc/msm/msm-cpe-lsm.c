@@ -1340,13 +1340,7 @@ static int msm_cpe_lsm_ioctl_shared(struct snd_pcm_substream *substream,
 
 		dev_dbg(rtd->dev,
 			"%s: %s\n",
-<<<<<<< HEAD
-			__func__, "SNDRV_LSM_EVENT_STATUS");
-
-		user = arg;
-=======
 			__func__, "SNDRV_LSM_EVENT_STATUS(_V3)");
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 		/*
 		 * Release the api lock before wait to allow

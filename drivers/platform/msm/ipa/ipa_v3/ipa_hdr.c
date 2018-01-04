@@ -348,10 +348,6 @@ static int __ipa_add_hdr_proc_ctx(struct ipa_hdr_proc_ctx_add *proc_ctx,
 	}
 
 	hdr_entry = ipa3_id_find(proc_ctx->hdr_hdl);
-<<<<<<< HEAD
-	if (!hdr_entry || (hdr_entry->cookie != IPA_HDR_COOKIE)) {
-		IPAERR_RL("hdr_hdl is invalid\n");
-=======
 	if (!hdr_entry) {
 		IPAERR_RL("hdr_hdl is invalid\n");
 		return -EINVAL;
@@ -359,7 +355,6 @@ static int __ipa_add_hdr_proc_ctx(struct ipa_hdr_proc_ctx_add *proc_ctx,
 	if (hdr_entry->cookie != IPA_HDR_COOKIE) {
 		IPAERR_RL("Invalid header cookie %u\n", hdr_entry->cookie);
 		WARN_ON(1);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		return -EINVAL;
 	}
 	IPADBG("Associated header is name=%s is_hdr_proc_ctx=%d\n",
@@ -396,14 +391,6 @@ static int __ipa_add_hdr_proc_ctx(struct ipa_hdr_proc_ctx_add *proc_ctx,
 	mem_size = (ipa3_ctx->hdr_proc_ctx_tbl_lcl) ?
 		IPA_MEM_PART(apps_hdr_proc_ctx_size) :
 		IPA_MEM_PART(apps_hdr_proc_ctx_size_ddr);
-<<<<<<< HEAD
-	if (htbl->end + ipa_hdr_proc_ctx_bin_sz[bin] > mem_size) {
-		IPAERR_RL("hdr proc ctx table overflow\n");
-		goto bad_len;
-	}
-
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	if (list_empty(&htbl->head_free_offset_list[bin])) {
 		if (htbl->end + ipa_hdr_proc_ctx_bin_sz[bin] > mem_size) {
 			IPAERR_RL("hdr proc ctx table overflow\n");
@@ -453,12 +440,7 @@ static int __ipa_add_hdr_proc_ctx(struct ipa_hdr_proc_ctx_add *proc_ctx,
 	return 0;
 
 ipa_insert_failed:
-<<<<<<< HEAD
-	if (offset)
-		list_move(&offset->link,
-=======
 	list_move(&offset->link,
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		&htbl->head_free_offset_list[offset->bin]);
 	entry->offset_entry = NULL;
 	list_del(&entry->link);
@@ -623,13 +605,10 @@ ipa_insert_failed:
 	}
 	htbl->hdr_cnt--;
 	list_del(&entry->link);
-<<<<<<< HEAD
-=======
 
 fail_dma_mapping:
 	entry->is_hdr_proc_ctx = false;
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 bad_hdr_len:
 	entry->cookie = 0;
 	kmem_cache_free(ipa3_ctx->hdr_cache, entry);
@@ -707,14 +686,6 @@ int __ipa3_del_hdr(u32 hdr_hdl, bool by_user)
 		IPADBG("del hdr of len=%d hdr_cnt=%d ofst=%d\n",
 			entry->hdr_len, htbl->hdr_cnt,
 			entry->offset_entry->offset);
-
-	if (by_user && entry->user_deleted) {
-		IPAERR_RL("proc_ctx already deleted by user\n");
-		return -EINVAL;
-	}
-
-	if (by_user)
-		entry->user_deleted = true;
 
 	if (by_user && entry->user_deleted) {
 		IPAERR_RL("proc_ctx already deleted by user\n");

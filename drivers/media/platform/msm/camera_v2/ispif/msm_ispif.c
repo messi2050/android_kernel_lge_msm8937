@@ -1315,17 +1315,10 @@ static int msm_ispif_restart_frame_boundary(struct ispif_device *ispif,
 
 		vfe_intf = params->entries[i].vfe_intf;
 
-<<<<<<< HEAD
 
 		cid_mask = msm_ispif_get_cids_mask_from_cfg(
 			&params->entries[i]);
 
-=======
-
-		cid_mask = msm_ispif_get_cids_mask_from_cfg(
-			&params->entries[i]);
-
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		msm_ispif_enable_intf_cids(ispif, intftype,
 			cid_mask, vfe_intf, 1);
 	}

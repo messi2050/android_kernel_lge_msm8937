@@ -2001,23 +2001,10 @@ static int msm_routing_lsm_port_get(struct snd_kcontrol *kcontrol,
 static int msm_routing_lsm_port_put(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
 {
-<<<<<<< HEAD
-	struct snd_soc_dapm_widget_list *wlist =
-					dapm_kcontrol_get_wlist(kcontrol);
-	struct snd_soc_dapm_widget *widget = wlist->widgets[0];
-	struct soc_enum *e = (struct soc_enum *)kcontrol->private_value;
-	unsigned int mux = ucontrol->value.enumerated.item[0];
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	int lsm_port = AFE_PORT_ID_SLIMBUS_MULTI_CHAN_5_TX;
 
 	pr_debug("%s: LSM enable %ld\n", __func__,
 			ucontrol->value.integer.value[0]);
-
-	if (mux >= ARRAY_SIZE(mad_audio_mux_text)){
-		pr_err(" %s: invalid mux value %d\n", __func__, mux);
-		return -EINVAL;
-	}
 
 	switch (ucontrol->value.integer.value[0]) {
 	case 1:
@@ -2407,12 +2394,6 @@ static int msm_pcm_channel_mixer_info(struct snd_kcontrol *kcontrol,
 {
 	struct soc_enum *e = (struct soc_enum *)kcontrol->private_value;
 
-<<<<<<< HEAD
-	if (mux >= e->items) {
-		pr_err("%s: Invalid mux value %d\n", __func__, mux);
-		return -EINVAL;
-	}
-=======
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_ENUMERATED;
 	uinfo->count = 1;
 
@@ -3051,8 +3032,6 @@ static int msm_routing_ec_ref_rx_put(struct snd_kcontrol *kcontrol,
 	struct snd_soc_dapm_widget *widget = wlist->widgets[0];
 	struct soc_enum *e = (struct soc_enum *)kcontrol->private_value;
 	struct snd_soc_dapm_update *update = NULL;
-
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	mutex_lock(&routing_lock);
 	switch (ucontrol->value.integer.value[0]) {

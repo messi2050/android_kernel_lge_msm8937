@@ -1285,11 +1285,7 @@ int msm_vdec_s_fmt(struct msm_vidc_inst *inst, struct v4l2_format *f)
 		}
 
 		f->fmt.pix_mp.plane_fmt[0].sizeimage =
-<<<<<<< HEAD
-			get_output_frame_size(inst, fmt,
-=======
 			get_output_frame_size(inst, &inst->fmts[fmt->type],
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			f->fmt.pix_mp.height, f->fmt.pix_mp.width, 0);
 
 		extra_idx = EXTRADATA_IDX(inst->fmts[fmt->type].num_planes);
@@ -1300,13 +1296,8 @@ int msm_vdec_s_fmt(struct msm_vidc_inst *inst, struct v4l2_format *f)
 					inst->prop.width[CAPTURE_PORT]);
 		}
 
-<<<<<<< HEAD
-		f->fmt.pix_mp.num_planes = fmt->num_planes;
-		for (i = 0; i < fmt->num_planes; ++i) {
-=======
 		f->fmt.pix_mp.num_planes = inst->fmts[fmt->type].num_planes;
 		for (i = 0; i < inst->fmts[fmt->type].num_planes; ++i) {
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			inst->bufq[CAPTURE_PORT].vb2_bufq.plane_sizes[i] =
 				f->fmt.pix_mp.plane_fmt[i].sizeimage;
 		}
@@ -1499,7 +1490,7 @@ static int msm_vdec_queue_setup(struct vb2_queue *q,
 		 * than 4 subframes requires more than 4
 		 * reference frames to decode.
 		 */
-		if (inst->fmts[OUTPUT_PORT]->fourcc ==
+		if (inst->fmts[OUTPUT_PORT].fourcc ==
 				V4L2_PIX_FMT_VP9 &&
 				*num_buffers < MIN_NUM_OUTPUT_BUFFERS_VP9)
 			*num_buffers = MIN_NUM_OUTPUT_BUFFERS_VP9;
@@ -1699,11 +1690,7 @@ static inline int start_streaming(struct msm_vidc_inst *inst)
 	unsigned int buffer_size;
 	struct msm_vidc_format *fmt = NULL;
 
-<<<<<<< HEAD
-	fmt = inst->fmts[CAPTURE_PORT];
-=======
 	fmt = &inst->fmts[CAPTURE_PORT];
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	buffer_size = get_output_frame_size(inst, fmt,
 		inst->prop.height[CAPTURE_PORT],
 		inst->prop.width[CAPTURE_PORT], 0);

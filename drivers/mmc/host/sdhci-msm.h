@@ -213,10 +213,7 @@ struct sdhci_msm_host {
 	bool pm_qos_group_enable;
 	struct sdhci_msm_pm_qos_irq pm_qos_irq;
 	bool tuning_in_progress;
-<<<<<<< HEAD
-=======
 	bool core_3_0v_support;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	bool pltfm_init_done;
 };
 

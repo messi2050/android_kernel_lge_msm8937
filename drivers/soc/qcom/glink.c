@@ -1206,10 +1206,7 @@ int ch_pop_remote_rx_intent(struct channel_ctx *ctx, size_t size,
 				best_intent->intent_size);
 		*riid_ptr = best_intent->id;
 		*intent_size = best_intent->intent_size;
-<<<<<<< HEAD
-=======
 		*cookie = best_intent->cookie;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		kfree(best_intent);
 		spin_unlock_irqrestore(
 			&ctx->rmt_rx_intent_lst_lock_lhc2, flags);
@@ -2895,11 +2892,7 @@ static int glink_tx_common(void *handle, void *pkt_priv,
 	}
 
 	/* find matching rx intent (best-fit algorithm for now) */
-<<<<<<< HEAD
-	if (ch_pop_remote_rx_intent(ctx, size, &riid, &intent_size)) {
-=======
 	if (ch_pop_remote_rx_intent(ctx, size, &riid, &intent_size, &cookie)) {
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		if (!(tx_flags & GLINK_TX_REQ_INTENT)) {
 			/* no rx intent available */
 			GLINK_ERR_CH(ctx,

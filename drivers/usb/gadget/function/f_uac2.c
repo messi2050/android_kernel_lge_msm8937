@@ -155,9 +155,6 @@ struct audio_dev {
 
 	/* The ALSA Sound Card it represents on the USB-Client side */
 	struct snd_uac2_chip uac2;
-<<<<<<< HEAD
-=======
-
 	/* Workqueue for handling uevents */
 	struct workqueue_struct *uevent_wq;
 
@@ -165,7 +162,6 @@ struct audio_dev {
 	struct delayed_work c_work;
 	struct work_struct  disconnect_work;
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	struct device *gdev;
 };
 
@@ -565,7 +561,7 @@ static int snd_uac2_probe(struct platform_device *pdev)
 	if (err < 0)
 		goto snd_fail;
 
-	strcpy(pcm->name, "UAC2 PCM");
+	strlcpy(pcm->name, "UAC2 PCM", sizeof(pcm->name));
 	pcm->private_data = uac2;
 
 	uac2->pcm = pcm;
@@ -573,9 +569,10 @@ static int snd_uac2_probe(struct platform_device *pdev)
 	snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_PLAYBACK, &uac2_pcm_ops);
 	snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_CAPTURE, &uac2_pcm_ops);
 
-	strcpy(card->driver, "UAC2_Gadget");
-	strcpy(card->shortname, "UAC2_Gadget");
-	sprintf(card->longname, "UAC2_Gadget %i", pdev->id);
+	strlcpy(card->driver, "UAC2_Gadget", sizeof(card->driver));
+	strlcpy(card->shortname, "UAC2_Gadget", sizeof(card->shortname));
+	snprintf(card->longname, sizeof(card->longname),
+			"UAC2_Gadget %i", pdev->id);
 
 	snd_pcm_lib_preallocate_pages_for_all(pcm, SNDRV_DMA_TYPE_CONTINUOUS,
 		snd_dma_continuous_data(GFP_KERNEL), 0, BUFF_SIZE_MAX);
@@ -1450,38 +1447,6 @@ static struct usb_descriptor_header *ss_audio_desc[] = {
 	NULL,
 };
 
-static struct usb_descriptor_header *ss_audio_desc[] = {
-	(struct usb_descriptor_header *)&iad_desc,
-	(struct usb_descriptor_header *)&std_ac_if_desc,
-
-	(struct usb_descriptor_header *)&ac_hdr_desc,
-	(struct usb_descriptor_header *)&in_clk_src_desc,
-	(struct usb_descriptor_header *)&out_clk_src_desc,
-	(struct usb_descriptor_header *)&usb_out_it_desc,
-	(struct usb_descriptor_header *)&io_in_it_desc,
-	(struct usb_descriptor_header *)&usb_in_ot_desc,
-	(struct usb_descriptor_header *)&io_out_ot_desc,
-
-	(struct usb_descriptor_header *)&std_as_out_if0_desc,
-	(struct usb_descriptor_header *)&std_as_out_if1_desc,
-
-	(struct usb_descriptor_header *)&as_out_hdr_desc,
-	(struct usb_descriptor_header *)&as_out_fmt1_desc,
-	(struct usb_descriptor_header *)&hs_epout_desc,
-	(struct usb_descriptor_header *)&ss_epout_comp_desc,
-	(struct usb_descriptor_header *)&as_iso_out_desc,
-
-	(struct usb_descriptor_header *)&std_as_in_if0_desc,
-	(struct usb_descriptor_header *)&std_as_in_if1_desc,
-
-	(struct usb_descriptor_header *)&as_in_hdr_desc,
-	(struct usb_descriptor_header *)&as_in_fmt1_desc,
-	(struct usb_descriptor_header *)&hs_epin_desc,
-	(struct usb_descriptor_header *)&ss_epin_comp_desc,
-	(struct usb_descriptor_header *)&as_iso_in_desc,
-	NULL,
-};
-
 struct cntrl_cur_lay3 {
 	__u32	dCUR;
 };
@@ -2210,7 +2175,7 @@ static ssize_t f_uac2_opts_##name##_show(struct f_uac2_opts *opts,	\
 	int result;							\
 									\
 	mutex_lock(&opts->lock);					\
-	result = sprintf(page, "%u\n", opts->name);			\
+	result = snprintf(page, PAGE_SIZE, "%u\n", opts->name);		\
 	mutex_unlock(&opts->lock);					\
 									\
 	return result;							\

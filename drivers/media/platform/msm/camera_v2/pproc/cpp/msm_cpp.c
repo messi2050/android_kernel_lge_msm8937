@@ -120,11 +120,8 @@ static void msm_cpp_set_micro_irq_mask(struct cpp_device *cpp_dev,
 static void msm_cpp_flush_queue_and_release_buffer(struct cpp_device *cpp_dev,
 	int queue_len);
 static int msm_cpp_dump_frame_cmd(struct msm_cpp_frame_info_t *frame_info);
-<<<<<<< HEAD
-=======
 static int msm_cpp_dump_addr(struct cpp_device *cpp_dev,
 	struct msm_cpp_frame_info_t *frame_info);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 static int32_t msm_cpp_reset_vbif_and_load_fw(struct cpp_device *cpp_dev);
 
 #if CONFIG_MSM_CPP_DBG

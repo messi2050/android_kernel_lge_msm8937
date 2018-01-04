@@ -1016,11 +1016,8 @@ struct mdss_overlay_private {
 
 	bool allow_kickoff;
 
-<<<<<<< HEAD
-=======
 	/* video frame info used by deterministic frame rate control */
 	struct mdss_mdp_frc_fsm *frc_fsm;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	u8 sd_transition_state;
 };
 

@@ -1782,18 +1782,12 @@ static int fg_check_ima_exception(struct fg_chip *chip, bool check_hw_sts)
 		}
 	}
 
-<<<<<<< HEAD
-		pr_err("IMA access failed ima_err_sts=%x ima_exp_sts=%x ima_hw_sts=%x\n",
-		       err_sts, exp_sts, hw_sts);
-		rc = err_sts;
-=======
 	if (exp_sts & (IACS_ERR_BIT | XCT_ERR_BIT | DATA_RD_ERR_BIT |
 		DATA_WR_ERR_BIT | ADDR_BURST_WRAP_BIT | ADDR_RNG_ERR_BIT |
 		ADDR_SRC_ERR_BIT)) {
 		pr_err("IMA exception bit set, exp_sts=%x\n", exp_sts);
 		run_err_clr_seq = true;
 	}
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	if (run_err_clr_seq) {
 		ret = fg_run_iacs_clear_sequence(chip);
@@ -2217,9 +2211,6 @@ static int fg_interleaved_mem_read(struct fg_chip *chip, u8 *val, u16 address,
 		pr_info("Read for %d bytes is attempted @ 0x%x[%d]\n",
 			len, address, offset);
 
-<<<<<<< HEAD
- retry:
-=======
 retry:
 	if (count >= RETRY_COUNT) {
 		pr_err("Retried reading 3 times\n");
@@ -2227,7 +2218,6 @@ retry:
 		goto out;
 	}
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	rc = fg_interleaved_mem_config(chip, val, address, offset, len, 0);
 	if (rc) {
 		pr_err("failed to configure SRAM for IMA rc = %d\n", rc);
@@ -2292,12 +2282,8 @@ retry:
 		goto retry;
 	}
 
-<<<<<<< HEAD
- exit:
-=======
 	mutex_unlock(&chip->rw_lock);
 exit:
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	fg_relax(&chip->memif_wakeup_source);
 	return rc;
 }
@@ -2329,12 +2315,6 @@ static int fg_interleaved_mem_write(struct fg_chip *chip, u8 *val, u16 address,
 		pr_info("Write for %d bytes is attempted @ 0x%x[%d]\n",
 			len, address, offset);
 
-<<<<<<< HEAD
- retry:
-	rc = fg_interleaved_mem_config(chip, val, address, offset, len, 1);
-	if (rc) {
-		pr_err("failed to configure SRAM for IMA rc = %d\n", rc);
-=======
 retry:
 	if (count >= RETRY_COUNT) {
 		pr_err("Retried writing 3 times\n");
@@ -2347,7 +2327,6 @@ retry:
 		pr_err("failed to configure SRAM for IMA rc = %d\n", rc);
 		retry = true;
 		count++;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		goto out;
 	}
 
@@ -3350,19 +3329,9 @@ static int fg_is_batt_id_valid(struct fg_chip *chip)
 		return rc;
 	}
 
-<<<<<<< HEAD
-	if (fg_debug_mask & FG_IRQS)
-		pr_debug("fg batt sts 0x%x\n", fg_batt_sts);
-#ifdef CONFIG_LGE_PM
-	return 1;
-#else
-=======
 	pr_debug("fg batt sts 0x%x\n", fg_batt_sts);
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return (fg_batt_sts & BATT_IDED) ? 1 : 0;
-#endif
-
 }
 
 static int64_t twos_compliment_extend(int64_t val, int nbytes)
@@ -4381,16 +4350,9 @@ static int fg_inc_store_cycle_ctr(struct fg_chip *chip, int bucket)
 		       bucket, rc);
 	else
 		chip->cyc_ctr.count[bucket] = cyc_count;
-<<<<<<< HEAD
-#ifdef CONFIG_LGE_PM_CYCLE_BASED_CHG_VOLTAGE
-out:
-		chip->batt_life_prev_cycle[bucket] = chip->cyc_ctr.count[bucket];
-#endif
-=======
 
 	if (fg_debug_mask & FG_POWER_SUPPLY)
 		pr_info("Stored bucket %d cyc_count: %d\n", bucket, cyc_count);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return rc;
 }
 
@@ -7231,12 +7193,9 @@ static void set_resume_soc_work(struct work_struct *work)
 #define RSLOW_COMP_REG			0x528
 #define RSLOW_COMP_C1_OFFSET		0
 #define RSLOW_COMP_C2_OFFSET		2
-<<<<<<< HEAD
 
 //#define CAPACITY_DELTA_DECIPCT		210
 
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 #define BATT_PROFILE_OFFSET		0x4C0
 static void get_default_rslow_comp_settings(struct fg_chip *chip)
 {
@@ -7304,16 +7263,10 @@ static int populate_system_data(struct fg_chip *chip)
 	chip->cutoff_voltage = voltage_2b(buffer);
 	if (fg_debug_mask & FG_AGING)
 		pr_info("cutoff_voltage = %lld, nom_cap_uah = %d p1p2 = %d, p2p3 = %d\n",
-<<<<<<< HEAD
-			chip->cutoff_voltage, chip->nom_cap_uah,
-			chip->ocv_junction_p1p2,
-			chip->ocv_junction_p2p3);
-=======
 				chip->cutoff_voltage, chip->nom_cap_uah,
 				chip->ocv_junction_p1p2,
 				chip->ocv_junction_p2p3);
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	get_default_rslow_comp_settings(chip);
 done:
 	fg_mem_release(chip);
@@ -9373,12 +9326,6 @@ static int fg_init_irqs(struct fg_chip *chip)
 			}
 			enable_irq_wake(chip->soc_irq[FULL_SOC].irq);
 			chip->full_soc_irq_enabled = true;
-<<<<<<< HEAD
-
-			enable_irq_wake(chip->soc_irq[FULL_SOC].irq);
-			chip->full_soc_irq_enabled = true;
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 			if (!chip->use_vbat_low_empty_soc) {
 				rc = devm_request_irq(chip->dev,

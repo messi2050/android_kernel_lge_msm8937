@@ -2007,8 +2007,6 @@ set_roi:
 	mdss_mdp_set_roi(ctl, &l_roi, &r_roi);
 }
 
-<<<<<<< HEAD
-=======
 static bool __is_supported_candence(int cadence)
 {
 	return (cadence == FRC_CADENCE_22) ||
@@ -2704,7 +2702,6 @@ static void __post_frc_in_disable_state(struct mdss_mdp_frc_fsm *frc_fsm,
 	/* do nothing */
 }
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 static int __config_secure_display(struct mdss_overlay_private *mdp5_data)
 {
 	int panel_type = mdp5_data->ctl->panel_data->panel_info.type;
@@ -2741,8 +2738,6 @@ static int __config_secure_display(struct mdss_overlay_private *mdp5_data)
 	return ret;
 }
 
-<<<<<<< HEAD
-=======
 /* predefined state table of FRC FSM */
 static struct mdss_mdp_frc_fsm_state frc_fsm_states[FRC_STATE_MAX] = {
 	{
@@ -2863,7 +2858,6 @@ static void mdss_mdp_overlay_update_frc(struct msm_fb_data_type *mfd)
 	}
 }
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
 				struct mdp_display_commit *data)
 {

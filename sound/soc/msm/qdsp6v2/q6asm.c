@@ -2545,11 +2545,6 @@ static int __q6asm_open_write(struct audio_client *ac, uint32_t format,
 	open.bits_per_sample = bits_per_sample;
 
 	open.postprocopo_id = q6asm_get_asm_topology_cal();
-<<<<<<< HEAD
-	if (ac->perf_mode != LEGACY_PCM_MODE)
-		open.postprocopo_id = ASM_STREAM_POSTPROCOPO_ID_NONE;
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	pr_debug("%s: perf_mode %d asm_topology 0x%x bps %d\n", __func__,
 		 ac->perf_mode, open.postprocopo_id, open.bits_per_sample);
@@ -2993,19 +2988,6 @@ int q6asm_set_shared_circ_buff(struct audio_client *ac,
 	struct audio_buffer *buf_circ;
 	int bytes_to_alloc, rc;
 	size_t len;
-<<<<<<< HEAD
-
-	mutex_lock(&ac->cmd_lock);
-
-	if (ac->port[dir].buf) {
-		pr_err("%s: Buffer already allocated\n", __func__);
-		rc = -EINVAL;
-		mutex_unlock(&ac->cmd_lock);
-		goto done;
-	}
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
-
 	buf_circ = kzalloc(sizeof(struct audio_buffer), GFP_KERNEL);
 
 	if (!buf_circ) {

@@ -598,20 +598,10 @@ static int msm_isp_set_dual_HW_master_slave_mode(
 	}
 
 	/* No lock needed here since ioctl lock protects 2 session from race */
-<<<<<<< HEAD
-	/* reset master SOF which refer slave in increment_frame_id function
-	 *
-	 */
-	vfe_dev->common_data->ms_resource.master_sof_info.frame_id = 0;
-	vfe_dev->common_data->ms_resource.master_sof_info.mono_timestamp_ms = 0;
-	/* we have only 1 slave so reset it frame_id so that master will
-	 * not jump*/
-=======
 	/* Reset master SOF which refer slave in increment_frame_id function */
 	vfe_dev->common_data->ms_resource.master_sof_info.frame_id = 0;
 	vfe_dev->common_data->ms_resource.master_sof_info.mono_timestamp_ms = 0;
 	/* Reset slave frame_id so that master will not jump */
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	vfe_dev->common_data->ms_resource.slave_sof_info[0].frame_id = 0;
 	if (src_info != NULL &&
 		dual_hw_ms_cmd->dual_hw_ms_type == MS_TYPE_MASTER) {
@@ -1920,32 +1910,6 @@ void msm_isp_process_overflow_irq(
 	ISP_DBG("%s: VFE%d Bus overflow detected: start recovery!\n",
 		__func__, vfe_dev->pdev->id);
 
-<<<<<<< HEAD
-		/* maks off irq for current vfe */
-		atomic_cmpxchg(&vfe_dev->error_info.overflow_state,
-			NO_OVERFLOW, OVERFLOW_DETECTED);
-		vfe_dev->recovery_irq0_mask = vfe_dev->irq0_mask;
-		vfe_dev->recovery_irq1_mask = vfe_dev->irq1_mask;
-
-		vfe_dev->hw_info->vfe_ops.core_ops.
-			set_halt_restart_mask(vfe_dev);
-
-		/* mask off other vfe if dual vfe is used */
-		if (vfe_dev->is_split) {
-			uint32_t other_vfe_id;
-			struct vfe_device *other_vfe_dev;
-
-			other_vfe_id = (vfe_dev->pdev->id == ISP_VFE0) ?
-				ISP_VFE1 : ISP_VFE0;
-			other_vfe_dev = vfe_dev->common_data->
-				dual_vfe_res->vfe_dev[other_vfe_id];
-			if (other_vfe_dev) {
-			  other_vfe_dev->recovery_irq0_mask =
-				  other_vfe_dev->irq0_mask;
-			  other_vfe_dev->recovery_irq1_mask =
-				  other_vfe_dev->irq1_mask;
-			}
-=======
 	trace_msm_cam_isp_overflow(vfe_dev, *irq_status0, *irq_status1);
 
 	/* maks off irq for current vfe */
@@ -1970,7 +1934,6 @@ void msm_isp_process_overflow_irq(
 			other_vfe_dev->recovery_irq1_mask =
 				other_vfe_dev->irq1_mask;
 		}
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 		atomic_cmpxchg(&(vfe_dev->common_data->dual_vfe_res->
 			vfe_dev[other_vfe_id]->

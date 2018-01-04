@@ -152,11 +152,7 @@ static int32_t msm_flash_i2c_write_table(
 	conf_array.size = settings->size;
 
 	/* Validate the settings size */
-<<<<<<< HEAD
-	if((!conf_array.size) || (conf_array.size > MAX_I2C_REG_SET)) {
-=======
 	if ((!conf_array.size) || (conf_array.size > MAX_I2C_REG_SET)) {
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		pr_err("failed: invalid size %d", conf_array.size);
 		return -EINVAL;
 	}
@@ -519,12 +515,8 @@ static int32_t msm_flash_init_prepare(
 	struct msm_flash_cfg_data_t flash_data_k;
 	struct msm_flash_init_info_t flash_init_info;
 	int32_t i = 0;
-<<<<<<< HEAD
-	if(!is_compat_task()) {
-=======
 
 	if (!is_compat_task()) {
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		/*for 64-bit usecase,it need copy the data to local memory*/
 		flash_data_k.cfg_type = flash_data->cfg_type;
 		for (i = 0; i < MAX_LED_TRIGGERS; i++) {
@@ -536,11 +528,7 @@ static int32_t msm_flash_init_prepare(
 
 		flash_data_k.cfg.flash_init_info = &flash_init_info;
 		if (copy_from_user(&flash_init_info,
-<<<<<<< HEAD
-			(void *)(flash_data->cfg.flash_init_info),
-=======
 			(void __user *)(flash_data->cfg.flash_init_info),
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			sizeof(struct msm_flash_init_info_t))) {
 			pr_err("%s copy_from_user failed %d\n",
 				__func__, __LINE__);
@@ -568,11 +556,7 @@ static int32_t msm_flash_init_prepare(
 
 	flash_data_k.cfg.flash_init_info = &flash_init_info;
 	if (copy_from_user(&flash_init_info,
-<<<<<<< HEAD
-		(void *)(flash_data->cfg.flash_init_info),
-=======
 		(void __user *)(flash_data->cfg.flash_init_info),
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		sizeof(struct msm_flash_init_info_t))) {
 		pr_err("%s copy_from_user failed %d\n",
 			__func__, __LINE__);
@@ -1105,9 +1089,6 @@ static long msm_flash_subdev_do_ioctl(
 			break;
 		}
 		break;
-	case VIDIOC_MSM_FLASH_CFG:
-		pr_err("invalid cmd 0x%x received\n", cmd);
-		return -EINVAL;
 	default:
 		return msm_flash_subdev_ioctl(sd, cmd, arg);
 	}

@@ -600,14 +600,6 @@ static int __ipa_add_hdr_proc_ctx(struct ipa_hdr_proc_ctx_add *proc_ctx,
 	mem_size = (ipa_ctx->hdr_proc_ctx_tbl_lcl) ?
 		IPA_MEM_PART(apps_hdr_proc_ctx_size) :
 		IPA_MEM_PART(apps_hdr_proc_ctx_size_ddr);
-<<<<<<< HEAD
-	if (htbl->end + ipa_hdr_proc_ctx_bin_sz[bin] > mem_size) {
-		IPAERR_RL("hdr proc ctx table overflow\n");
-		goto bad_len;
-	}
-
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	if (list_empty(&htbl->head_free_offset_list[bin])) {
 		if (htbl->end + ipa_hdr_proc_ctx_bin_sz[bin] > mem_size) {
 			IPAERR_RL("hdr proc ctx table overflow\n");
@@ -657,12 +649,7 @@ static int __ipa_add_hdr_proc_ctx(struct ipa_hdr_proc_ctx_add *proc_ctx,
 	return 0;
 
 ipa_insert_failed:
-<<<<<<< HEAD
-	if (offset)
-		list_move(&offset->link,
-=======
 	list_move(&offset->link,
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		&htbl->head_free_offset_list[offset->bin]);
 	entry->offset_entry = NULL;
 	list_del(&entry->link);
@@ -838,12 +825,9 @@ ipa_insert_failed:
 	}
 	htbl->hdr_cnt--;
 	list_del(&entry->link);
-<<<<<<< HEAD
-=======
 
 fail_dma_mapping:
 	entry->is_hdr_proc_ctx = false;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 bad_hdr_len:
 	entry->cookie = 0;
 	kmem_cache_free(ipa_ctx->hdr_cache, entry);

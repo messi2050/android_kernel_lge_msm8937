@@ -94,7 +94,6 @@
 		};
 
 		adsp_fw_mem: adsp_fw_region@0 {
-<<<<<<< HEAD
 			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0x0 0x8b800000 0x0 0x1100000>;
@@ -103,16 +102,6 @@
 		wcnss_fw_mem: wcnss_fw_region@0 {
 			compatible = "removed-dma-pool";
 			no-map;
-=======
-			compatible = "removed-dma-pool";
-			no-map;
-			reg = <0x0 0x8b800000 0x0 0x1100000>;
-		};
-
-		wcnss_fw_mem: wcnss_fw_region@0 {
-			compatible = "removed-dma-pool";
-			no-map;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			reg = <0x0 0x8c900000 0x0 0x700000>;
 		};
 

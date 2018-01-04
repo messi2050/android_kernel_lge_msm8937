@@ -256,15 +256,11 @@ struct dwc3_msm {
 	struct notifier_block	dwc3_cpu_notifier;
 	struct notifier_block	usbdev_nb;
 	bool			hc_died;
-<<<<<<< HEAD
-	bool			host_only_mode;
-=======
 	bool			stop_host;
 	bool			no_wakeup_src_in_hostmode;
 	bool			host_only_mode;
 	bool			psy_not_used;
 	bool			xhci_ss_compliance_enable;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	int  pwr_event_irq;
 	atomic_t                in_p3;
@@ -961,13 +957,8 @@ static void gsi_ring_db(struct usb_ep *ep, struct usb_gsi_request *request)
 		dev_dbg(mdwc->dev, "Failed to get GSI DBL address MSB\n");
 
 	offset = dwc3_trb_dma_offset(dep, &dep->trb_pool[num_trbs-1]);
-<<<<<<< HEAD
-	dev_dbg(mdwc->dev, "Writing link TRB addr: %pKa to %pK (%x)\n",
-	&offset, gsi_dbl_address_lsb, dbl_lo_addr);
-=======
 	dev_dbg(mdwc->dev, "Writing link TRB addr:%pKa to %pK (%x) for ep:%s\n",
 		&offset, gsi_dbl_address_lsb, dbl_lo_addr, ep->name);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	writel_relaxed(offset, gsi_dbl_address_lsb);
 	writel_relaxed(0, gsi_dbl_address_msb);
@@ -1991,11 +1982,8 @@ static int dwc3_msm_prepare_suspend(struct dwc3_msm *mdwc)
 		/* Mark fatal error for host mode or USB bus suspend case */
 		if (mdwc->in_host_mode || (mdwc->vbus_active
 			&& mdwc->otg_state == OTG_STATE_B_SUSPEND)) {
-<<<<<<< HEAD
-			queue_delayed_work(mdwc->dwc3_wq,
-=======
+
 			queue_delayed_work(mdwc->dwc3_resume_wq,
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 					&mdwc->resume_work, 0);
 			return -EBUSY;
 		}
@@ -3296,8 +3284,6 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 	if (!dwc->is_drd && host_mode) {
 		dev_dbg(&pdev->dev, "DWC3 in host only mode\n");
 		mdwc->host_only_mode = true;
-<<<<<<< HEAD
-=======
 		mdwc->id_state = DWC3_ID_GROUND;
 		device_create_file(&pdev->dev, &dev_attr_xhci_link_compliance);
 		dwc3_ext_event_notify(mdwc);
@@ -3309,7 +3295,6 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 	 */
 	if (dwc->is_drd && mdwc->psy_not_used) {
 		dev_dbg(&pdev->dev, "DWC3 in host mode\n");
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		mdwc->id_state = DWC3_ID_GROUND;
 		dwc3_ext_event_notify(mdwc);
 	}

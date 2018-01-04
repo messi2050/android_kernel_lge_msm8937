@@ -56,16 +56,6 @@ static struct msm_cam_clk_info msm_vfe32_2_clk_info[] = {
 	{"csi_vfe_clk", -1},
 };
 
-static uint32_t msm_vfe32_ub_reg_offset(struct vfe_device *vfe_dev, int idx)
-{
-	return (VFE32_WM_BASE(idx) + 0xC);
-}
-
-static uint32_t msm_vfe32_get_ub_size(struct vfe_device *vfe_dev)
-{
-	return MSM_ISP32_TOTAL_WM_UB;
-}
-
 static int32_t msm_vfe32_init_qos_parms(struct vfe_device *vfe_dev,
 				struct msm_vfe_hw_init_parms *qos_parms,
 				struct msm_vfe_hw_init_parms *ds_parms)
@@ -1148,11 +1138,6 @@ static void msm_vfe32_axi_clear_wm_xbar_reg(
 	msm_camera_io_w(xbar_reg_cfg, vfe_dev->vfe_base + VFE32_XBAR_BASE(wm));
 }
 
-<<<<<<< HEAD
-static void msm_vfe32_update_ping_pong_addr(void __iomem *vfe_base,
-	uint8_t wm_idx, uint32_t pingpong_bit, dma_addr_t paddr,
-	int32_t buf_size)
-=======
 static void msm_vfe32_cfg_axi_ub_equal_default(struct vfe_device *vfe_dev)
 {
 	int i;
@@ -1227,7 +1212,6 @@ static void msm_vfe32_cfg_axi_ub(struct vfe_device *vfe_dev)
 
 static void msm_vfe32_update_ping_pong_addr(struct vfe_device *vfe_dev,
 		uint8_t wm_idx, uint32_t pingpong_status, dma_addr_t paddr)
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 {
 	uint32_t paddr32 = (paddr & 0xFFFFFFFF);
 	msm_camera_io_w(paddr32, vfe_dev->vfe_base +
@@ -1616,19 +1600,14 @@ struct msm_vfe_hardware_info vfe32_hw_info = {
 			.clear_wm_reg = msm_vfe32_axi_clear_wm_reg,
 			.cfg_wm_xbar_reg = msm_vfe32_axi_cfg_wm_xbar_reg,
 			.clear_wm_xbar_reg = msm_vfe32_axi_clear_wm_xbar_reg,
-			.cfg_ub = msm_vfe47_cfg_axi_ub,
+			.cfg_ub = msm_vfe32_cfg_axi_ub,
 			.update_ping_pong_addr =
 				msm_vfe32_update_ping_pong_addr,
 			.get_comp_mask = msm_vfe32_get_comp_mask,
 			.get_wm_mask = msm_vfe32_get_wm_mask,
 			.get_pingpong_status = msm_vfe32_get_pingpong_status,
 			.halt = msm_vfe32_axi_halt,
-<<<<<<< HEAD
-			.ub_reg_offset = msm_vfe32_ub_reg_offset,
-			.get_ub_size = msm_vfe32_get_ub_size,
-=======
 			.restart = msm_vfe32_axi_restart,
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		},
 		.core_ops = {
 			.reg_update = msm_vfe32_reg_update,

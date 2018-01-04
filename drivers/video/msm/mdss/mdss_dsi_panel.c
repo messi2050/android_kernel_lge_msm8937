@@ -26,7 +26,7 @@
 #include "mdss_dsi.h"
 #ifdef TARGET_HW_MDSS_HDMI
 #include "mdss_dba_utils.h"
-<<<<<<< HEAD
+#endif
 
 #if IS_ENABLED(CONFIG_LGE_DISPLAY_READER_MODE)
 #include "lge/reader_mode.h"
@@ -41,9 +41,6 @@ extern bool lge_get_disable_esd_absent_bettery(void);
 
 #endif
 
-=======
-#endif
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 #define DT_CMD_HDR 6
 #define MIN_REFRESH_RATE 48
 #define DEFAULT_MDP_TRANSFER_TIME 14000
@@ -243,14 +240,6 @@ static void mdss_dsi_panel_bklt_dcs(struct mdss_dsi_ctrl_pdata *ctrl, int level)
 	mdss_dsi_cmdlist_put(ctrl, &cmdreq);
 }
 
-<<<<<<< HEAD
-#if IS_ENABLED(CONFIG_LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_RESET)
-/*
- * mdss_dsi_panel_reset() should be defined in other file.
- */
-int mdss_dsi_request_gpios(struct mdss_dsi_ctrl_pdata *ctrl_pdata);
-#else
-=======
 static void mdss_dsi_panel_set_idle_mode(struct mdss_panel_data *pdata,
 							bool enable)
 {
@@ -300,7 +289,12 @@ static bool mdss_dsi_panel_get_idle_mode(struct mdss_panel_data *pdata)
 	return ctrl->idle;
 }
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_RESET)
+/*
+ * mdss_dsi_panel_reset() should be defined in other file.
+ */
+int mdss_dsi_request_gpios(struct mdss_dsi_ctrl_pdata *ctrl_pdata);
+#else
 static int mdss_dsi_request_gpios(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 {
 	int rc = 0;
@@ -814,11 +808,6 @@ static void mdss_dsi_panel_bl_ctrl(struct mdss_panel_data *pdata,
 	}
 }
 
-<<<<<<< HEAD
-#if IS_ENABLED(CONFIG_LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_ON)
-int mdss_dsi_panel_on(struct mdss_panel_data *pdata);
-#else
-=======
 #ifdef TARGET_HW_MDSS_HDMI
 static void mdss_dsi_panel_on_hdmi(struct mdss_dsi_ctrl_pdata *ctrl,
 			struct mdss_panel_info *pinfo)
@@ -835,7 +824,9 @@ static void mdss_dsi_panel_on_hdmi(struct mdss_dsi_ctrl_pdata *ctrl,
 }
 #endif
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
+#if IS_ENABLED(CONFIG_LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_ON)
+int mdss_dsi_panel_on(struct mdss_panel_data *pdata);
+#else
 static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 {
 	struct mdss_dsi_ctrl_pdata *ctrl = NULL;
@@ -914,6 +905,7 @@ static int mdss_dsi_post_panel_on(struct mdss_panel_data *pdata)
 	struct mdss_dsi_ctrl_pdata *ctrl = NULL;
 	struct mdss_panel_info *pinfo;
 	struct dsi_panel_cmds *cmds;
+	u32 vsync_period = 0;
 
 	if (pdata == NULL) {
 		pr_err("%s: Invalid input data\n", __func__);
@@ -935,7 +927,6 @@ static int mdss_dsi_post_panel_on(struct mdss_panel_data *pdata)
 		mdss_dsi_panel_cmds_send(ctrl, cmds, CMD_REQ_COMMIT);
 	}
 
-<<<<<<< HEAD
 #if IS_ENABLED(CONFIG_LGE_DISPLAY_READER_MODE)
 	lge_mdss_dsi_panel_send_post_on_cmds(ctrl, lge_get_reader_mode());
 #endif
@@ -946,42 +937,38 @@ static int mdss_dsi_post_panel_on(struct mdss_panel_data *pdata)
 		msleep(vsync_period);
 		mdss_dba_utils_hdcp_enable(pinfo->dba_data, true);
 	}
-=======
+
 	mdss_dsi_post_panel_on_hdmi(pinfo);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 end:
 	pr_debug("%s:-\n", __func__);
 	return 0;
 }
 
-<<<<<<< HEAD
+//#ifdef TARGET_HW_MDSS_HDMI
+//static void mdss_dsi_panel_off_hdmi(struct mdss_dsi_ctrl_pdata *ctrl,
+//			struct mdss_panel_info *pinfo)
+//{
+//	if (ctrl->ds_registered && pinfo->is_pluggable) {
+//		mdss_dba_utils_video_off(pinfo->dba_data);
+//		mdss_dba_utils_hdcp_enable(pinfo->dba_data, false);
+//	}
+//}
+//#else
+//static void mdss_dsi_panel_off_hdmi(struct mdss_dsi_ctrl_pdata *ctrl,
+//			struct mdss_panel_info *pinfo)
+//{
+//	(void)(*ctrl);
+//	(void)(*pinfo);
+//}
+//#endif
+
 #if IS_ENABLED(CONFIG_LGE_DISPLAY_OVERRIDE_MDSS_DSI_PANEL_OFF)
 /*
  * mdss_dsi_panel_off() should be defined in other file.
 */
 extern int mdss_dsi_panel_off(struct mdss_panel_data *pdata);
 #else
-=======
-#ifdef TARGET_HW_MDSS_HDMI
-static void mdss_dsi_panel_off_hdmi(struct mdss_dsi_ctrl_pdata *ctrl,
-			struct mdss_panel_info *pinfo)
-{
-	if (ctrl->ds_registered && pinfo->is_pluggable) {
-		mdss_dba_utils_video_off(pinfo->dba_data);
-		mdss_dba_utils_hdcp_enable(pinfo->dba_data, false);
-	}
-}
-#else
-static void mdss_dsi_panel_off_hdmi(struct mdss_dsi_ctrl_pdata *ctrl,
-			struct mdss_panel_info *pinfo)
-{
-	(void)(*ctrl);
-	(void)(*pinfo);
-}
-#endif
-
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 static int mdss_dsi_panel_off(struct mdss_panel_data *pdata)
 {
 	struct mdss_dsi_ctrl_pdata *ctrl = NULL;
@@ -2623,9 +2610,10 @@ static int mdss_panel_parse_dt(struct device_node *np,
 {
 	u32 tmp;
 	u8 lanes = 0;
-	int rc = 0;
+	int rc, len = 0;
 	const char *data;
 	static const char *pdest;
+	const char *bridge_chip_name;
 	struct mdss_panel_info *pinfo = &(ctrl_pdata->panel_data.panel_info);
 #if IS_ENABLED(CONFIG_LGE_DISPLAY_BL_USE_BLMAP)
 	u32 *array;
@@ -2893,7 +2881,6 @@ static int mdss_panel_parse_dt(struct device_node *np,
 
 	mdss_dsi_parse_dfps_config(np, ctrl_pdata);
 
-<<<<<<< HEAD
 	pinfo->is_dba_panel = of_property_read_bool(np,
 			"qcom,dba-panel");
 
@@ -2925,11 +2912,10 @@ static int mdss_panel_parse_dt(struct device_node *np,
 		strlcpy(ctrl_pdata->bridge_name, bridge_chip_name,
 			MSM_DBA_CHIP_NAME_MAX_LEN);
 	}
-=======
+
 	rc = mdss_panel_parse_dt_hdmi(np, ctrl_pdata);
 	if (rc)
 		goto error;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	return 0;
 
@@ -2987,7 +2973,6 @@ int mdss_dsi_panel_init(struct device_node *node,
 	ctrl_pdata->low_power_config = mdss_dsi_panel_low_power_config;
 	ctrl_pdata->panel_data.set_backlight = mdss_dsi_panel_bl_ctrl;
 	ctrl_pdata->switch_mode = mdss_dsi_panel_switch_mode;
-<<<<<<< HEAD
 
 
 #if IS_ENABLED(CONFIG_LGE_DISPLAY_COMMON)
@@ -2996,8 +2981,6 @@ int mdss_dsi_panel_init(struct device_node *node,
 	lge_mdss_panel_select_initial_cmd_set(ctrl_pdata);
 #endif
 
-=======
 	ctrl_pdata->panel_data.get_idle = mdss_dsi_panel_get_idle_mode;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return 0;
 }

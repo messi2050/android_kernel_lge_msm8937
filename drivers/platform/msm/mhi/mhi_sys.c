@@ -217,10 +217,7 @@ static ssize_t mhi_dbgfs_ev_read(struct file *fp, char __user *buf,
 static const struct file_operations mhi_dbgfs_ev_fops = {
 	.read = mhi_dbgfs_ev_read,
 	.write = NULL,
-<<<<<<< HEAD
-=======
 	.open = mhi_dbgfs_open,
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 };
 
 static ssize_t mhi_dbgfs_state_read(struct file *fp, char __user *buf,
@@ -319,12 +316,6 @@ int mhi_init_debugfs(struct mhi_device_ctxt *mhi_dev_ctxt)
 	if (mhi_dev_ctxt->chan_info == NULL)
 		goto clean_ev_stats;
 	return 0;
-<<<<<<< HEAD
-clean_all:
-	debugfs_remove(mhi_state_stats);
-=======
-
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 clean_ev_stats:
 	debugfs_remove(mhi_ev_stats);
 clean_chan:

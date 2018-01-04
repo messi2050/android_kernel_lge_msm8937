@@ -925,12 +925,9 @@ CSID_TG:
 
 	pr_err("%s probe succeeded", slave_info->sensor_name);
 
-<<<<<<< HEAD
-=======
 	s_ctrl->bypass_video_node_creation =
 		slave_info->bypass_video_node_creation;
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	/*
 	 * Update the subdevice id of flash-src based on availability in kernel.
 	 */

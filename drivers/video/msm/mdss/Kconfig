@@ -63,7 +63,6 @@ config FB_MSM_MDSS_XLOG_DEBUG
 	driver during fatal errors and enable some display-driver logging
 	into an internal buffer (this avoids logging overhead).
 
-<<<<<<< HEAD
 config LGE_DISPLAY_P2S_VSYNC_SKIP
 	bool "MDSS VSYNC Skip scheme"
 	default n
@@ -355,7 +354,6 @@ config LGE_DISPLAY_PRE_ACTIVE_AREA_DELAY
 	help
 	if you say yes here you get support for pre active area delay
 
-=======
 config FB_MSM_MDSS_FRC_DEBUG
 	depends on DEBUG_FS && FB_MSM_MDSS
 	bool "Enable Video FRC debugging"
@@ -365,4 +363,3 @@ config FB_MSM_MDSS_FRC_DEBUG
 	frame rate control (FRC) debugging features to: Collect video frame
 	statistics and check whether its output pattern matches expected
 	cadence.
->>>>>>> LA.UM.6.6.r1-02700-89xx.0

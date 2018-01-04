@@ -114,17 +114,10 @@ enum qseecom_clk_definitions {
 	CLK_SFPB,
 };
 
-<<<<<<< HEAD
-enum qseecom_ice_key_size_type{
-    QSEECOM_ICE_FDE_KEY_SIZE_16_BYTE = (0 << QSEECOM_ICE_FDE_KEY_SIZE_MASK),
-    QSEECOM_ICE_FDE_KEY_SIZE_32_BYTE = (1 << QSEECOM_ICE_FDE_KEY_SIZE_MASK),
-    QSEE_ICE_FDE_KEY_SIZE_UNDEFINED = (0xF << QSEECOM_ICE_FDE_KEY_SIZE_MASK),
-=======
 enum qseecom_ice_key_size_type {
 	QSEECOM_ICE_FDE_KEY_SIZE_16_BYTE = (0 << QSEECOM_ICE_FDE_KEY_SIZE_MASK),
 	QSEECOM_ICE_FDE_KEY_SIZE_32_BYTE = (1 << QSEECOM_ICE_FDE_KEY_SIZE_MASK),
 	QSEECOM_ICE_FDE_KEY_SIZE_UNDEF = (0xF << QSEECOM_ICE_FDE_KEY_SIZE_MASK),
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 };
 
 enum qseecom_client_handle_type {
@@ -1801,14 +1794,9 @@ static int __qseecom_process_incomplete_cmd(struct qseecom_dev_handle *data,
 				QSEOS_LISTENER_DATA_RSP_COMMAND_WHITELIST;
 		if (ptr_svc) {
 			ret = msm_ion_do_cache_op(qseecom.ion_clnt,
-<<<<<<< HEAD
-				ptr_svc->ihandle, ptr_svc->sb_virt,
-				ptr_svc->sb_length, ION_IOC_CLEAN_INV_CACHES);
-=======
 					ptr_svc->ihandle,
 					ptr_svc->sb_virt, ptr_svc->sb_length,
 					ION_IOC_CLEAN_INV_CACHES);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			if (ret) {
 				pr_err("cache operation failed %d\n", ret);
 				return ret;
@@ -2054,27 +2042,6 @@ static int __qseecom_reentrancy_process_incomplete_cmd(
 		else
 			*(uint32_t *)cmd_buf =
 				QSEOS_LISTENER_DATA_RSP_COMMAND_WHITELIST;
-<<<<<<< HEAD
-
-		if (lstnr == RPMB_SERVICE)
-			__qseecom_enable_clk(CLK_QSEE);
-
-		if (ptr_svc) {
-			ret = msm_ion_do_cache_op(qseecom.ion_clnt,
-				ptr_svc->ihandle, ptr_svc->sb_virt,
-				ptr_svc->sb_length, ION_IOC_CLEAN_INV_CACHES);
-			if (ret) {
-				pr_err("cache operation failed %d\n", ret);
-				return ret;
-			}
-		}
-		if (lstnr == RPMB_SERVICE) {
-			ret = __qseecom_enable_clk(CLK_QSEE);
-			if (ret)
-				return ret;
-		}
-
-=======
 		if (ptr_svc) {
 			ret = msm_ion_do_cache_op(qseecom.ion_clnt,
 					ptr_svc->ihandle,
@@ -2091,7 +2058,6 @@ static int __qseecom_reentrancy_process_incomplete_cmd(
 				return ret;
 		}
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		ret = qseecom_scm_call(SCM_SVC_TZSCHEDULER, 1,
 					cmd_buf, cmd_len, resp, sizeof(*resp));
 		ptr_svc->listener_in_use = false;
@@ -8478,14 +8444,9 @@ static int qseecom_probe(struct platform_device *pdev)
 						"qcom,commonlib64-loaded-by-uefi");
 		pr_debug("qseecom.commonlib64-loaded-by-uefi = 0x%x",
 				qseecom.commonlib64_loaded);
-<<<<<<< HEAD
-		qseecom.fde_key_size = of_property_read_bool((&pdev->dev)->of_node,
-						"qcom,fde-key-size");
-=======
 		qseecom.fde_key_size = of_property_read_bool(
 					(&pdev->dev)->of_node,
 					"qcom,fde-key-size");
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		qseecom.no_clock_support =
 				of_property_read_bool((&pdev->dev)->of_node,
 						"qcom,no-clock-support");

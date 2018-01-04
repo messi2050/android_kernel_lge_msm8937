@@ -651,7 +651,6 @@ static int subsystem_shutdown(struct subsys_device *dev, void *data)
 
 	pr_info("[%s:%d]: Shutting down %s\n",
 			current->comm, current->pid, name);
-<<<<<<< HEAD
 
 #if defined(CONFIG_LGE_HANDLE_PANIC)
 	if (dev->desc->shutdown(dev->desc, true) < 0) {
@@ -668,7 +667,7 @@ static int subsystem_shutdown(struct subsys_device *dev, void *data)
 	if (dev->desc->shutdown(dev->desc, true) < 0)
 		panic("subsys-restart: [%s:%d]: Failed to shutdown %s!",
 			current->comm, current->pid, name);
-=======
+
 	ret = dev->desc->shutdown(dev->desc, true);
 	if (ret < 0) {
 		if (!dev->desc->ignore_ssr_failure)
@@ -679,7 +678,6 @@ static int subsystem_shutdown(struct subsys_device *dev, void *data)
 			return ret;
 		}
 	}
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	dev->crash_count++;
 	subsys_set_state(dev, SUBSYS_OFFLINE);
 	disable_all_irqs(dev);
@@ -718,14 +716,13 @@ static int subsystem_powerup(struct subsys_device *dev, void *data)
 	if (ret < 0) {
 		notify_each_subsys_device(&dev, 1, SUBSYS_POWERUP_FAILURE,
 								NULL);
-<<<<<<< HEAD
 
 #if defined(CONFIG_LGE_HANDLE_PANIC)
 		lge_set_subsys_crash_reason(name, LGE_ERR_SUB_PWR);
 #endif
 		panic("[%s:%d]: Powerup error: %s!",
 			current->comm, current->pid, name);
-=======
+
 		if (!dev->desc->ignore_ssr_failure)
 			panic("[%s:%d]: Powerup error: %s!",
 				current->comm, current->pid, name);
@@ -733,7 +730,6 @@ static int subsystem_powerup(struct subsys_device *dev, void *data)
 			pr_err("Powerup failure on %s\n", name);
 			return ret;
 		}
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	}
 	enable_all_irqs(dev);
 
@@ -741,20 +737,19 @@ static int subsystem_powerup(struct subsys_device *dev, void *data)
 	if (ret) {
 		notify_each_subsys_device(&dev, 1, SUBSYS_POWERUP_FAILURE,
 								NULL);
-<<<<<<< HEAD
 
 #if defined(CONFIG_LGE_HANDLE_PANIC)
 		lge_set_subsys_crash_reason(name, LGE_ERR_SUB_TOW);
 #endif
 		panic("[%s:%d]: Timed out waiting for error ready: %s!",
 			current->comm, current->pid, name);
-=======
+
 		if (!dev->desc->ignore_ssr_failure)
 			panic("[%s:%d]: Timed out waiting for error ready: %s!",
 				current->comm, current->pid, name);
 		else
 			return ret;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
+
 	}
 	subsys_set_state(dev, SUBSYS_ONLINE);
 	subsys_set_crash_status(dev, false);
@@ -1072,14 +1067,10 @@ static void subsystem_restart_wq_func(struct work_struct *work)
 
 	pr_info("[%s:%d]: Restart sequence for %s completed.\n",
 			current->comm, current->pid, desc->name);
-<<<<<<< HEAD
-=======
-
 err:
 	/* Reset subsys count */
 	if (ret)
 		dev->count = 0;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	mutex_unlock(&soc_order_reg_lock);
 	mutex_unlock(&track->lock);

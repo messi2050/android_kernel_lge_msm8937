@@ -1238,8 +1238,6 @@ static int msm_lsm_ioctl_shared(struct snd_pcm_substream *substream,
 	return rc;
 }
 #ifdef CONFIG_COMPAT
-<<<<<<< HEAD
-=======
 
 struct snd_lsm_event_status_v3_32 {
 	u32 timestamp_lsw;
@@ -1248,7 +1246,6 @@ struct snd_lsm_event_status_v3_32 {
 	u16 payload_size;
 	u8 payload[0];
 };
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 struct snd_lsm_sound_model_v2_32 {
 	compat_uptr_t data;
@@ -1818,8 +1815,6 @@ static int msm_lsm_ioctl(struct snd_pcm_substream *substream,
 		struct snd_lsm_event_status *user = NULL, userarg;
 		dev_dbg(rtd->dev,
 			"%s: SNDRV_LSM_EVENT_STATUS\n", __func__);
-<<<<<<< HEAD
-=======
 		if (copy_from_user(&userarg, arg, sizeof(userarg))) {
 			dev_err(rtd->dev,
 				"%s: err copyuser event_status\n",
@@ -1882,7 +1877,6 @@ static int msm_lsm_ioctl(struct snd_pcm_substream *substream,
 				__func__);
 			return -EINVAL;
 		}
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		if (copy_from_user(&userarg, arg, sizeof(userarg))) {
 			dev_err(rtd->dev,
 				"%s: err copyuser event_status_v3\n",
@@ -1900,27 +1894,14 @@ static int msm_lsm_ioctl(struct snd_pcm_substream *substream,
 			goto done;
 		}
 
-<<<<<<< HEAD
-		size = sizeof(struct snd_lsm_event_status) +
-		userarg.payload_size;
-=======
 		size = sizeof(struct snd_lsm_event_status_v3) +
 			userarg.payload_size;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		user = kzalloc(size, GFP_KERNEL);
 		if (!user) {
 			dev_err(rtd->dev,
 				"%s: Allocation failed event status size %d\n",
 				__func__, size);
-<<<<<<< HEAD
-			err = -EFAULT;
-			goto done;
-		} else {
-			user->payload_size = userarg.payload_size;
-			err = msm_lsm_ioctl_shared(substream, cmd, user);
-=======
 			return -EFAULT;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		}
 		user->payload_size = userarg.payload_size;
 		err = msm_lsm_ioctl_shared(substream, cmd, user);
@@ -1942,13 +1923,8 @@ static int msm_lsm_ioctl(struct snd_pcm_substream *substream,
 		kfree(user);
 		if (err)
 			dev_err(rtd->dev,
-<<<<<<< HEAD
-				"%s: lsmevent failed %d", __func__, err);
-		goto done;
-=======
 				"%s: lsm_event_v3 failed %d", __func__, err);
 		break;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	}
 
 	default:

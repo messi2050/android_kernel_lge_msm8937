@@ -448,17 +448,12 @@ static int qpnp_pon_get_dbc(struct qpnp_pon *pon, u32 *delay)
 	}
 	val &= QPNP_PON_DBC_DELAY_MASK(pon);
 
-<<<<<<< HEAD
-	*delay = USEC_PER_SEC /
-		(1 << (QPNP_PON_DELAY_BIT_SHIFT - val));
-=======
 	if (is_pon_gen2(pon))
 		*delay = USEC_PER_SEC /
 			(1 << (QPNP_PON_GEN2_DELAY_BIT_SHIFT - val));
 	else
 		*delay = USEC_PER_SEC /
 			(1 << (QPNP_PON_DELAY_BIT_SHIFT - val));
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	return rc;
 }
@@ -811,12 +806,9 @@ qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 	if (!cfg->key_code)
 		return 0;
 
-<<<<<<< HEAD
-=======
 	if (device_may_wakeup(&pon->spmi->dev))
 		pm_wakeup_event(&pon->spmi->dev, WAKEUP_TIMEOUT_MSEC);
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	if (pon->kpdpwr_dbc_enable && cfg->pon_type == PON_KPDPWR) {
 		elapsed_us = ktime_us_delta(ktime_get(),
 				pon->kpdpwr_last_release_time);

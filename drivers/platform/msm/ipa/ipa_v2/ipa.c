@@ -1412,11 +1412,7 @@ static long ipa_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		/* add check in case user-space module compromised */
 		if (unlikely(((struct ipa_ioc_del_hdr_proc_ctx *)
 			param)->num_hdls != pre_entry)) {
-<<<<<<< HEAD
-			IPAERR_RL(" current %d pre %d\n",
-=======
 			IPAERR_RL("current %d pre %d\n",
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 				((struct ipa_ioc_del_hdr_proc_ctx *)param)->
 				num_hdls,
 				pre_entry);

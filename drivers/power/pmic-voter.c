@@ -20,7 +20,6 @@
 
 #include <linux/pmic-voter.h>
 
-<<<<<<< HEAD
 #ifdef CONFIG_LGE_PM
 #ifdef CONFIG_LGE_PM_SMBCHG_STEP_CHG
 #define NUM_MAX_CLIENTS 10
@@ -30,15 +29,12 @@
 #else
 #define NUM_MAX_CLIENTS	8
 #endif
-=======
-#define NUM_MAX_CLIENTS		16
 #define DEBUG_FORCE_CLIENT	"DEBUG_FORCE_CLIENT"
 
 static DEFINE_SPINLOCK(votable_list_slock);
 static LIST_HEAD(votable_list);
 
 static struct dentry *debug_root;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 struct client_vote {
 	bool	enabled;

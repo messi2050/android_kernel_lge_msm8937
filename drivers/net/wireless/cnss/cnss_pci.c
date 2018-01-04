@@ -122,10 +122,6 @@
 #define PCIE_ENABLE_DELAY	100
 #define WLAN_BOOTSTRAP_DELAY	10
 #define EVICT_BIN_MAX_SIZE      (512*1024)
-<<<<<<< HEAD
-#define CNSS_PINCTRL_STATE_ACTIVE "default"
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 static DEFINE_SPINLOCK(pci_link_down_lock);
 
@@ -155,11 +151,6 @@ struct cnss_wlan_gpio_info {
 	bool state;
 	bool init;
 	bool prop;
-<<<<<<< HEAD
-	struct pinctrl *pinctrl;
-	struct pinctrl_state *gpio_state_default;
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 };
 
 struct cnss_wlan_vreg_info {
@@ -578,68 +569,6 @@ static void cnss_wlan_gpio_set(struct cnss_wlan_gpio_info *info, bool state)
 {
 	if (!info->prop)
 		return;
-<<<<<<< HEAD
-
-	if (info->state == state) {
-		pr_debug("Already %s gpio is %s\n",
-			 info->name, state ? "high" : "low");
-		return;
-	}
-
-	if (state == WLAN_EN_LOW && penv->dual_wifi_info.is_dual_wifi_enabled) {
-		pr_debug("%s Dual WiFi enabled\n", __func__);
-		return;
-	}
-
-	gpio_set_value(info->num, state);
-	info->state = state;
-
-	pr_debug("%s: %s gpio is now %s\n", __func__,
-		 info->name, info->state ? "enabled" : "disabled");
-}
-
-static int cnss_configure_wlan_en_gpio(bool state)
-{
-	int ret = 0;
-	struct cnss_wlan_gpio_info *gpio_info = &penv->gpio_info;
-	struct cnss_wlan_vreg_info *vreg_info = &penv->vreg_info;
-
-	if (penv->wlan_en_vreg_support) {
-		if (state)
-			ret = regulator_enable(vreg_info->wlan_en_reg);
-		else
-			ret = regulator_disable(vreg_info->wlan_en_reg);
-	} else {
-		cnss_wlan_gpio_set(gpio_info, state);
-	}
-
-	msleep(WLAN_ENABLE_DELAY);
-	return ret;
-}
-
-static int cnss_pinctrl_init(struct cnss_wlan_gpio_info *gpio_info,
-			     struct platform_device *pdev)
-{
-	int ret;
-
-	gpio_info->pinctrl = devm_pinctrl_get(&pdev->dev);
-	if (IS_ERR_OR_NULL(gpio_info->pinctrl)) {
-		pr_err("%s: Failed to get pinctrl!\n", __func__);
-		return PTR_ERR(gpio_info->pinctrl);
-	}
-
-	gpio_info->gpio_state_default = pinctrl_lookup_state(gpio_info->pinctrl,
-		CNSS_PINCTRL_STATE_ACTIVE);
-	if (IS_ERR_OR_NULL(gpio_info->gpio_state_default)) {
-		pr_err("%s: Can not get active pin state!\n", __func__);
-		return PTR_ERR(gpio_info->gpio_state_default);
-	}
-
-	ret = pinctrl_select_state(gpio_info->pinctrl,
-				   gpio_info->gpio_state_default);
-
-=======
-
 	if (info->state == state) {
 		pr_debug("Already %s gpio is %s\n",
 			 info->name, state ? "high" : "low");
@@ -669,7 +598,6 @@ static int cnss_configure_wlan_en_gpio(bool state)
 	}
 
 	msleep(WLAN_ENABLE_DELAY);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return ret;
 }
 
@@ -780,13 +708,6 @@ static int cnss_get_wlan_enable_gpio(
 			"can't get gpio %s ret %d", gpio_info->name, ret);
 	}
 
-<<<<<<< HEAD
-	ret = cnss_pinctrl_init(gpio_info, pdev);
-	if (ret)
-		pr_debug("%s: pinctrl init failed!\n", __func__);
-
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	ret = cnss_wlan_gpio_init(gpio_info);
 	if (ret)
 		pr_err("gpio init failed\n");
@@ -795,7 +716,6 @@ static int cnss_get_wlan_enable_gpio(
 }
 
 static int cnss_get_wlan_bootstrap_gpio(struct platform_device *pdev)
-<<<<<<< HEAD
 {
 	int ret = 0;
 	struct device_node *node = (&pdev->dev)->of_node;
@@ -820,32 +740,6 @@ static int cnss_get_wlan_bootstrap_gpio(struct platform_device *pdev)
 static int cnss_wlan_get_resources(struct platform_device *pdev)
 {
 	int ret = 0;
-=======
-{
-	int ret = 0;
-	struct device_node *node = (&pdev->dev)->of_node;
-
-	if (!of_find_property(node, WLAN_BOOTSTRAP_GPIO_NAME, NULL))
-		return ret;
-
-	penv->wlan_bootstrap_gpio =
-		of_get_named_gpio(node, WLAN_BOOTSTRAP_GPIO_NAME, 0);
-	if (penv->wlan_bootstrap_gpio > 0) {
-		ret = cnss_wlan_bootstrap_gpio_init();
-	} else {
-		ret = penv->wlan_bootstrap_gpio;
-		pr_err(
-		"%s: Can't get GPIO %s, ret = %d",
-		__func__, WLAN_BOOTSTRAP_GPIO_NAME, ret);
-	}
-
-	return ret;
-}
-
-static int cnss_wlan_get_resources(struct platform_device *pdev)
-{
-	int ret = 0;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	struct cnss_wlan_gpio_info *gpio_info = &penv->gpio_info;
 	struct cnss_wlan_vreg_info *vreg_info = &penv->vreg_info;
 	struct device_node *node = pdev->dev.of_node;
@@ -2768,8 +2662,6 @@ static int cnss_powerup(const struct subsys_desc *subsys)
 
 	msleep(POWER_ON_DELAY);
 	cnss_configure_wlan_en_gpio(WLAN_EN_HIGH);
-<<<<<<< HEAD
-=======
 	/**
 	 *  Some platforms have wifi and other PCIE card attached with PCIE
 	 *  switch on the same RC like P5459 board(ROME 3.2 PCIE card + Ethernet
@@ -2777,7 +2669,6 @@ static int cnss_powerup(const struct subsys_desc *subsys)
 	 *  otherwise fail to create the PCIE link, so add PCIE_SWITCH_DELAY.
 	 */
 	msleep(PCIE_SWITCH_DELAY);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	if (!pdev) {
 		pr_err("%d: invalid pdev\n", __LINE__);

@@ -469,7 +469,6 @@ u32 mdss_fb_get_mode_switch(struct msm_fb_data_type *mfd);
 void mdss_fb_report_panel_dead(struct msm_fb_data_type *mfd);
 void mdss_panelinfo_to_fb_var(struct mdss_panel_info *pinfo,
 						struct fb_var_screeninfo *var);
-<<<<<<< HEAD
 #if IS_ENABLED(CONFIG_LGE_DISPLAY_RECOVERY_ESD)
 enum {
 	ESDRC_OK = 0,
@@ -493,7 +492,5 @@ enum esd_state_flag {
 extern int get_esd_power_recovery(void);
 extern void set_esd_power_recovery(int esd_detection);
 #endif
-=======
 void mdss_fb_calc_fps(struct msm_fb_data_type *mfd);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 #endif /* MDSS_FB_H */

@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-/* Copyright (c) 2012-2014, 2016-2017, The Linux Foundation. All rights
- * reserved.
-=======
 /* Copyright (c) 2012-2014, 2016-2017 The Linux Foundation. All rights reserved.
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -104,10 +99,7 @@ static int msm_rpm_master_copy_stats(
 	static int master_cnt;
 	int count, j = 0;
 	char *buf;
-<<<<<<< HEAD
-=======
 	unsigned long active_cores;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	/* Iterate possible number of masters */
 	if (master_cnt > prvdata->num_masters - 1) {

@@ -92,12 +92,6 @@ struct f_midi {
 	unsigned int buflen, qlen;
 };
 
-<<<<<<< HEAD
-#ifdef CONFIG_LGE_USB_G_ANDROID
-static struct f_midi _midi;
-#endif
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 static struct f_midi *the_midi;
 
 static inline struct f_midi *func_to_midi(struct usb_function *f)
@@ -426,16 +420,6 @@ static void f_midi_unbind(struct usb_configuration *c, struct usb_function *f)
 	card = midi->card;
 	midi->card = NULL;
 	if (card)
-<<<<<<< HEAD
-
-#ifdef CONFIG_LGE_USB_G_ANDROID
-		snd_card_free_when_closed(card);
-#else
-		snd_card_free(card);
-#endif
-
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		snd_card_free_when_closed(card);
 
 	kfree(midi->id);
@@ -452,12 +436,7 @@ static void f_midi_unbind(struct usb_configuration *c, struct usb_function *f)
 #endif
 
 	usb_free_all_descriptors(f);
-#ifndef CONFIG_LGE_USB_G_ANDROID
 	kfree(midi);
-<<<<<<< HEAD
-#endif
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	the_midi = NULL;
 }
 
@@ -1046,16 +1025,12 @@ int /* __init */ f_midi_bind_config(struct usb_configuration *c,
 	if (in_ports > MAX_PORTS || out_ports > MAX_PORTS)
 		return -EINVAL;
 
-#ifdef CONFIG_LGE_USB_G_ANDROID
-	midi = &_midi;
-#else
 	/* allocate and initialize one new instance */
 	midi = kzalloc(sizeof *midi, GFP_KERNEL);
 	if (!midi) {
 		status = -ENOMEM;
 		goto fail;
 	}
-#endif
 
 	for (i = 0; i < in_ports; i++) {
 		struct gmidi_in_port *port = kzalloc(sizeof(*port), GFP_KERNEL);
@@ -1107,10 +1082,8 @@ int /* __init */ f_midi_bind_config(struct usb_configuration *c,
 setup_fail:
 	for (--i; i >= 0; i--)
 		kfree(midi->in_port[i]);
-#ifndef CONFIG_LGE_USB_G_ANDROID
 	kfree(midi);
 fail:
-#endif
 	return status;
 }
 

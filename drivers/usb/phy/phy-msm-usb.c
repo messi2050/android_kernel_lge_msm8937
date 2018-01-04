@@ -3591,7 +3591,7 @@ static void msm_otg_set_vbus_state(int online)
 		msm_otg_dbg_log_event(&motg->phy, "PMIC: BSV CLEAR",
 				init, motg->inputs);
 		motg->is_ext_chg_dcp = false;
-<<<<<<< HEAD
+
 #ifdef CONFIG_LGE_USB_TYPE_A
 		soc = msm_get_battery_capacity();
 		if((soc > 0) && (soc < 16)){
@@ -3599,8 +3599,6 @@ static void msm_otg_set_vbus_state(int online)
 			pr_info("%s under voltage\n",__func__);
 		}
 #endif
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		if (!test_and_clear_bit(B_SESS_VLD, &motg->inputs) && init)
 			return;
 	}

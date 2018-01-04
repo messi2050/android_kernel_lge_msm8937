@@ -1339,14 +1339,11 @@ int msm_vidc_destroy(struct msm_vidc_inst *inst)
 	for (i = 0; i < MAX_PORT_NUM; i++)
 		vb2_queue_release(&inst->bufq[i].vb2_bufq);
 
-<<<<<<< HEAD
-=======
 	mutex_destroy(&inst->sync_lock);
 	mutex_destroy(&inst->bufq[CAPTURE_PORT].lock);
 	mutex_destroy(&inst->bufq[OUTPUT_PORT].lock);
 	mutex_destroy(&inst->lock);
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	msm_vidc_debugfs_deinit_inst(inst);
 	pr_info(VIDC_DBG_TAG "Closed video instance: %pK\n",
 			VIDC_MSG_PRIO2STRING(VIDC_INFO), inst);

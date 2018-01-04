@@ -104,18 +104,6 @@ bool osq_lock(struct optimistic_spin_queue *lock)
 	node->prev = prev;
 
 	/*
-<<<<<<< HEAD
-	 * osq_lock()                   unqueue
-	 *
-	 * node->prev = prev            osq_wait_next()
-	 * WMB                          MB
-	 * prev->next = node            next->prev = prev // unqueue-C
-	 *
-	 * Here 'node->prev' and 'next->prev' are the same variable and we need
-	 * to ensure these stores happen in-order to avoid corrupting the list.
-	 */
-	smp_wmb();
-=======
 	 * We need to avoid reordering of link updation sequence of osq.
 	 * A case in which the status of optimistic spin queue is
 	 * CPU6->CPU2 in which CPU6 has acquired the lock. At this point
@@ -139,7 +127,6 @@ bool osq_lock(struct optimistic_spin_queue *lock)
 	 * true.
 	 */
 	smp_mb();
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	ACCESS_ONCE(prev->next) = node;
 

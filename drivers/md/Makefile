@@ -66,10 +66,3 @@ endif
 ifeq ($(CONFIG_DM_VERITY_FEC),y)
 dm-verity-objs			+= dm-verity-fec.o
 endif
-<<<<<<< HEAD
-
-ifeq ($(CONFIG_DM_ANDROID_VERITY),y)
-dm-verity-objs			+= dm-android-verity.o
-endif
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0

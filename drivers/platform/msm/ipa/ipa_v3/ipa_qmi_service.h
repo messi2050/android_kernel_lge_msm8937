@@ -228,8 +228,6 @@ int ipa3_qmi_stop_data_qouta(void);
 
 void ipa3_q6_handshake_complete(bool ssr_bootup);
 
-<<<<<<< HEAD
-=======
 int ipa3_qmi_enable_per_client_stats(
 	struct ipa_enable_per_client_stats_req_msg_v01 *req,
 	struct ipa_enable_per_client_stats_resp_msg_v01 *resp);
@@ -238,7 +236,6 @@ int ipa3_qmi_get_per_client_packet_stats(
 	struct ipa_get_stats_per_client_req_msg_v01 *req,
 	struct ipa_get_stats_per_client_resp_msg_v01 *resp);
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 void ipa3_qmi_init(void);
 
 void ipa3_qmi_cleanup(void);
@@ -360,10 +357,6 @@ static inline int ipa3_qmi_stop_data_qouta(void)
 
 static inline void ipa3_q6_handshake_complete(bool ssr_bootup) { }
 
-<<<<<<< HEAD
-static inline void ipa3_qmi_init(void)
-{
-=======
 static inline int ipa3_qmi_enable_per_client_stats(
 	struct ipa_enable_per_client_stats_req_msg_v01 *req,
 	struct ipa_enable_per_client_stats_resp_msg_v01 *resp)
@@ -381,15 +374,11 @@ static inline int ipa3_qmi_get_per_client_packet_stats(
 static inline void ipa3_qmi_init(void)
 {
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 }
 
 static inline void ipa3_qmi_cleanup(void)
 {
-<<<<<<< HEAD
-=======
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 }
 
 #endif /* CONFIG_RMNET_IPA3 */

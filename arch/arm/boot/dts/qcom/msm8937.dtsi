@@ -30,14 +30,6 @@
 			compatible = "android,firmware";
 			fstab {
 				compatible = "android,fstab";
-				vendor {
-					compatible = "android,vendor";
-					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/vendor";
-					type = "ext4";
-					mnt_flags = "ro,barrier=1,discard";
-					fsmgr_flags = "wait";
-					status = "ok";
-				};
 				system {
 					compatible = "android,system";
 					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/system";
@@ -71,21 +63,13 @@
 		adsp_fw_mem: adsp_fw_region@0 {
 			compatible = "removed-dma-pool";
 			no-map;
-<<<<<<< HEAD
 			reg = <0x0 0x8ba00000 0x0 0x1100000>;
-=======
-			reg = <0x0 0x8b800000 0x0 0x1100000>;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		};
 
 		wcnss_fw_mem: wcnss_fw_region@0 {
 			compatible = "removed-dma-pool";
 			no-map;
-<<<<<<< HEAD
 			reg = <0x0 0x8cb00000 0x0 0x700000>;
-=======
-			reg = <0x0 0x8c900000 0x0 0x700000>;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		};
 
 

@@ -666,8 +666,6 @@ static int nfcc_hw_check(struct i2c_client *client, struct nqx_dev *nqx_dev)
 	"%s: - nq - reset cmd answer : NfcNciRx %x %x %x\n",
 	__func__, nci_reset_rsp[0],
 	nci_reset_rsp[1], nci_reset_rsp[2]);
-<<<<<<< HEAD
-=======
 	if (ret < 0) {
 		dev_err(&client->dev,
 		"%s: - i2c_master_recv Error\n", __func__);
@@ -685,32 +683,11 @@ static int nfcc_hw_check(struct i2c_client *client, struct nqx_dev *nqx_dev)
 	/* Read Response of INIT command */
 	ret = i2c_master_recv(client, nci_init_rsp,
 		sizeof(nci_init_rsp));
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	if (ret < 0) {
 		dev_err(&client->dev,
 		"%s: - i2c_master_recv Error\n", __func__);
 		goto err_nfcc_hw_check;
 	}
-<<<<<<< HEAD
-	ret = i2c_master_send(client, raw_nci_init_cmd,
-		sizeof(raw_nci_init_cmd));
-	if (ret < 0) {
-		dev_err(&client->dev,
-		"%s: - i2c_master_send Error\n", __func__);
-		goto err_nfcc_hw_check;
-	}
-	/* hardware dependent delay */
-	msleep(30);
-	/* Read Response of INIT command */
-	ret = i2c_master_recv(client, nci_init_rsp,
-		sizeof(nci_init_rsp));
-	if (ret < 0) {
-		dev_err(&client->dev,
-		"%s: - i2c_master_recv Error\n", __func__);
-		goto err_nfcc_hw_check;
-	}
-=======
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	init_rsp_len = 2 + nci_init_rsp[2]; /*payload + len*/
 	if (init_rsp_len > PAYLOAD_HEADER_LENGTH) {
 		nqx_dev->nqx_info.info.chip_type =
@@ -746,13 +723,10 @@ static int nfcc_hw_check(struct i2c_client *client, struct nqx_dev *nqx_dev)
 		dev_dbg(&client->dev,
 		"%s: ## NFCC == NQ330 ##\n", __func__);
 		break;
-<<<<<<< HEAD
-=======
 	case NFCC_PN66T:
 		dev_dbg(&client->dev,
 		"%s: ## NFCC == PN66T ##\n", __func__);
 		break;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	default:
 		dev_err(&client->dev,
 		"%s: - NFCC HW not Supported\n", __func__);

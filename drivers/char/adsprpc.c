@@ -271,12 +271,6 @@ static struct fastrpc_channel_ctx gcinfo[NUM_CHANNELS] = {
 		.channel = SMD_APPS_MODEM,
 		.edge = "mdsp",
 	},
-	{
-		.name = "mdsprpc-smd",
-		.subsys = "mdsp",
-		.channel = SMD_APPS_MODEM,
-		.edge = "mdsp",
-	},
 };
 
 static void fastrpc_buf_free(struct fastrpc_buf *buf, int cache)
@@ -1807,11 +1801,7 @@ static int fastrpc_session_alloc(struct fastrpc_channel_ctx *chan, int *session)
 		chan->session[0].dev = me->dev;
 		break;
 	case SMD_APPS_MODEM:
-<<<<<<< HEAD
-		VERIFY(err, me->dev != NULL);
-=======
 		VERIFY(err, me->modem_cma_dev != NULL);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		if (err)
 			goto bail;
 		chan->session[0].dev = me->modem_cma_dev;
@@ -2436,8 +2426,6 @@ static int fastrpc_probe(struct platform_device *pdev)
 	if (of_device_is_compatible(dev->of_node,
 					"qcom,msm-mdsprpc-mem-region")) {
 		me->modem_cma_dev = dev;
-<<<<<<< HEAD
-=======
 		range.addr = 0;
 		ion_node = of_find_compatible_node(NULL, NULL, "qcom,msm-ion");
 		if (ion_node) {
@@ -2471,7 +2459,6 @@ static int fastrpc_probe(struct platform_device *pdev)
 			if (err)
 				goto bail;
 		}
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		return 0;
 	}
 

@@ -105,12 +105,9 @@ int msm_dss_gpio_enable(struct dss_gpio *in_gpio, int num_gpio, int enable);
 int msm_dss_config_vreg(struct device *dev, struct dss_vreg *in_vreg,
 	int num_vreg, int config);
 int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg,	int enable);
-<<<<<<< HEAD
-=======
 int msm_dss_config_vreg_opt_mode(struct dss_vreg *in_vreg, int num_vreg,
 	 enum dss_vreg_mode mode);
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 int msm_dss_get_clk(struct device *dev, struct dss_clk *clk_arry, int num_clk);
 void msm_dss_put_clk(struct dss_clk *clk_arry, int num_clk);
 int msm_dss_clk_set_rate(struct dss_clk *clk_arry, int num_clk);

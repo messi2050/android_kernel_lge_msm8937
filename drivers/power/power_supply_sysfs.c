@@ -93,7 +93,6 @@ static ssize_t power_supply_show_property(struct device *dev,
 	static char *scope_text[] = {
 		"Unknown", "System", "Device"
 	};
-<<<<<<< HEAD
 #if defined(CONFIG_MACH_MSM8937_PH2_GLOBAL_COM) || defined(CONFIG_MACH_MSM8937_PH2_CMO_CN)
 	static char *lge_hw_rev_text[] = {
 		"rev_0", "rev_a", "rev_b", "rev_c", "rev_10", "rev_11", "rev_12",
@@ -148,7 +147,6 @@ static ssize_t power_supply_show_property(struct device *dev,
 		"reserved"
 	};
 #endif
-=======
 	static const char * const typec_text[] = {
 		"Nothing attached", "Sink attached", "Powered cable w/ sink",
 		"Debug Accessory", "Audio Adapter", "Powered cable w/o sink",
@@ -160,7 +158,6 @@ static ssize_t power_supply_show_property(struct device *dev,
 	static const char * const typec_pr_text[] = {
 		"none", "dual power role", "sink", "source"
 	};
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	ssize_t ret = 0;
 	struct power_supply *psy = dev_get_drvdata(dev);
 	const ptrdiff_t off = attr - power_supply_attrs;
@@ -196,10 +193,8 @@ static ssize_t power_supply_show_property(struct device *dev,
 		return sprintf(buf, "%s\n", type_text[value.intval]);
 	else if (off == POWER_SUPPLY_PROP_SCOPE)
 		return sprintf(buf, "%s\n", scope_text[value.intval]);
-<<<<<<< HEAD
 	else if (off == POWER_SUPPLY_PROP_HW_REV)
 		return sprintf(buf, "%s\n", lge_hw_rev_text[value.intval]);
-=======
 	else if (off == POWER_SUPPLY_PROP_TYPEC_MODE)
 		return snprintf(buf, PAGE_SIZE,
 					"%s\n", typec_text[value.intval]);
@@ -212,7 +207,6 @@ static ssize_t power_supply_show_property(struct device *dev,
 	else if (off == POWER_SUPPLY_PROP_CONNECTOR_HEALTH)
 		return snprintf(buf, PAGE_SIZE,
 					"%s\n", health_text[value.intval]);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	else if (off >= POWER_SUPPLY_PROP_MODEL_NAME)
 		return sprintf(buf, "%s\n", value.strval);
 

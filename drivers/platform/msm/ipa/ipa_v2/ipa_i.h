@@ -107,10 +107,6 @@
 		} \
 	} while (0)
 
-#define IPAERR_RL(fmt, args...) \
-	pr_err_ratelimited(DRV_NAME " %s:%d " fmt, __func__, \
-		__LINE__, ## args)
-
 #define WLAN_AMPDU_TX_EP 15
 #define WLAN_PROD_TX_EP  19
 #define WLAN1_CONS_RX_EP  14

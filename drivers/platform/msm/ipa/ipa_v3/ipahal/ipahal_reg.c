@@ -1558,21 +1558,6 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 		IPAHAL_ERR("Input error\n");
 		return;
 	}
-<<<<<<< HEAD
-	if (ep_idx > (sizeof(valmask->val) * 8 - 1)) {
-		IPAHAL_ERR("too big ep_idx %d\n", ep_idx);
-		ipa_assert();
-		return;
-	}
-	IPA_SETFIELD_IN_REG(valmask->val, 1 << ep_idx,
-		IPA_AGGR_FORCE_CLOSE_OFST_AGGR_FORCE_CLOSE_PIPE_BITMAP_SHFT,
-		IPA_AGGR_FORCE_CLOSE_OFST_AGGR_FORCE_CLOSE_PIPE_BITMAP_BMSK);
-
-	valmask->mask =
-		IPA_AGGR_FORCE_CLOSE_OFST_AGGR_FORCE_CLOSE_PIPE_BITMAP_BMSK <<
-		IPA_AGGR_FORCE_CLOSE_OFST_AGGR_FORCE_CLOSE_PIPE_BITMAP_SHFT;
-
-=======
 
 	if (ipahal_ctx->hw_type <= IPA_HW_v3_1) {
 		shft = IPA_AGGR_FORCE_CLOSE_AGGR_FORCE_CLOSE_PIPE_BITMAP_SHFT;
@@ -1591,7 +1576,6 @@ void ipahal_get_aggr_force_close_valmask(int ep_idx,
 	}
 	IPA_SETFIELD_IN_REG(valmask->val, 1 << ep_idx, shft, bmsk);
 	valmask->mask = bmsk << shft;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 }
 
 void ipahal_get_fltrt_hash_flush_valmask(

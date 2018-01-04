@@ -3090,12 +3090,9 @@ static int ep_queue(struct usb_ep *ep, struct usb_request *req,
 	struct ci13xxx *udc = _udc;
 
 	trace("%pK, %pK, %X", ep, req, gfp_flags);
-<<<<<<< HEAD
-=======
 
 	if (ep == NULL)
 		return -EINVAL;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	spin_lock_irqsave(mEp->lock, flags);
 	if (req == NULL || mEp->desc == NULL) {

@@ -442,8 +442,6 @@ int verity_fec_decode(struct dm_verity *v, struct dm_verity_io *io,
 	if (!verity_fec_is_enabled(v))
 		return -EOPNOTSUPP;
 
-<<<<<<< HEAD
-=======
 	if (fio->level >= DM_VERITY_FEC_MAX_RECURSION) {
 		DMWARN_LIMIT("%s: FEC: recursion too deep", v->data_dev->name);
 		return -EIO;
@@ -451,7 +449,6 @@ int verity_fec_decode(struct dm_verity *v, struct dm_verity_io *io,
 
 	fio->level++;
 
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	if (type == DM_VERITY_BLOCK_TYPE_METADATA)
 		block += v->data_blocks;
 
@@ -466,13 +463,7 @@ int verity_fec_decode(struct dm_verity *v, struct dm_verity_io *io,
 	 */
 
 	offset = block << v->data_dev_block_bits;
-<<<<<<< HEAD
-
-	res = offset;
-	div64_u64(res, v->fec->rounds << v->data_dev_block_bits);
-=======
 	res = div64_u64(offset, v->fec->rounds << v->data_dev_block_bits);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 
 	/*
 	 * The base RS block we can feed to the interleaver to find out all
@@ -489,11 +480,7 @@ int verity_fec_decode(struct dm_verity *v, struct dm_verity_io *io,
 	if (r < 0) {
 		r = fec_decode_rsb(v, io, fio, rsb, offset, true);
 		if (r < 0)
-<<<<<<< HEAD
-			return r;
-=======
 			goto done;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	}
 
 	if (dest)
@@ -503,11 +490,8 @@ int verity_fec_decode(struct dm_verity *v, struct dm_verity_io *io,
 		r = verity_for_bv_block(v, io, iter, fec_bv_copy);
 	}
 
-<<<<<<< HEAD
-=======
 done:
 	fio->level--;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 	return r;
 }
 
@@ -548,10 +532,7 @@ void verity_fec_init_io(struct dm_verity_io *io)
 	memset(fio->bufs, 0, sizeof(fio->bufs));
 	fio->nbufs = 0;
 	fio->output = NULL;
-<<<<<<< HEAD
-=======
 	fio->level = 0;
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 }
 
 /*
@@ -707,12 +688,8 @@ static struct attribute *fec_attrs[] = {
 
 static struct kobj_type fec_ktype = {
 	.sysfs_ops = &kobj_sysfs_ops,
-<<<<<<< HEAD
-	.default_attrs = fec_attrs
-=======
 	.default_attrs = fec_attrs,
 	.release = dm_kobject_release
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 };
 
 /*

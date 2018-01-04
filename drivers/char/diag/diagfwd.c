@@ -474,6 +474,24 @@ void diag_update_md_clients(unsigned int type)
 	wake_up_interruptible(&driver->wait_q);
 	mutex_unlock(&driver->diagchar_mutex);
 }
+
+#if defined(CONFIG_LGE_USB_DIAG_LOCK_SPR) || defined(CONFIG_LGE_USB_DIAG_LOCK_TRF)
+void diag_update_sleeping_process_atd(int data_type)
+{
+	int i;
+
+	mutex_lock(&driver->diagchar_mutex);
+	for (i = 0; i < driver->num_clients; i++)
+		if (!strcmp(driver->client_map[i].name, "atd")) {
+			pr_debug("%s: process atd found\n", __func__);
+			driver->data_ready[i] |= data_type;
+			break;
+		}
+	wake_up_interruptible(&driver->wait_q);
+	mutex_unlock(&driver->diagchar_mutex);
+}
+#endif
+
 void diag_update_sleeping_process(int process_id, int data_type)
 {
 	int i;
@@ -493,6 +511,22 @@ static int diag_send_data(struct diag_cmd_reg_t *entry, unsigned char *buf,
 {
 	if (!entry)
 		return -EIO;
+
+#if defined(CONFIG_LGE_USB_DIAG_LOCK_SPR) || defined(CONFIG_LGE_USB_DIAG_LOCK_TRF)
+	if ((*(unsigned char *)(buf)) == 0x27) {
+		if (((*(unsigned char *)(buf+1)) == 0x16) && ((*(unsigned char *)(buf+2)) == 0x84)) {
+			diag_update_pkt_buffer(buf, len, PKT_TYPE);
+			diag_update_sleeping_process_atd(PKT_TYPE);
+		}
+
+		if (entry->proc == APPS_DATA) {
+			pr_debug("%s: forwarding DIAG_NV_WRITE_F to PERIPHERAL_MODEM\n", __func__);
+			return diagfwd_write(0, TYPE_CMD, buf, len); /* PERIPHERAL_MODEM:0 */
+		} else {
+			return diagfwd_write(entry->proc, TYPE_CMD, buf, len);
+		}
+	}
+#endif
 
 	if (entry->proc == APPS_DATA) {
 		diag_update_pkt_buffer(buf, len, PKT_TYPE);
@@ -871,6 +905,39 @@ void diag_send_error_rsp(unsigned char *buf, int len)
 	diag_send_rsp(driver->apps_rsp_buf, len + 1);
 }
 
+#if defined(CONFIG_LGE_USB_DIAG_LOCK)
+extern int get_diag_enable(void);
+#define DIAG_ENABLE			1
+#define DIAG_DISABLE			0
+#define COMMAND_PORT_LOCK		0xA1
+#define COMMAND_WEB_DOWNLOAD		0xEF
+#define COMMAND_ASYNC_HDLC_FLAG		0x7E
+#define COMMAND_DLOAD_RESET		0x3A
+#define COMMAND_TEST_MODE		0xFA
+#define COMMAND_TEST_MODE_RESET		0x29
+
+int is_filtering_command(char *buf)
+{
+	if (buf == NULL)
+		return 0;
+
+	switch(buf[0]) {
+		case COMMAND_PORT_LOCK :
+#if !defined(CONFIG_LGE_USB_DIAG_LOCK_SPR) && !defined(CONFIG_LGE_USB_DIAG_LOCK_TRF)
+		case COMMAND_WEB_DOWNLOAD :
+		case COMMAND_ASYNC_HDLC_FLAG :
+		case COMMAND_DLOAD_RESET :
+		case COMMAND_TEST_MODE :
+		case COMMAND_TEST_MODE_RESET :
+#endif
+			return 1;
+		default:
+			break;
+	}
+	return 0;
+}
+#endif
+
 int diag_process_apps_pkt(unsigned char *buf, int len,
 			struct diag_md_session_t *info)
 {
@@ -884,6 +951,16 @@ int diag_process_apps_pkt(unsigned char *buf, int len,
 
 	if (!buf)
 		return -EIO;
+#if defined(CONFIG_LGE_USB_DIAG_LOCK)
+	/* buf[0] : 0xA1(161) is a diag command for mdm port lock */
+	if (!is_filtering_command(buf) && (get_diag_enable() == DIAG_DISABLE)) {
+#if defined(CONFIG_LGE_USB_DIAG_LOCK_SPR) || defined(CONFIG_LGE_USB_DIAG_LOCK_TRF)
+		*(uint8_t *)driver->apps_rsp_buf = 0x18; // DIAG_BAD_MODE_F(24)
+		diag_send_rsp(driver->apps_rsp_buf, 1);
+#endif
+		return 0;
+	}
+#endif
 
 	/* Check if the command is a supported mask command */
 	mask_ret = diag_process_apps_masks(buf, len, info);
@@ -924,11 +1001,27 @@ int diag_process_apps_pkt(unsigned char *buf, int len,
 				info->peripheral_mask)
 				write_len = diag_send_data(reg_item, buf, len);
 		} else {
+/* [LGE_S][BSP_Modem] LGSSL to support testmode cmd */
+#ifdef CONFIG_LGE_DM_APP
+			if (driver->logging_mode == DIAG_MEMORY_DEVICE_MODE)
+			{
+				pr_err("in %s, Testmode cmd on DIAG_MEMORY_DEVICE_MODE(%d)!!", __func__, DIAG_MEMORY_DEVICE_MODE);
+				write_len = diag_send_data(reg_item, buf, len);
+			}
+			else
+			{
+#endif
+/* [LGE_E][BSP_Modem] LGSSL to support testmode cmd */
 			if (MD_PERIPHERAL_MASK(reg_item->proc) &
 				driver->logging_mask)
 				diag_send_error_rsp(buf, len);
 			else
 				write_len = diag_send_data(reg_item, buf, len);
+/* [LGE_S][BSP_Modem] LGSSL to support testmode cmd */
+#ifdef CONFIG_LGE_DM_APP
+			}
+#endif
+/* [LGE_E][BSP_Modem] LGSSL to support testmode cmd */
 		}
 		mutex_unlock(&driver->cmd_reg_mutex);
 		return write_len;
@@ -1098,6 +1191,15 @@ int diag_process_apps_pkt(unsigned char *buf, int len,
 	}
 #endif
 
+#if defined(CONFIG_MACH_MSM8940_MH_GLOBAL_LDU)
+	if ((*buf == 0x29) && (*(buf+1) == 0x01)) {
+		for (i = 0; i < 5; i++)
+			*(driver->apps_rsp_buf+i) = *(buf+i);
+		diag_send_rsp(driver->apps_rsp_buf, 3);
+		return 0;
+	}
+#endif
+
 	/* We have now come to the end of the function. */
 	if (chk_apps_only())
 		diag_send_error_rsp(buf, len);
@@ -1147,6 +1249,11 @@ void diag_process_hdlc_pkt(void *data, unsigned len,
 				   DIAG_MAX_REQ_SIZE);
 		goto fail;
 	}
+#ifdef CONFIG_LGE_USB_G_ANDROID
+    if( driver->hdlc_buf[0] == 0x41 && driver->hdlc_buf[1] == 0x54) {
+        ret = HDLC_COMPLETE;
+    }
+#endif
 
 	if (ret == HDLC_COMPLETE) {
 		err = crc_check(driver->hdlc_buf, driver->hdlc_buf_len);
@@ -1154,6 +1261,15 @@ void diag_process_hdlc_pkt(void *data, unsigned len,
 			/* CRC check failed. */
 			pr_err_ratelimited("diag: In %s, bad CRC. Dropping packet\n",
 					   __func__);
+
+#ifdef CONFIG_LGE_USB_G_ANDROID
+            // packet drop for AT Command - 'A' 'T' 0x41 , 0x54
+            if( driver->hdlc_buf[0] == 0x41 && driver->hdlc_buf[1] == 0x54 ) {
+                pr_err("[DEBUG] at command packet drop - buf[0] = 0x%x\n", driver->hdlc_buf[0]);
+                driver->hdlc_buf_len = 0;
+                goto end;
+            }
+#endif
 			goto fail;
 		}
 		driver->hdlc_buf_len -= HDLC_FOOTER_LEN;
@@ -1225,6 +1341,8 @@ static int diagfwd_mux_open(int id, int mode)
 
 static int diagfwd_mux_close(int id, int mode)
 {
+	uint8_t i;
+
 	switch (mode) {
 	case DIAG_USB_MODE:
 		driver->usb_connected = 0;
@@ -1245,12 +1363,6 @@ static int diagfwd_mux_close(int id, int mode)
 		 */
 	} else {
 		/*
-<<<<<<< HEAD
-		* With clearing of masks on ODL exit and
-		* USB disconnection, closing of the channel is
-		* not needed.This enables read and drop of stale packets.
-		*/
-=======
 		 * With sysfs parameter to clear masks set,
 		 * peripheral masks are cleared on ODL exit and
 		 * USB disconnection and buffers are not marked busy.
@@ -1267,7 +1379,6 @@ static int diagfwd_mux_close(int id, int mode)
 				diagfwd_close(i, TYPE_CMD);
 			}
 		}
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 		/* Re enable HDLC encoding */
 		pr_debug("diag: In %s, re-enabling HDLC encoding\n",
 		       __func__);
