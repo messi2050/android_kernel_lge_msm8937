@@ -332,7 +332,7 @@ static struct fg_mem_data fg_backup_regs[FG_BACKUP_MAX] = {
 
 
 #ifdef CONFIG_LGE_PM
-extern bool minfreq_enabled;
+/*extern bool minfreq_enabled;
 static void fg_set_minfreq(bool enable) {
 	int i;
 	minfreq_enabled = enable;
@@ -346,7 +346,7 @@ static void fg_set_minfreq(bool enable) {
 	}
 	unlock_device_hotplug();
 	pr_info("Set minfreq %sable\n", enable ? "en" : "dis");
-}
+} */
 #if defined(CONFIG_MACH_MSM8917_SF317_CRK_US) || defined(CONFIG_MACH_MSM8917_SF317_TRF_US) || defined(CONFIG_MACH_MSM8917_SF317_TRF_US_VZW) \
 || defined(CONFIG_MACH_MSM8940_SF3_MPCS_US) || defined(CONFIG_MACH_MSM8940_SF3_SPR_US) || defined(CONFIG_MACH_MSM8940_SF3_TMO_US) || defined(CONFIG_MACH_MSM8940_SF3_GLOBAL_CA)
 #define NUMBER_DELTA_TEMP 26
@@ -8043,9 +8043,9 @@ static int fg_batt_profile_init(struct fg_chip *chip)
 	}
 
 
-#ifdef CONFIG_LGE_PM
+/*#ifdef CONFIG_LGE_PM
 	fg_set_minfreq(true);
-#endif
+#endif*/
 
 	vbat_in_range = get_vbat_est_diff(chip)
 		< settings[FG_MEM_VBAT_EST_DIFF].value * 1000;
@@ -8157,9 +8157,9 @@ static int fg_batt_profile_init(struct fg_chip *chip)
 			pr_err("Error in updating ESR, rc=%d\n", rc);
 	}
 done:
-#ifdef CONFIG_LGE_PM
+/*#ifdef CONFIG_LGE_PM
         fg_set_minfreq(false);
-#endif
+#endif*/
 	if (chip->charging_disabled) {
 		rc = set_prop_enable_charging(chip, true);
 		if (rc)
