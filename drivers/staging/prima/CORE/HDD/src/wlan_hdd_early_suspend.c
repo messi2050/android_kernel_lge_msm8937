@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2018 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -43,7 +43,14 @@
 #include <linux/wait.h>
 #include <wlan_hdd_includes.h>
 #include <wlan_qct_driver.h>
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)) && \
+    defined(WLAN_OPEN_SOURCE)
+#include <linux/device.h>
+#include <linux/pm_wakeup.h>
+#else
 #include <linux/wakelock.h>
+#endif
 
 #include "halTypes.h"
 #include "sme_Api.h"
@@ -2251,6 +2258,7 @@ VOS_STATUS hdd_wlan_shutdown(void)
         vos_timer_stop(&pHddCtx->tx_rx_trafficTmr);
    }
    vos_flush_delayed_work(&pHddCtx->spoof_mac_addr_work);
+   vos_flush_delayed_work(&pHddCtx->ecsa_chan_change_work);
    vos_flush_work(&pHddCtx->sap_start_work);
    hdd_reset_all_adapters(pHddCtx);
 
