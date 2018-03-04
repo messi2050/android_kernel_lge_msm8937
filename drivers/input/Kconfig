@@ -193,7 +193,6 @@ config INPUT_KEYCOMBO
 	depends on INPUT
 	---help---
 	  Say Y here if you want to take action when some keys are pressed;
-
 	  To compile this driver as a module, choose M here: the
 	  module will be called keycombo.
 
@@ -202,9 +201,15 @@ config INPUT_EPACK
 	depends on INPUT
 	---help---
 	  Say Y here if you want to take action when some keys are pressed;
-
 	  To compile this driver as a module, choose M here: the
 	  module will be called keycombo.
+
+config SENSORS_HALL
+	bool "Hall sensor"
+	depends on INPUT
+	---help---
+	 Say y here if you want to use this hall sensor driver, it
+	 is like a switch. For example, lid.
 
 comment "Input Device Drivers"
 

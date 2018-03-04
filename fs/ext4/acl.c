@@ -201,12 +201,7 @@ __ext4_set_acl(handle_t *handle, struct inode *inode, int type,
 	case ACL_TYPE_ACCESS:
 		name_index = EXT4_XATTR_INDEX_POSIX_ACL_ACCESS;
 		if (acl) {
-<<<<<<< HEAD
-			error = posix_acl_update_mode(inode,
-				&inode->i_mode, &acl);
-=======
 			error = posix_acl_update_mode(inode, &inode->i_mode, &acl);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
 			if (error)
 				return error;
 			inode->i_ctime = ext4_current_time(inode);

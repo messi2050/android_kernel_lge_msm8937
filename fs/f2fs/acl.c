@@ -195,11 +195,6 @@ static struct posix_acl *__f2fs_get_acl(struct inode *inode, int type,
 	return acl;
 }
 
-struct posix_acl *f2fs_get_acl(struct inode *inode, int type)
-{
-	return __f2fs_get_acl(inode, type, NULL);
-}
-
 static int __f2fs_set_acl(struct inode *inode, int type,
 			struct posix_acl *acl, struct page *ipage)
 {
@@ -207,24 +202,16 @@ static int __f2fs_set_acl(struct inode *inode, int type,
 	void *value = NULL;
 	size_t size = 0;
 	int error;
+	umode_t mode = inode->i_mode;
 
 	switch (type) {
 	case ACL_TYPE_ACCESS:
 		name_index = F2FS_XATTR_INDEX_POSIX_ACL_ACCESS;
-<<<<<<< HEAD
-		if (acl) {
-			error = posix_acl_update_mode(inode,
-				&inode->i_mode, &acl);
-			if (error)
-				return error;
-			set_acl_inode(fi, inode->i_mode);
-=======
 		if (acl && !ipage) {
-			error = posix_acl_update_mode(inode, &inode->i_mode, &acl);
+			error = posix_acl_update_mode(inode, &mode, &acl);
 			if (error)
 				return error;
-			set_acl_inode(inode, inode->i_mode);
->>>>>>> LA.UM.6.6.r1-02700-89xx.0
+			set_acl_inode(inode, mode);
 		}
 		break;
 
@@ -258,6 +245,9 @@ static int __f2fs_set_acl(struct inode *inode, int type,
 
 int f2fs_set_acl(struct inode *inode, struct posix_acl *acl, int type)
 {
+	if (unlikely(f2fs_cp_error(F2FS_I_SB(inode))))
+		return -EIO;
+
 	return __f2fs_set_acl(inode, type, acl, NULL);
 }
 

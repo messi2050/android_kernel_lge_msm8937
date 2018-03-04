@@ -70,6 +70,7 @@ enum {
 	HW_PLATFORM_LGPS29 = 0x60,
 	HW_PLATFORM_LGPS29_1 = 0x61,
 	HW_PLATFORM_LV3_KR = 0x64,
+	HW_PLATFORM_TTP = 30,
 	HW_PLATFORM_INVALID
 };
 
@@ -94,6 +95,7 @@ const char *hw_platform[] = {
 	[HW_PLATFORM_LGPS29] = "LGPS29",
 	[HW_PLATFORM_LGPS29_1] = "LGPS29_1",
 	[HW_PLATFORM_LV3_KR] = "LV3_KR",
+	[HW_PLATFORM_TTP] = "TTP",
 };
 
 enum {
@@ -566,6 +568,8 @@ static struct msm_soc_info cpu_of_id[] = {
 
 	/* SDM450 ID */
 	[338] = {MSM_CPU_SDM450, "SDM450"},
+	[351] = {MSM_CPU_SDM450, "SDA450"},
+
 
 	/* 9607 IDs */
 	[290] = {MSM_CPU_9607, "MDM9607"},

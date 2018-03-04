@@ -1377,10 +1377,13 @@ static int gps_function_bind_config(struct android_usb_function *f,
 {
 	int err;
 	static int gps_initialized;
+	char buf[MAX_XPORT_STR_LEN], *b;
 
 	if (!gps_initialized) {
+		strlcpy(buf, gps_transport, sizeof(buf));
+		b = strim(buf);
 		gps_initialized = 1;
-		err = gps_init_port();
+		err = gps_init_port(b);
 		if (err) {
 			pr_err("gps: Cannot init gps port");
 			return err;

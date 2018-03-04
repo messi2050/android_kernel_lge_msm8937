@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2017, Linux Foundation. All rights reserved.
+/* Copyright (c) 2009-2018, Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -97,6 +97,14 @@ int msm_get_battery_capacity(void);
 #define LGE_USB_HOST 1
 #define LGE_USB_DEVICE 0
 #endif
+
+#define MICRO_5V 5000000
+#define MICRO_9V 9000000
+
+#define SDP_CURRENT_UA 500000
+#define CDP_CURRENT_UA 1500000
+#define DCP_CURRENT_UA 1500000
+#define HVDCP_CURRENT_UA 3000000
 
 enum msm_otg_phy_reg_mode {
 	USB_PHY_REG_OFF,
@@ -1816,7 +1824,7 @@ static void msm_otg_notify_host_mode(struct msm_otg *motg, bool host_mode)
 static int msm_otg_notify_chg_type(struct msm_otg *motg)
 {
 	static int charger_type;
-
+	union power_supply_propval propval;
 	/*
 	 * TODO
 	 * Unify OTG driver charger types and power supply charger types
@@ -1843,7 +1851,10 @@ static int msm_otg_notify_chg_type(struct msm_otg *motg)
 	pr_info("setting usb power supply type %d\n", charger_type);
 	msm_otg_dbg_log_event(&motg->phy, "SET USB PWR SUPPLY TYPE",
 			motg->chg_type, charger_type);
-	power_supply_set_supply_type(psy, charger_type);
+
+	propval.intval = charger_type;
+	psy->set_property(psy, POWER_SUPPLY_PROP_REAL_TYPE, &propval);
+
 	return 0;
 }
 
@@ -4136,6 +4147,9 @@ static int otg_power_get_property_usb(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_ONLINE:
 		val->intval = motg->online;
 		break;
+	case POWER_SUPPLY_PROP_REAL_TYPE:
+		val->intval = motg->usb_supply_type;
+		break;
 	case POWER_SUPPLY_PROP_TYPE:
 		val->intval = psy->type;
 		break;
@@ -4184,7 +4198,8 @@ static int otg_power_set_property_usb(struct power_supply *psy,
 	int next_ep_state;
 #endif
 
-	msm_otg_dbg_log_event(&motg->phy, "SET PWR PROPERTY", psp, psy->type);
+	msm_otg_dbg_log_event(&motg->phy, "SET PWR PROPERTY",
+				psp, motg->usb_supply_type);
 	switch (psp) {
 #ifdef CONFIG_INPUT_EPACK
 	case POWER_SUPPLY_PROP_USB_EPACK:
@@ -4243,9 +4258,21 @@ static int otg_power_set_property_usb(struct power_supply *psy,
 			msm_otg_notify_charger(motg, motg->bc1p2_current_max);
 		}
 		break;
-	case POWER_SUPPLY_PROP_TYPE:
-		psy->type = val->intval;
-
+	case POWER_SUPPLY_PROP_REAL_TYPE:
+		motg->usb_supply_type = val->intval;
+		/*
+		 * Update TYPE property to DCP for HVDCP/HVDCP3 charger types
+		 * so that they can be recongized as AC chargers by healthd.
+		 * Don't report UNKNOWN charger type to prevent healthd missing
+		 * detecting this power_supply status change.
+		 */
+		if (motg->usb_supply_type == POWER_SUPPLY_TYPE_USB_HVDCP_3
+			|| motg->usb_supply_type == POWER_SUPPLY_TYPE_USB_HVDCP)
+			psy->type = POWER_SUPPLY_TYPE_USB_DCP;
+		else if (motg->usb_supply_type == POWER_SUPPLY_TYPE_UNKNOWN)
+			psy->type = POWER_SUPPLY_TYPE_USB;
+		else
+			psy->type = motg->usb_supply_type;
 		/*
 		 * If charger detection is done by the USB driver,
 		 * motg->chg_type is already assigned in the
@@ -4260,21 +4287,29 @@ static int otg_power_set_property_usb(struct power_supply *psy,
 		if (motg->chg_state == USB_CHG_STATE_DETECTED)
 			break;
 
-		switch (psy->type) {
+		switch (motg->usb_supply_type) {
 		case POWER_SUPPLY_TYPE_USB:
 #ifndef CONFIG_LGE_USB_FLOATED_CHARGER_DETECT
 			motg->chg_type = USB_SDP_CHARGER;
 #endif
+			motg->voltage_max = MICRO_5V;
+			motg->current_max = SDP_CURRENT_UA;
 			break;
 		case POWER_SUPPLY_TYPE_USB_DCP:
 			motg->chg_type = USB_DCP_CHARGER;
+			motg->voltage_max = MICRO_5V;
+			motg->current_max = DCP_CURRENT_UA;
 			break;
 		case POWER_SUPPLY_TYPE_USB_HVDCP:
 			motg->chg_type = USB_DCP_CHARGER;
+			motg->voltage_max = MICRO_9V;
+			motg->current_max = HVDCP_CURRENT_UA;
 			msm_otg_notify_charger(motg, hvdcp_max_current);
 			break;
 		case POWER_SUPPLY_TYPE_USB_CDP:
 			motg->chg_type = USB_CDP_CHARGER;
+			motg->voltage_max = MICRO_5V;
+			motg->current_max = CDP_CURRENT_UA;
 			break;
 		case POWER_SUPPLY_TYPE_USB_ACA:
 			motg->chg_type = USB_PROPRIETARY_CHARGER;
@@ -4293,7 +4328,7 @@ static int otg_power_set_property_usb(struct power_supply *psy,
 		dev_dbg(motg->phy.dev, "%s: charger type = %s\n", __func__,
 			chg_to_string(motg->chg_type));
 		msm_otg_dbg_log_event(&motg->phy, "SET CHARGER TYPE ",
-				motg->chg_type, psy->type);
+				motg->chg_type, motg->usb_supply_type);
 		break;
 	case POWER_SUPPLY_PROP_HEALTH:
 		if (val->intval > POWER_SUPPLY_HEALTH_HOT)
@@ -4324,6 +4359,7 @@ static int otg_power_property_is_writeable_usb(struct power_supply *psy,
 #ifdef CONFIG_INPUT_EPACK
 	case POWER_SUPPLY_PROP_USB_EPACK:
 #endif
+	case POWER_SUPPLY_PROP_REAL_TYPE:
 		return 1;
 	default:
 		break;
@@ -4362,6 +4398,7 @@ static enum power_supply_property otg_pm_power_props_usb[] = {
 	POWER_SUPPLY_PROP_INCOMPATIBLE_CHG,
 #endif
 #endif
+	POWER_SUPPLY_PROP_REAL_TYPE,
 };
 
 const struct file_operations msm_otg_bus_fops = {
